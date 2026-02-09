@@ -14,3 +14,4 @@ This site is hosted on GitHub Pages and configured with a custom domain.
 ## Deployment
 
 Push to the `main` branch and GitHub Pages will automatically deploy.
+

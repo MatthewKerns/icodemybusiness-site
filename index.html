@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I Code My Business</title>
+    <meta name="description" content="AI-powered business systems for SMBs. Amazon-trained engineer building real code that runs your operations.">
+    <title>iCodeMyBusiness | AI-Powered Business Systems for SMBs</title>
+
     <style>
         * {
             margin: 0;
@@ -13,72 +15,617 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
+            line-height: 1.7;
             color: #333;
             background: #f5f5f5;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 60px 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        /* Section styling */
+        section {
+            padding: 80px 20px;
         }
 
-        h1 {
-            font-size: 3rem;
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .container-narrow {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: white;
+            padding: 100px 20px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
             font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+            line-height: 1.2;
+        }
+
+        .hero .subheadline {
+            font-size: 1.25rem;
+            color: #555;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: #0066cc;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0052a3;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #0066cc;
+            border: 2px solid #0066cc;
+        }
+
+        .btn-secondary:hover {
+            background: #0066cc;
+            color: white;
+        }
+
+        /* Problem-Agitate-Solution Section */
+        .pas {
+            background: #ffffff;
+        }
+
+        .pas h2 {
+            font-size: 2rem;
             margin-bottom: 1.5rem;
             color: #1a1a1a;
         }
 
-        .tagline {
+        .pas h3 {
             font-size: 1.5rem;
-            color: #666;
-            margin-bottom: 2rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: #0066cc;
         }
 
-        p {
+        .pas p {
             font-size: 1.1rem;
             margin-bottom: 1rem;
             color: #555;
         }
 
-        .cta {
+        /* Process Section */
+        .process {
+            background: #f5f5f5;
+        }
+
+        .process h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #1a1a1a;
+            text-align: center;
+        }
+
+        .pipeline {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
             margin-top: 2rem;
         }
 
-        .cta a {
-            display: inline-block;
-            padding: 15px 30px;
+        .pipeline-step {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #0066cc;
+        }
+
+        .pipeline-step h3 {
+            font-size: 1.25rem;
+            color: #0066cc;
+            margin-bottom: 0.5rem;
+        }
+
+        .pipeline-step p {
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .process-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .process-link a {
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .process-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Proof Section */
+        .proof {
+            background: white;
+        }
+
+        .proof h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: #1a1a1a;
+        }
+
+        .credentials {
+            display: flex;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .credential {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .credential h3 {
+            font-size: 1.1rem;
+            color: #0066cc;
+            margin-bottom: 0.5rem;
+        }
+
+        .credential p {
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .story {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .story h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+
+        .story p {
+            color: #555;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Case Study Section */
+        .case-study {
+            background: #f5f5f5;
+        }
+
+        .case-study h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+            text-align: center;
+        }
+
+        .case-study p {
+            font-size: 1.1rem;
+            color: #555;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .video-placeholder {
+            background: white;
+            padding: 4rem 2rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px dashed #ccc;
+        }
+
+        .video-placeholder h3 {
+            font-size: 1.5rem;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+        }
+
+        .video-placeholder p {
+            color: #666;
+        }
+
+        /* Lead Capture Section */
+        .lead-capture {
             background: #0066cc;
             color: white;
-            text-decoration: none;
-            border-radius: 5px;
+        }
+
+        .lead-capture h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .lead-capture p {
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #f0f0f0;
+        }
+
+        .form-wrapper {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
             font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: 2px solid #00cc66;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #00cc66;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
             transition: background 0.3s ease;
         }
 
-        .cta a:hover {
-            background: #0052a3;
+        .submit-btn:hover {
+            background: #00b359;
+        }
+
+        .privacy-note {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #d0d0d0;
+        }
+
+        .form-success {
+            display: none;
+            background: #00cc66;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .form-error {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        footer a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-links {
+            margin-bottom: 1rem;
+        }
+
+        .tagline {
+            color: #999;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero .subheadline {
+                font-size: 1.1rem;
+            }
+
+            .cta-group {
+                flex-direction: column;
+            }
+
+            .credentials {
+                flex-direction: column;
+            }
+
+            section {
+                padding: 60px 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>I Code My Business</h1>
-        <p class="tagline">Build systems that create freedom.</p>
-
-        <p>Software engineer turned business builder. I use AI + code to build real business systems.</p>
-
-        <p>No enterprise price tag. No complexity for complexity's sake. Just systems that work.</p>
-
-        <div class="cta">
-            <a href="https://www.linkedin.com/in/matthew-kerns/" target="_blank">Connect on LinkedIn</a>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Turn Business Chaos Into Code.<br>Real Systems for Real SMBs.</h1>
+            <p class="subheadline">Amazon-trained software engineer building AI-powered business systems. Not consulting. Not templates. Actual code that runs your operations.</p>
+            <div class="cta-group">
+                <a href="#process" class="btn btn-primary">See How It Works</a>
+                <a href="#contact" class="btn btn-secondary">Book a Discovery Call</a>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- Problem-Agitate-Solution Section -->
+    <section class="pas">
+        <div class="container-narrow">
+            <h2>You're Stuck Between Two Expensive Options</h2>
+
+            <p>Most small businesses hit the same wall: they need real systems to grow, but they're stuck choosing between hiring a full dev team (expensive, slow, risky) or using no-code tools (limited, breaks at scale, still needs someone to figure it out).</p>
+
+            <p>I know because I've been on both sides of this. I spent years at Amazon learning how to build systems that integrate with enormous ecosystems without breaking. Then I left to run an e-commerce business and learned the hard way that business is harder than code. I invested my life savings, went into debt, and eventually lost it all trying to do everything myself.</p>
+
+            <p>The ego death that came from that taught me something valuable: being smart isn't enough, and you can't build everything alone. But you also can't wait months for enterprise development cycles or settle for tools that limit what's possible.</p>
+
+            <h3>There's a Third Way</h3>
+
+            <p>Real engineering methodology combined with AI acceleration. Amazon-level rigor applied at startup speed. Code that actually runs your business, built in weeks instead of quarters, at a price point that makes sense for SMBs.</p>
+
+            <p>Not consulting decks. Not course modules. Not templates you have to hack together. Actual custom code, designed for your specific business constraints, built by someone who's lived both the engineering side and the entrepreneur side.</p>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section id="process" class="process">
+        <div class="container">
+            <h2>The 5-Step Pipeline: Discovery to Delivery</h2>
+
+            <div class="pipeline">
+                <div class="pipeline-step">
+                    <h3>1. DISCOVERY</h3>
+                    <p>We start by identifying the actual business frustration — not feature requests, but the real constraint costing you time, money, or sanity. What task do you hate? What changes if it's gone? How often does it happen? (The 3-Question Diagnostic)</p>
+                </div>
+
+                <div class="pipeline-step">
+                    <h3>2. BREAKTHROUGH METHOD FOR AGILE DEVELOPMENT (BMAD)</h3>
+                    <p>Business-first development methodology. We map your business processes, identify integration points, design the system architecture, and create executable specs before writing a single line of code. This is the Amazon design review process compressed from weeks into hours using AI.</p>
+                </div>
+
+                <div class="pipeline-step">
+                    <h3>3. AUTOCLAUDE</h3>
+                    <p>Autonomous AI development that builds components in the background while maintaining engineering rigor. Not vibe coding — structured development with proper error handling, testing, and documentation.</p>
+                </div>
+
+                <div class="pipeline-step">
+                    <h3>4. AGENT TEAMS</h3>
+                    <p>Multiple AI agents working in parallel to integrate components, handle edge cases, and ensure the system works together as a cohesive whole. Speed without chaos.</p>
+                </div>
+
+                <div class="pipeline-step">
+                    <h3>5. MANUAL TESTING</h3>
+                    <p>Every system gets hands-on validation. We test the actual workflows, verify edge cases, and make sure it solves the business frustration we identified in step 1. The Prototype Rule: if the simple version solves the problem, the polished version will too.</p>
+                </div>
+            </div>
+
+            <div class="process-link">
+                <p><strong>Want to see this process in action?</strong><br>
+                <a href="#case-study">Watch me build my own business dashboard using this exact process →</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proof and Credibility Section -->
+    <section class="proof">
+        <div class="container">
+            <h2>Built on Experience, Not Theory</h2>
+
+            <div class="credentials">
+                <div class="credential">
+                    <h3>Education</h3>
+                    <p>CS degree from UCSB. Fought to get in undeclared after initial rejection. Earned 3.8+ GPA. Switched from Computer Engineering to Computer Science.</p>
+                </div>
+                <div class="credential">
+                    <h3>Engineering</h3>
+                    <p>Amazon developer. Learned design reviews, modularity, and systems thinking at scale. Built systems that integrate with massive ecosystems without breaking.</p>
+                </div>
+                <div class="credential">
+                    <h3>Entrepreneurship</h3>
+                    <p>Built and ran Infinity Vault (e-commerce). Real business scars. Lost life savings learning that being smart isn't enough and you need people.</p>
+                </div>
+            </div>
+
+            <div class="story">
+                <h3>From Corporate to Freedom (The Honest Version)</h3>
+                <p>I left Amazon to chase business freedom, dove into e-commerce, and spent years grinding solo. I invested everything, went into debt, and eventually lost it all. The ego death from that failure taught me the most valuable lesson: I need people, and I actually want to work with people. It's so much more rewarding than trying to automate your way to being a one-man billion-dollar business.</p>
+
+                <p>When AI tools like Claude Code emerged in 2025, something clicked. The design reviews that took weeks at Amazon now take minutes. The Amazon engineering skills I'd built weren't gone — they were dormant, waiting for a vehicle that matched my values: speed, autonomy, building what matters.</p>
+
+                <p>Or so I thought. A few months in, things still took forever. Then Opus 4.5 broke through another ceiling. This isn't a "I figured it out" story — it's an active, ongoing journey. I'm the explorer sharing the map as I draw it, not the guru on the mountain selling the finished map.</p>
+
+                <p>iCodeMyBusiness is my personal LLC, and I'm also building Arise Group AI with three aligned teammates — Chris (storyteller), Mekaiel (PM/client activation), and Trent (technical lead). We're not trying to replace people with automation. We're using AI to create real value efficiently for real businesses.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Case Study Section -->
+    <section id="case-study" class="case-study">
+        <div class="container">
+            <h2>Building the iCodeMyBusiness Dashboard</h2>
+            <p>See the process in action: building my business dashboard from scratch using the exact steps above.</p>
+
+            <div class="video-placeholder">
+                <h3>Video Series Coming Soon</h3>
+                <p>Full video walkthrough from discovery to delivery.<br>Subscribe below to get notified when it's live.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lead Capture Section -->
+    <section id="contact" class="lead-capture">
+        <div class="container-narrow">
+            <h2>Ready to Code Your Business?</h2>
+            <p>Get the discovery process guide and see if we're a fit for your business.</p>
+
+            <div class="form-wrapper">
+                <form id="leadForm">
+                    <div class="form-group">
+                        <label for="name">Name *</label>
+                        <input type="text" id="name" name="name" required>
+                        <div class="form-error" id="nameError">Please enter your name</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required>
+                        <div class="form-error" id="emailError">Please enter a valid email</div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Get the Discovery Process</button>
+                </form>
+
+                <div class="form-success" id="formSuccess">
+                    Thanks! Check your email for the discovery process guide.
+                </div>
+
+                <p class="privacy-note">No spam. Unsubscribe anytime.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://www.linkedin.com/in/mkerns1/" target="_blank">LinkedIn</a> •
+                <a href="mailto:matthew@icodemybusiness.com">matthew@icodemybusiness.com</a>
+            </div>
+            <p class="tagline">Freedom through systems.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Form handling
+        document.getElementById('leadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Get form values
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            // Reset errors
+            document.getElementById('nameError').style.display = 'none';
+            document.getElementById('emailError').style.display = 'none';
+
+            // Validate
+            let isValid = true;
+
+            if (!name) {
+                document.getElementById('nameError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (!email || !email.includes('@')) {
+                document.getElementById('emailError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Prepare lead data
+            const lead = {
+                name: name,
+                email: email,
+                timestamp: new Date().toISOString(),
+                source: 'icodemybusiness.com'
+            };
+
+            // Save to leads.json (this is a simple client-side implementation)
+            // In production, this should POST to a server endpoint
+            try {
+                // For now, just show success and log to console
+                console.log('Lead captured:', lead);
+
+                // Show success message
+                document.getElementById('leadForm').style.display = 'none';
+                document.getElementById('formSuccess').style.display = 'block';
+
+                // In production, you would send this to a server:
+                // const response = await fetch('/api/leads', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(lead)
+                // });
+
+            } catch (error) {
+                console.error('Error saving lead:', error);
+                alert('Something went wrong. Please try again or email matthew@icodemybusiness.com directly.');
+            }
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
