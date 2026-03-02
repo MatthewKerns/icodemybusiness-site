@@ -218,8 +218,8 @@ Supabase Edge Function: process-business-card
 6. Follow-up email auto-drafted (see Phase 3)
 7. Dashboard shows the new lead + draft for your review
 
-### Phase 3: AI Follow-up Email Drafting (Week 3-4)
-**Goal: Auto-draft personalized follow-up emails after meetings or card scans**
+### Phase 3: AI Follow-up Email Drafting + Unipile Email (Week 3-4)
+**Goal: Auto-draft personalized follow-up emails after meetings or card scans, send via your real email**
 
 ```
 Supabase Edge Function: draft-followup
@@ -232,11 +232,19 @@ Supabase Edge Function: draft-followup
   6. Dashboard shows it for your approval
 ```
 
-**Email sending (after you approve):**
-- Use Resend (simple API, generous free tier, great deliverability)
-- Edge Function: `send-followup` - triggered when you click "Approve & Send"
-- Updates follow_up status to 'sent', records sent_at timestamp
-- Scheduled sends: Supabase pg_cron job checks for follow_ups where send_at < now() and status = 'approved'
+**Email sending via Unipile (replaces Resend):**
+- Connect your Gmail/Outlook account to Unipile (one-time setup via hosted auth link)
+- Edge Function: `send-followup` calls Unipile Email API to send from your actual inbox
+- Emails come FROM matthew@icodemybusiness.com (not a transactional sender - much better deliverability)
+- Unipile tracks opens, replies, and threading automatically
+- When the lead replies, Unipile receives it -> webhook fires -> Edge Function updates follow_up status to 'replied'
+- Scheduled sends: Supabase pg_cron checks for follow_ups where send_at < now() and status = 'approved', sends via Unipile
+
+**Why Unipile instead of Resend:**
+- Emails send from YOUR inbox, not a transactional domain (higher trust, lands in inbox)
+- Two-way: you can also READ incoming replies, not just send
+- Email threading preserved (replies show up in the same thread in your inbox)
+- One API for email + LinkedIn + WhatsApp (see Phases 5 and 7)
 
 ### Phase 4: Fathom Integration (Week 4-5)
 **Goal: Auto-detect meetings, pull transcripts, suggest follow-ups**
@@ -279,14 +287,24 @@ Supabase Edge Function: generate-content
   7. Dashboard shows them for review/approval
 ```
 
-**Content publishing (after approval):**
-- LinkedIn: LinkedIn API (requires OAuth app approval - can take weeks)
+**Content publishing via Unipile (after approval):**
+- LinkedIn: Unipile LinkedIn API posts directly to your profile - NO LinkedIn partner approval needed
 - YouTube: Descriptions/metadata only (you still record/upload the video)
 - TikTok: Script + caption ready for you to record
 
-**Realistic note:** LinkedIn and TikTok API access for posting requires app review.
-Initial approach: drafts appear in dashboard, you copy-paste to post manually.
-Automate publishing later once API access is approved.
+**Unipile makes LinkedIn posting immediate** - no weeks-long app review process.
+When you click "Approve & Schedule" on a LinkedIn draft, the Edge Function calls
+Unipile's LinkedIn post creation endpoint. Done. It also pulls back engagement
+data (impressions, comments, reactions) for the metrics page.
+
+```
+Supabase Edge Function: publish-linkedin
+  Triggered when content_draft status changes to 'approved' and platform = 'linkedin'
+  1. Call Unipile POST /posts with the draft body
+  2. Store Unipile post_id in content_drafts table
+  3. Update status to 'published'
+  4. Later: aggregate-metrics function pulls engagement data via Unipile
+```
 
 ### Phase 6: Schedule + Calendar Integration (Week 6-7)
 **Goal: Schedule shows real data, syncs with your calendar**
@@ -303,34 +321,54 @@ Automate publishing later once API access is approved.
 
 **Recommendation:** Start with Option B (simpler, no OAuth dependency), add Google Calendar read-only sync later.
 
-### Phase 7: Messages Aggregation (Week 7-8)
-**Goal: Pull LinkedIn messages + emails into one inbox**
+### Phase 7: Messages Aggregation via Unipile (Week 7-8)
+**Goal: Pull LinkedIn messages + emails into one unified inbox**
 
-**LinkedIn messages:**
-- LinkedIn API is restrictive for message access (requires LinkedIn partner program)
-- Practical alternative: LinkedIn webhook notifications -> email forwarding -> parse in Edge Function
-- Or: manual "Add Message" button (you paste the message, AI suggests a reply)
+**Unipile solves the hardest problem here.** The original plan flagged LinkedIn message
+access as requiring LinkedIn partner program approval. Unipile bypasses this entirely.
 
-**Email:**
-- Connect via IMAP (read-only) or use an email API service
-- Filter for business-relevant emails (not spam/newsletters)
-- AI suggests replies using Claude API
+```
+Supabase Edge Function: sync-messages
+  Runs every 15 min (or triggered by Unipile webhook)
+  1. Call Unipile GET /chats to list recent conversations across all connected accounts
+  2. For each new/updated message:
+     a. Check platform (linkedin, email, whatsapp, instagram)
+     b. Match sender to existing lead (by name/email)
+     c. Insert/update messages table
+     d. Call Claude API to generate suggested reply based on:
+        - Sender context (lead data, meeting history)
+        - Your communication style
+        - Conversation thread history
+  3. Dashboard messages page renders from messages table
+```
 
-**Realistic approach for Phase 1:**
-- Messages page has a "Log Message" button
-- You paste the message content + sender info
-- AI generates a suggested reply
-- Over time, automate with email/LinkedIn integrations
+**Replying from the dashboard:**
+- You click "Use Suggestion" or write a custom reply
+- Edge Function calls Unipile to send the reply ON THE ORIGINAL PLATFORM
+- LinkedIn message -> reply goes back to LinkedIn
+- Email -> reply goes back as email (in the same thread)
+- WhatsApp -> reply goes back to WhatsApp
+- The sender sees a normal reply in their inbox, not a redirected message
+
+**Connected platforms (all through Unipile):**
+- LinkedIn messages + InMails
+- Gmail / Outlook email
+- WhatsApp (if you use it for business)
+- Instagram DMs (if relevant)
+
+**This means the Messages page becomes a true unified inbox** - not a manual log.
+Real messages flowing in from all platforms, AI-suggested replies, one-click send back
+to the original platform.
 
 ### Phase 8: Metrics Aggregation (Week 8-9)
 **Goal: Real numbers flowing into the metrics page**
 
 **Data sources:**
-- LinkedIn impressions: LinkedIn API (if approved) or manual entry from LinkedIn analytics
+- LinkedIn impressions/engagement: **Unipile** (pull post engagement data for content you published)
 - YouTube views: YouTube Data API (easy, free quota is generous)
 - TikTok views: TikTok API or manual
 - Website visitors: Plausible Analytics or Google Analytics Data API
-- Email metrics: From Resend API (open/click data on follow-ups you send)
+- Email metrics: **Unipile** (open/reply tracking on follow-ups sent through your inbox)
 - Revenue: Manual entry or Stripe API if using Stripe
 
 ```
@@ -387,10 +425,14 @@ supabase/
 ├── functions/
 │   ├── process-business-card/index.ts
 │   ├── draft-followup/index.ts
-│   ├── send-followup/index.ts
+│   ├── send-followup/index.ts         -- Sends via Unipile (email, LinkedIn, WhatsApp)
 │   ├── sync-fathom/index.ts
 │   ├── generate-content/index.ts
-│   └── aggregate-metrics/index.ts
+│   ├── publish-linkedin/index.ts      -- Posts to LinkedIn via Unipile
+│   ├── sync-messages/index.ts         -- Pulls messages from Unipile (all platforms)
+│   ├── enrich-lead/index.ts           -- LinkedIn profile enrichment via Unipile
+│   ├── aggregate-metrics/index.ts
+│   └── unipile-webhook/index.ts       -- Receives Unipile webhooks (new messages, replies)
 └── config.toml
 ```
 
@@ -402,10 +444,139 @@ supabase/
 |---------|---------|------|----------|
 | Supabase | Database, auth, storage, edge functions | Free tier (sufficient) | Phase 1 |
 | Claude API (Anthropic) | Business card OCR, email drafting, content generation, reply suggestions | Pay per use (~$5-20/mo at your volume) | Phase 2 |
-| Resend | Email sending for follow-ups | Free tier (100 emails/day) | Phase 3 |
+| **Unipile** | **Unified API: LinkedIn messaging/posting, email send/receive/track, WhatsApp, Instagram** | **~$55/mo (10 accounts)** | **Phase 3** |
 | Fathom | Meeting transcripts | Existing subscription + API access | Phase 4 |
 | YouTube Data API | Video metrics | Free (10K quota/day) | Phase 8 |
 | Google Analytics API | Website metrics | Free | Phase 8 |
+
+**Note: Unipile replaces Resend** (email) and the LinkedIn official API. One service
+covers email sending/receiving, LinkedIn messaging + posting, and opens up WhatsApp
+and Instagram as bonus channels. See "Unipile Integration" section below for details.
+
+---
+
+## Unipile Integration (Detailed)
+
+### What Unipile Is
+
+Unipile (unipile.com) is a unified communications API. You connect your LinkedIn, email,
+WhatsApp, and other accounts to Unipile, and then interact with ALL of them through one
+REST API. It's the single biggest simplification to this integration plan.
+
+**What it replaces:**
+- ~~Resend~~ (email sending) -> Unipile sends from your real inbox
+- ~~LinkedIn official API~~ (restrictive, needs partner approval) -> Unipile gives full access
+- ~~IMAP connection~~ (email reading) -> Unipile handles it
+- ~~Manual message logging~~ -> Unipile syncs messages automatically
+
+### Setup (One-Time)
+
+```
+1. Sign up at unipile.com ($55/mo for 10 connected accounts)
+2. Connect your accounts via Unipile's hosted auth flow:
+   - LinkedIn account (username/password or cookie-based auth)
+   - Gmail or Outlook (OAuth flow)
+   - WhatsApp (QR code scan, optional)
+   - Instagram (optional)
+3. Store your Unipile DSN + access token in Supabase secrets
+4. All Edge Functions that need comms access use the Unipile Node SDK
+```
+
+### Unipile Node SDK Usage
+
+```javascript
+import { UnipileClient } from 'unipile-node-sdk';
+
+const client = new UnipileClient('https://{YOUR_DSN}', '{YOUR_ACCESS_TOKEN}');
+
+// Send a LinkedIn message
+await client.messaging.sendMessage({
+  account_id: 'linkedin-account-id',
+  chat_id: 'conversation-id',
+  text: 'Hey James, great chatting yesterday...'
+});
+
+// Send an email from your inbox
+await client.emails.sendEmail({
+  account_id: 'gmail-account-id',
+  to: 'james@meridian.com',
+  subject: 'Great meeting yesterday',
+  body: 'Hey James, following up on our conversation...'
+});
+
+// List recent LinkedIn messages
+const chats = await client.messaging.listChats({ account_id: 'linkedin-account-id' });
+
+// Create a LinkedIn post
+await client.posts.createPost({
+  account_id: 'linkedin-account-id',
+  text: 'Most founders think automation means replacing themselves...'
+});
+
+// Get LinkedIn profile data (for lead enrichment)
+const profile = await client.users.getProfile({ account_id: 'linkedin-account-id', identifier: 'linkedin-url' });
+```
+
+### Where Unipile Touches Each Phase
+
+| Phase | Without Unipile | With Unipile |
+|-------|----------------|--------------|
+| **3: Follow-up emails** | Resend (transactional sender, send-only) | Send from YOUR inbox, track replies, threading preserved |
+| **5: Content publishing** | Copy-paste to LinkedIn manually (API needs partner approval) | Post to LinkedIn directly via API, pull engagement data |
+| **7: Messages** | Manual logging or hacky email forwarding | Real-time inbox sync across LinkedIn + email + WhatsApp |
+| **8: Metrics** | LinkedIn metrics manual or unavailable | Pull post impressions/engagement + email open/reply rates |
+| **Bonus: Lead enrichment** | Manual lookup | Auto-pull LinkedIn profile data when adding a lead |
+
+### New Capability: LinkedIn Lead Enrichment
+
+When you add a lead (from business card, Fathom, or manual entry), an Edge Function can
+call Unipile to pull their LinkedIn profile:
+
+```
+Supabase Edge Function: enrich-lead
+  Triggered when a new lead is created with a LinkedIn URL or enough info to search
+  1. Call Unipile to search/fetch LinkedIn profile
+  2. Pull: photo, headline, company, role, recent posts, mutual connections
+  3. Update lead record with enriched data
+  4. Dashboard lead card shows full profile context
+```
+
+This means when you scan a business card, you don't just get the OCR text - you get
+their full LinkedIn profile attached automatically.
+
+### New Capability: Multi-Channel Follow-up Sequences
+
+With Unipile, follow-up sequences aren't limited to email:
+
+```
+Sequence example for a new lead (Sarah Chen):
+  Day 0: Email follow-up (sent from your inbox via Unipile)
+  Day 2: LinkedIn connection request with personalized note (via Unipile)
+  Day 5: If no email reply, LinkedIn message (via Unipile)
+  Day 7: Final email follow-up (via Unipile)
+```
+
+Each step is AI-drafted, shows up on your dashboard for approval, and sends on
+the original platform. The lead sees normal messages, not automated-looking blasts.
+
+### Updated follow_ups Table
+
+```sql
+-- Add channel support to follow_ups
+alter table follow_ups add column channel text
+  check (channel in ('email', 'linkedin', 'whatsapp', 'instagram'))
+  default 'email';
+alter table follow_ups add column unipile_message_id text;  -- Track sent message
+alter table follow_ups add column unipile_account_id text;  -- Which connected account
+```
+
+### Cost Analysis
+
+- Unipile: $55/mo for 10 connected accounts
+- You need: 1 LinkedIn + 1 email = 2 accounts minimum
+- Room for: WhatsApp, Instagram, additional email accounts
+- Replaces: Resend ($0 free tier, but limited + send-only)
+- Net value: massive - unified inbox, LinkedIn posting, lead enrichment, multi-channel sequences
 
 ---
 
@@ -432,19 +603,29 @@ Phase 1 (Week 1-2):  Supabase setup, auth, data.js, render.js
                       Forms actually save data, pages load from DB
 
 Phase 2 (Week 2-3):  Business card upload -> Claude Vision OCR -> auto-create lead
+                      + LinkedIn profile enrichment via Unipile
 
-Phase 3 (Week 3-4):  AI email drafting + Resend integration
-                      Follow-up sequences actually send emails
+Phase 3 (Week 3-4):  Unipile setup + AI email drafting
+                      Connect LinkedIn + email accounts to Unipile
+                      Follow-up emails send from YOUR inbox via Unipile
+                      Multi-channel sequences (email + LinkedIn message)
 
 Phase 4 (Week 4-5):  Fathom API sync -> auto-detect meetings -> suggest follow-ups
 
 Phase 5 (Week 5-7):  Content pipeline -> AI drafts LinkedIn/YouTube/TikTok content daily
+                      LinkedIn posts publish directly via Unipile (no copy-paste)
 
 Phase 6 (Week 6-7):  Schedule becomes database-driven, optional calendar sync
 
-Phase 7 (Week 7-8):  Message aggregation (manual first, automated later)
+Phase 7 (Week 7-8):  Unified inbox via Unipile
+                      Real-time LinkedIn + email + WhatsApp messages
+                      AI-suggested replies, send back on original platform
 
-Phase 8 (Week 8-9):  Metrics from real sources (YouTube API, analytics, Resend stats)
+Phase 8 (Week 8-9):  Metrics from real sources
+                      LinkedIn engagement via Unipile
+                      Email open/reply rates via Unipile
+                      YouTube API, Google Analytics
 ```
 
 Each phase is independently deployable. You get value after Phase 1.
+Unipile connects in Phase 3 and progressively powers Phases 5, 7, and 8.
