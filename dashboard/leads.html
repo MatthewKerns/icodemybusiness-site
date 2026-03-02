@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leads | iCodeMyBusiness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">iC</div>
+    <span class="brand-text">iCodeMyBusiness</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-label">Overview</div>
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+        Dashboard
+      </a>
+      <a href="schedule.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+        Schedule
+      </a>
+      <a href="projects.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span>
+        Projects
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Growth</div>
+      <a href="leads.html" class="nav-item active">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        Leads
+        <span class="nav-badge">3</span>
+      </a>
+      <a href="content.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+        Content
+        <span class="nav-badge">2</span>
+      </a>
+      <a href="outreach.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+        Outreach
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Insights</div>
+      <a href="metrics.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+        Metrics
+      </a>
+      <a href="messages.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        Messages
+        <span class="nav-badge">5</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">External</div>
+      <a href="../index.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
+        Public Site
+      </a>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="avatar">MK</div>
+      <div class="user-info">
+        <div class="user-name">Matthew Kerns</div>
+        <div class="user-role">Founder</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="sidebar-overlay"></div>
+
+<!-- Main Content -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="mobile-menu-btn">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <h1>Leads</h1>
+      <span class="page-subtitle">Manage contacts &amp; follow-ups</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-primary" data-modal="add-lead-modal">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Lead
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Lead Input Section -->
+    <div class="grid-2 mb-32" id="upload">
+      <!-- Business Card Scanner -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Scan Business Card</h2>
+        </div>
+        <div class="card-body">
+          <div class="upload-zone" id="card-upload">
+            <input type="file" accept="image/*" capture="environment" style="display:none">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <div class="upload-text">Take a photo or upload a business card</div>
+            <div class="upload-hint">Drag &amp; drop, click to browse, or use your camera</div>
+          </div>
+          <div class="mt-16">
+            <div class="form-group">
+              <label class="form-label">Quick Notes</label>
+              <textarea class="form-textarea" placeholder="Where did you meet? What did you discuss? Any key details..." rows="3"></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="showToast('Business card saved! Follow-up sequence started.', 'success')">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><polyline points="20 6 9 17 4 12"/></svg>
+              Save &amp; Start Follow-up
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Add Lead -->
+      <div class="card" id="new">
+        <div class="card-header">
+          <h2>Quick Add Lead</h2>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">Name</label>
+            <input type="text" class="form-input" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Company &amp; Role</label>
+            <input type="text" class="form-input" placeholder="Company - Title">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" placeholder="email@company.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">How did you meet?</label>
+            <select class="form-select">
+              <option value="">Select source...</option>
+              <option value="in-person">In Person / Networking Event</option>
+              <option value="fathom">Fathom Meeting</option>
+              <option value="linkedin">LinkedIn</option>
+              <option value="referral">Referral</option>
+              <option value="website">Website Inquiry</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <textarea class="form-textarea" placeholder="Key discussion points, interests, potential needs..." rows="3"></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="showToast('Lead added! Follow-up email will be sent in 24 hours.', 'success')">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            Add Lead &amp; Queue Follow-up
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fathom Meeting Suggestions -->
+    <div class="card mb-32">
+      <div class="card-header">
+        <h2>Fathom Meeting Follow-ups</h2>
+        <span class="badge badge-blue">Auto-detected</span>
+      </div>
+      <div class="card-body">
+        <p class="text-sm text-muted mb-16">These follow-ups were suggested based on your recent Fathom meeting recordings. Review and approve to send.</p>
+
+        <div class="lead-card">
+          <div class="lead-avatar">JR</div>
+          <div class="lead-info">
+            <div class="lead-name">James Rodriguez</div>
+            <div class="lead-company">Meridian Consulting - Founder</div>
+            <div class="lead-details">
+              <span>Discovery call - 45 min - Mar 1</span>
+            </div>
+            <div style="margin-top: 10px; padding: 12px; background: var(--bg-primary); border-radius: var(--radius); font-size: 13px;">
+              <strong style="color: var(--text-primary);">AI-drafted follow-up:</strong>
+              <p style="margin-top: 6px; color: var(--text-secondary); line-height: 1.6;">
+                "Hey James, great chatting yesterday about the operational bottlenecks at Meridian. I put together some initial thoughts on how we could automate your client onboarding flow - would love to walk you through it. Free Thursday afternoon?"
+              </p>
+            </div>
+          </div>
+          <div class="lead-actions">
+            <button class="btn btn-primary btn-sm btn-send-followup">Approve &amp; Send</button>
+            <button class="btn btn-secondary btn-sm">Edit Draft</button>
+            <button class="btn btn-ghost btn-sm">Skip</button>
+          </div>
+        </div>
+
+        <div class="lead-card">
+          <div class="lead-avatar">KL</div>
+          <div class="lead-info">
+            <div class="lead-name">Karen Liu</div>
+            <div class="lead-company">PixelPerfect Design - Creative Director</div>
+            <div class="lead-details">
+              <span>Intro call - 30 min - Feb 28</span>
+            </div>
+            <div style="margin-top: 10px; padding: 12px; background: var(--bg-primary); border-radius: var(--radius); font-size: 13px;">
+              <strong style="color: var(--text-primary);">AI-drafted follow-up:</strong>
+              <p style="margin-top: 6px; color: var(--text-secondary); line-height: 1.6;">
+                "Karen, thanks for the intro call. I totally get the pain of managing design assets across 4 different tools. I think there's a clean way to consolidate that into one workflow. Let me sketch something up and send it over this week."
+              </p>
+            </div>
+          </div>
+          <div class="lead-actions">
+            <button class="btn btn-primary btn-sm btn-send-followup">Approve &amp; Send</button>
+            <button class="btn btn-secondary btn-sm">Edit Draft</button>
+            <button class="btn btn-ghost btn-sm">Skip</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Leads Pipeline -->
+    <div class="card mb-32">
+      <div class="card-header">
+        <h2>Lead Pipeline</h2>
+        <div class="card-actions">
+          <button class="btn btn-secondary btn-sm">Export</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding: 0;">
+        <div class="tabs" style="padding: 0 24px;">
+          <button class="tab active" data-tab="tab-all">All Leads (12)</button>
+          <button class="tab" data-tab="tab-new">New (3)</button>
+          <button class="tab" data-tab="tab-followup">Follow-up (5)</button>
+          <button class="tab" data-tab="tab-proposal">Proposal (2)</button>
+          <button class="tab" data-tab="tab-won">Won (2)</button>
+        </div>
+
+        <div id="tab-all" class="tab-content active" style="padding: 0 24px 24px;">
+          <div class="lead-card">
+            <div class="lead-avatar">SC</div>
+            <div class="lead-info">
+              <div class="lead-name">Sarah Chen</div>
+              <div class="lead-company">GreenTech Solutions - CTO</div>
+              <div class="lead-details">
+                <span>Source: Networking event</span>
+                <span>Added: Feb 28</span>
+                <span>Stage: New</span>
+              </div>
+            </div>
+            <div class="lead-actions">
+              <span class="badge badge-blue">New</span>
+            </div>
+          </div>
+
+          <div class="lead-card">
+            <div class="lead-avatar">JR</div>
+            <div class="lead-info">
+              <div class="lead-name">James Rodriguez</div>
+              <div class="lead-company">Meridian Consulting - Founder</div>
+              <div class="lead-details">
+                <span>Source: Fathom meeting</span>
+                <span>Added: Mar 1</span>
+                <span>Stage: Follow-up</span>
+              </div>
+            </div>
+            <div class="lead-actions">
+              <span class="badge badge-yellow">Follow-up</span>
+            </div>
+          </div>
+
+          <div class="lead-card">
+            <div class="lead-avatar">AP</div>
+            <div class="lead-info">
+              <div class="lead-name">Aisha Patel</div>
+              <div class="lead-company">NovaBuild - Operations Lead</div>
+              <div class="lead-details">
+                <span>Source: Business card</span>
+                <span>Added: Mar 1</span>
+                <span>Stage: New</span>
+              </div>
+            </div>
+            <div class="lead-actions">
+              <span class="badge badge-blue">New</span>
+            </div>
+          </div>
+
+          <div class="lead-card">
+            <div class="lead-avatar">KL</div>
+            <div class="lead-info">
+              <div class="lead-name">Karen Liu</div>
+              <div class="lead-company">PixelPerfect Design - Creative Director</div>
+              <div class="lead-details">
+                <span>Source: Fathom meeting</span>
+                <span>Added: Feb 28</span>
+                <span>Stage: Follow-up</span>
+              </div>
+            </div>
+            <div class="lead-actions">
+              <span class="badge badge-yellow">Follow-up</span>
+            </div>
+          </div>
+
+          <div class="lead-card">
+            <div class="lead-avatar">RM</div>
+            <div class="lead-info">
+              <div class="lead-name">Robert Martinez</div>
+              <div class="lead-company">ScaleUp Ventures - Partner</div>
+              <div class="lead-details">
+                <span>Source: LinkedIn</span>
+                <span>Added: Feb 25</span>
+                <span>Stage: Proposal</span>
+              </div>
+            </div>
+            <div class="lead-actions">
+              <span class="badge badge-purple">Proposal</span>
+            </div>
+          </div>
+
+          <div class="lead-card">
+            <div class="lead-avatar">TN</div>
+            <div class="lead-info">
+              <div class="lead-name">Tanya Nguyen</div>
+              <div class="lead-company">CloudFirst Inc - VP Engineering</div>
+              <div class="lead-details">
+                <span>Source: Referral</span>
+                <span>Added: Feb 20</span>
+                <span>Stage: Won</span>
+              </div>
+            </div>
+            <div class="lead-actions">
+              <span class="badge badge-green">Won</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-new" class="tab-content" style="padding: 0 24px 24px;">
+          <div class="lead-card">
+            <div class="lead-avatar">SC</div>
+            <div class="lead-info">
+              <div class="lead-name">Sarah Chen</div>
+              <div class="lead-company">GreenTech Solutions - CTO</div>
+              <div class="lead-details"><span>Networking event - Feb 28</span></div>
+            </div>
+            <div class="lead-actions"><span class="badge badge-blue">New</span></div>
+          </div>
+          <div class="lead-card">
+            <div class="lead-avatar">AP</div>
+            <div class="lead-info">
+              <div class="lead-name">Aisha Patel</div>
+              <div class="lead-company">NovaBuild - Operations Lead</div>
+              <div class="lead-details"><span>Business card - Mar 1</span></div>
+            </div>
+            <div class="lead-actions"><span class="badge badge-blue">New</span></div>
+          </div>
+        </div>
+
+        <div id="tab-followup" class="tab-content" style="padding: 0 24px 24px;">
+          <div class="lead-card">
+            <div class="lead-avatar">JR</div>
+            <div class="lead-info">
+              <div class="lead-name">James Rodriguez</div>
+              <div class="lead-company">Meridian Consulting - Founder</div>
+              <div class="lead-details"><span>Fathom meeting - Mar 1</span></div>
+            </div>
+            <div class="lead-actions"><span class="badge badge-yellow">Follow-up</span></div>
+          </div>
+          <div class="lead-card">
+            <div class="lead-avatar">KL</div>
+            <div class="lead-info">
+              <div class="lead-name">Karen Liu</div>
+              <div class="lead-company">PixelPerfect Design - Creative Director</div>
+              <div class="lead-details"><span>Fathom meeting - Feb 28</span></div>
+            </div>
+            <div class="lead-actions"><span class="badge badge-yellow">Follow-up</span></div>
+          </div>
+        </div>
+
+        <div id="tab-proposal" class="tab-content" style="padding: 0 24px 24px;">
+          <div class="lead-card">
+            <div class="lead-avatar">RM</div>
+            <div class="lead-info">
+              <div class="lead-name">Robert Martinez</div>
+              <div class="lead-company">ScaleUp Ventures - Partner</div>
+              <div class="lead-details"><span>LinkedIn - Feb 25</span></div>
+            </div>
+            <div class="lead-actions"><span class="badge badge-purple">Proposal</span></div>
+          </div>
+        </div>
+
+        <div id="tab-won" class="tab-content" style="padding: 0 24px 24px;">
+          <div class="lead-card">
+            <div class="lead-avatar">TN</div>
+            <div class="lead-info">
+              <div class="lead-name">Tanya Nguyen</div>
+              <div class="lead-company">CloudFirst Inc - VP Engineering</div>
+              <div class="lead-details"><span>Referral - Feb 20</span></div>
+            </div>
+            <div class="lead-actions"><span class="badge badge-green">Won</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Follow-up Sequence Status -->
+    <div class="card mb-32">
+      <div class="card-header">
+        <h2>Active Follow-up Sequences</h2>
+      </div>
+      <div class="card-body">
+        <ul class="item-list">
+          <li class="item-row">
+            <span class="item-dot green"></span>
+            <div class="item-content">
+              <div class="item-title">Sarah Chen - Initial Follow-up</div>
+              <div class="item-meta">Email 1 of 3 - Sends in 18 hours - Personalized intro + value prop</div>
+            </div>
+            <span class="badge badge-green">Queued</span>
+          </li>
+          <li class="item-row">
+            <span class="item-dot blue"></span>
+            <div class="item-content">
+              <div class="item-title">James Rodriguez - Post-Discovery</div>
+              <div class="item-meta">Email 1 of 2 - Awaiting approval - Recap + next steps</div>
+            </div>
+            <span class="badge badge-yellow">Review</span>
+          </li>
+          <li class="item-row">
+            <span class="item-dot blue"></span>
+            <div class="item-content">
+              <div class="item-title">Karen Liu - Post-Intro</div>
+              <div class="item-meta">Email 1 of 2 - Awaiting approval - Solution sketch follow-up</div>
+            </div>
+            <span class="badge badge-yellow">Review</span>
+          </li>
+          <li class="item-row">
+            <span class="item-dot purple"></span>
+            <div class="item-content">
+              <div class="item-title">Robert Martinez - Proposal Follow-up</div>
+              <div class="item-meta">Email 2 of 3 - Sent yesterday - Awaiting reply</div>
+            </div>
+            <span class="badge badge-blue">Sent</span>
+          </li>
+          <li class="item-row">
+            <span class="item-dot green"></span>
+            <div class="item-content">
+              <div class="item-title">Aisha Patel - Initial Follow-up</div>
+              <div class="item-meta">Email 1 of 3 - Sends in 22 hours - Business card follow-up</div>
+            </div>
+            <span class="badge badge-green">Queued</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Add Lead Modal -->
+<div class="modal-backdrop" id="add-lead-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add New Lead</h3>
+      <button class="btn btn-ghost btn-icon modal-close">
+        <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" placeholder="Enter full name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" placeholder="email@company.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Company &amp; Title</label>
+        <input type="text" class="form-input" placeholder="Company - Title">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Source</label>
+        <select class="form-select">
+          <option value="">Select how you met...</option>
+          <option value="in-person">In Person / Event</option>
+          <option value="fathom">Fathom Meeting</option>
+          <option value="linkedin">LinkedIn</option>
+          <option value="referral">Referral</option>
+          <option value="website">Website</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" placeholder="Meeting notes, interests, potential needs..." rows="4"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Business Card Photo (optional)</label>
+        <div class="upload-zone" style="padding: 24px;">
+          <input type="file" accept="image/*" capture="environment" style="display:none">
+          <svg viewBox="0 0 24 24" style="width:32px;height:32px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <div class="upload-text" style="font-size:13px;">Upload card photo</div>
+          <div class="upload-hint" style="font-size:12px;">Click or drag</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary modal-cancel">Cancel</button>
+      <button class="btn btn-primary modal-close" onclick="showToast('Lead added successfully!', 'success')">Add Lead</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
