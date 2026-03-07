@@ -598,34 +598,474 @@ The dashboard keeps working throughout the entire migration.
 ## Sequence Summary
 
 ```
-Phase 1 (Week 1-2):  Supabase setup, auth, data.js, render.js
-                      Dashboard reads/writes to real database
-                      Forms actually save data, pages load from DB
+--- YOUR INTERNAL DASHBOARD ---
 
-Phase 2 (Week 2-3):  Business card upload -> Claude Vision OCR -> auto-create lead
-                      + LinkedIn profile enrichment via Unipile
+Phase 1 (Week 1-2):   Supabase setup, auth, data.js, render.js
+                       Dashboard reads/writes to real database
+                       Forms actually save data, pages load from DB
 
-Phase 3 (Week 3-4):  Unipile setup + AI email drafting
-                      Connect LinkedIn + email accounts to Unipile
-                      Follow-up emails send from YOUR inbox via Unipile
-                      Multi-channel sequences (email + LinkedIn message)
+Phase 2 (Week 2-3):   Business card upload -> Claude Vision OCR -> auto-create lead
+                       + LinkedIn profile enrichment via Unipile
 
-Phase 4 (Week 4-5):  Fathom API sync -> auto-detect meetings -> suggest follow-ups
+Phase 3 (Week 3-4):   Unipile setup + AI email drafting
+                       Connect LinkedIn + email accounts to Unipile
+                       Follow-up emails send from YOUR inbox via Unipile
+                       Multi-channel sequences (email + LinkedIn message)
 
-Phase 5 (Week 5-7):  Content pipeline -> AI drafts LinkedIn/YouTube/TikTok content daily
-                      LinkedIn posts publish directly via Unipile (no copy-paste)
+Phase 4 (Week 4-5):   Fathom API sync -> auto-detect meetings -> suggest follow-ups
 
-Phase 6 (Week 6-7):  Schedule becomes database-driven, optional calendar sync
+Phase 5 (Week 5-7):   Content pipeline -> AI drafts LinkedIn/YouTube/TikTok content daily
+                       LinkedIn posts publish directly via Unipile (no copy-paste)
 
-Phase 7 (Week 7-8):  Unified inbox via Unipile
-                      Real-time LinkedIn + email + WhatsApp messages
-                      AI-suggested replies, send back on original platform
+Phase 6 (Week 6-7):   Schedule becomes database-driven, optional calendar sync
 
-Phase 8 (Week 8-9):  Metrics from real sources
-                      LinkedIn engagement via Unipile
-                      Email open/reply rates via Unipile
-                      YouTube API, Google Analytics
+Phase 7 (Week 7-8):   Unified inbox via Unipile
+                       Real-time LinkedIn + email + WhatsApp messages
+                       AI-suggested replies, send back on original platform
+
+Phase 8 (Week 8-9):   Metrics from real sources
+                       LinkedIn engagement via Unipile
+                       Email open/reply rates via Unipile
+                       YouTube API, Google Analytics
+
+--- CLIENT-FACING SYSTEMS ---
+
+Phase 9 (Week 9-11):  SOPs + client onboarding automation
+                       Document onboarding, delivery, and support processes
+                       Auto-generate checklists when lead converts to client
+                       Dashboard shows active onboarding progress
+
+Phase 10 (Week 11-13): Client portal (SEPARATE SITE)
+                        Client login, project progress, deliverable review
+                        Approve/request changes on deliverables
+                        Project timeline and updates
+
+Phase 11 (Week 13-15): Work requests + support
+                        Clients submit bugs, features, questions from portal
+                        AI triage + priority suggestion
+                        Comment threads between you and client
+                        Dashboard shows requests to review
+
+Phase 12 (Week 15-16): Client communication hub
+                        AI-drafted project updates from git/sprint activity
+                        Client notification via Unipile email
+                        Full communication history searchable
 ```
 
 Each phase is independently deployable. You get value after Phase 1.
 Unipile connects in Phase 3 and progressively powers Phases 5, 7, and 8.
+Client-facing systems start in Phase 9 as a separate site sharing the same Supabase backend.
+
+---
+
+## Client-Facing Systems (Phases 9-12)
+
+The phases above build YOUR internal ops dashboard. Phases 9-12 build the
+client-facing side: how clients interact with you, submit requests, track
+their projects, and get support.
+
+**Architecture principle:** Each of these is a SEPARATE site/app, not bolted onto your
+dashboard. Your dashboard links INTO these systems. Clients log into their own portal.
+This follows your rule: when a site gets too complicated, break it off.
+
+```
+Your dashboard (icodemybusiness.com/dashboard)
+  └── Links to: client portal, support system, SOP docs
+
+Client portal (e.g., portal.icodemybusiness.com)
+  └── Clients log in here to see their project, submit requests, approve deliverables
+
+Support (e.g., support.icodemybusiness.com)
+  └── Clients submit tickets, track resolution
+
+SOPs (internal, not client-facing)
+  └── Your documented processes for onboarding, delivery, support
+  └── Could live in dashboard or in a separate knowledge base
+```
+
+---
+
+### Phase 9: Client Onboarding + SOPs (Week 9-11)
+**Goal: Documented, repeatable process from "lead won" to "project kicked off"**
+
+**The problem:** Right now when a lead converts to a client, the next steps live
+in your head. Onboarding is ad-hoc. This means inconsistent experiences and
+things falling through the cracks.
+
+**SOPs to document (stored in Supabase, viewable in dashboard):**
+
+```sql
+create table sops (
+  id uuid primary key default gen_random_uuid(),
+  category text check (category in ('onboarding', 'delivery', 'support', 'sales', 'internal')),
+  title text not null,
+  steps jsonb not null,           -- Ordered array of step objects
+  trigger_event text,             -- What kicks off this SOP (e.g., 'lead_stage_won')
+  auto_checklist boolean default true, -- Auto-create checklist when triggered
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table sop_checklists (
+  id uuid primary key default gen_random_uuid(),
+  sop_id uuid references sops(id),
+  client_id uuid references clients(id),
+  project_id uuid references projects(id),
+  steps_completed jsonb,          -- Track which steps are done
+  status text check (status in ('active', 'completed', 'blocked')) default 'active',
+  started_at timestamptz default now(),
+  completed_at timestamptz
+);
+```
+
+**Client Onboarding SOP (example):**
+```
+Trigger: Lead stage changes to 'won'
+Steps:
+  1. Send welcome email (via Unipile) with next steps + contract link
+  2. Create client record in clients table
+  3. Create project record linked to client
+  4. Schedule kickoff call (calendar integration)
+  5. Send pre-kickoff questionnaire (what are your goals, constraints, timeline)
+  6. Receive signed contract + payment
+  7. Run BMAD Discovery session
+  8. Send Discovery summary + project plan
+  9. Set up client portal access
+  10. Begin Sprint 1
+```
+
+**Dashboard integration:**
+- New section on dashboard: "Active Onboardings" showing checklist progress
+- When a lead moves to 'won', the SOP auto-generates a checklist
+- Each step can be manual (you do it) or automated (Edge Function does it)
+- Dashboard shows what's blocked, what's next
+
+**SOPs for other processes:**
+- **Delivery SOP:** Sprint cycle, code review, staging deploy, client review, production deploy
+- **Support SOP:** Ticket received -> triage -> assign -> fix -> test -> deploy -> notify client
+- **Sales SOP:** Discovery call -> BMAD proposal -> follow-up sequence -> close
+
+---
+
+### Phase 10: Client Portal (Week 11-13)
+**Goal: Clients log in and see their project status, deliverables, and communication**
+
+**This is a separate site** (portal.icodemybusiness.com or clients.icodemybusiness.com).
+Built on Supabase with its own auth (client email/password or magic link).
+
+```sql
+create table clients (
+  id uuid primary key default gen_random_uuid(),
+  lead_id uuid references leads(id),  -- Links back to lead record
+  name text not null,
+  company text,
+  email text not null unique,
+  auth_user_id uuid,                   -- Supabase auth user for portal login
+  status text check (status in ('onboarding', 'active', 'paused', 'completed')) default 'onboarding',
+  created_at timestamptz default now()
+);
+
+create table client_projects (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid references clients(id),
+  project_id uuid references projects(id),
+  -- Client-visible fields (subset of internal project data)
+  display_name text,
+  current_phase text,              -- e.g., 'Discovery', 'Sprint 2', 'Testing'
+  progress_percent int default 0,
+  next_milestone text,
+  next_milestone_date date,
+  created_at timestamptz default now()
+);
+
+create table deliverables (
+  id uuid primary key default gen_random_uuid(),
+  client_project_id uuid references client_projects(id),
+  title text not null,
+  description text,
+  status text check (status in ('in-progress', 'ready-for-review', 'approved', 'revision-requested')) default 'in-progress',
+  file_url text,                   -- Supabase Storage URL
+  preview_url text,                -- Staging/preview link
+  client_feedback text,
+  submitted_at timestamptz,
+  approved_at timestamptz,
+  created_at timestamptz default now()
+);
+```
+
+**What the client sees when they log in:**
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Welcome back, Sarah                                │
+│  GreenTech Solutions                                │
+│                                                     │
+│  ┌─────────────────────────────────────────────┐    │
+│  │  Project: Custom CRM Platform               │    │
+│  │  Phase: Sprint 2 of 4                        │    │
+│  │  Progress: ████████░░ 65%                    │    │
+│  │  Next milestone: User dashboard - Mar 15     │    │
+│  └─────────────────────────────────────────────┘    │
+│                                                     │
+│  Deliverables Ready for Review (1)                  │
+│  ┌─────────────────────────────────────────────┐    │
+│  │  User Dashboard v1                           │    │
+│  │  Preview: [staging-link]                     │    │
+│  │  [Approve] [Request Changes]                 │    │
+│  └─────────────────────────────────────────────┘    │
+│                                                     │
+│  Recent Updates                                     │
+│  • Mar 5: Sprint 2 started - user dashboard focus   │
+│  • Mar 1: Discovery phase completed                 │
+│  • Feb 28: Kickoff call - project plan shared       │
+│                                                     │
+│  [Submit a Request]  [View All Messages]            │
+└─────────────────────────────────────────────────────┘
+```
+
+**Key features:**
+- Project progress bar with current phase
+- Deliverables with preview links + approve/request-changes buttons
+- Timeline of updates (you post these, client sees them)
+- Request submission form (see Phase 11)
+- Message thread with you (via Unipile email or in-app)
+
+**Your dashboard integration:**
+- Dashboard shows "Client Reviews Pending" when a deliverable is submitted
+- When client approves/requests changes, you see it immediately
+- Client activity feeds into your daily view
+
+---
+
+### Phase 11: Work Request Intake + Support (Week 13-15)
+**Goal: Clients submit requests, bug reports, and change orders through a structured system**
+
+```sql
+create table work_requests (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid references clients(id),
+  client_project_id uuid references client_projects(id),
+  type text check (type in ('feature', 'bug', 'change', 'question', 'support')) not null,
+  priority text check (priority in ('low', 'medium', 'high', 'urgent')) default 'medium',
+  title text not null,
+  description text,
+  attachments text[],             -- Array of Supabase Storage URLs
+  status text check (status in ('submitted', 'triaged', 'in-progress', 'resolved', 'closed')) default 'submitted',
+  resolution_notes text,
+  submitted_at timestamptz default now(),
+  resolved_at timestamptz,
+  created_at timestamptz default now()
+);
+
+create table request_comments (
+  id uuid primary key default gen_random_uuid(),
+  work_request_id uuid references work_requests(id),
+  author_type text check (author_type in ('client', 'admin')),
+  author_name text,
+  body text not null,
+  created_at timestamptz default now()
+);
+```
+
+**Client submits a request from the portal:**
+```
+Request Type: [Bug / Feature / Change / Question / Support]
+Priority: [Low / Medium / High / Urgent]
+Title: "Login button not working on mobile"
+Description: [text area]
+Attachments: [file upload]
+[Submit Request]
+```
+
+**What happens after submission:**
+1. Request saved to `work_requests` table
+2. You get a notification on your dashboard: "New Request from Sarah Chen"
+3. AI triages it: reads the description, suggests priority, tags it
+4. Shows up in your dashboard under "Client Requests to Review"
+5. You can respond with comments (client sees them in portal)
+6. When resolved, client gets notified via email (Unipile)
+
+**Your dashboard shows:**
+- "Client Requests" card with unresolved count
+- Priority-sorted list: urgent first
+- Quick actions: Respond, Change Status, Assign to Project Sprint
+
+**This doubles as customer support.** For a small operation, you don't need
+a separate help desk. Work requests + comments + status tracking IS support.
+If volume grows, this can be broken off into a dedicated support app later.
+
+---
+
+### Phase 12: Client Communication Hub (Week 15-16)
+**Goal: All client communication in one place, visible to both sides**
+
+```sql
+create table client_updates (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid references clients(id),
+  client_project_id uuid references client_projects(id),
+  title text,
+  body text not null,
+  update_type text check (update_type in ('progress', 'milestone', 'deliverable', 'general')),
+  visible_to_client boolean default true,  -- Some updates are internal-only
+  created_at timestamptz default now()
+);
+```
+
+**How it works:**
+- When you complete a sprint/milestone, you write a quick update (or AI drafts one from git commits)
+- Update appears in client portal timeline
+- Client gets an email notification via Unipile
+- Client can reply (via portal or email), response shows up in your messages
+- All communication is threaded and searchable
+
+**AI-assisted updates:**
+```
+Supabase Edge Function: draft-client-update
+  Triggered when a deliverable status changes or a sprint completes
+  1. Pull recent project activity (git commits, completed tasks)
+  2. Call Claude API to draft a client-friendly update
+  3. Insert into client_updates with visible_to_client = false (draft)
+  4. You review, edit if needed, then publish (set visible_to_client = true)
+  5. Client gets notified
+```
+
+---
+
+## Updated Database Schema (Client Tables)
+
+```sql
+-- Add to existing schema
+
+create table clients (
+  id uuid primary key default gen_random_uuid(),
+  lead_id uuid references leads(id),
+  name text not null,
+  company text,
+  email text not null unique,
+  auth_user_id uuid,
+  status text check (status in ('onboarding', 'active', 'paused', 'completed')) default 'onboarding',
+  created_at timestamptz default now()
+);
+
+create table client_projects (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid references clients(id),
+  project_id uuid references projects(id),
+  display_name text,
+  current_phase text,
+  progress_percent int default 0,
+  next_milestone text,
+  next_milestone_date date,
+  created_at timestamptz default now()
+);
+
+create table deliverables (
+  id uuid primary key default gen_random_uuid(),
+  client_project_id uuid references client_projects(id),
+  title text not null,
+  description text,
+  status text check (status in ('in-progress', 'ready-for-review', 'approved', 'revision-requested')) default 'in-progress',
+  file_url text,
+  preview_url text,
+  client_feedback text,
+  submitted_at timestamptz,
+  approved_at timestamptz,
+  created_at timestamptz default now()
+);
+
+create table work_requests (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid references clients(id),
+  client_project_id uuid references client_projects(id),
+  type text check (type in ('feature', 'bug', 'change', 'question', 'support')) not null,
+  priority text check (priority in ('low', 'medium', 'high', 'urgent')) default 'medium',
+  title text not null,
+  description text,
+  attachments text[],
+  status text check (status in ('submitted', 'triaged', 'in-progress', 'resolved', 'closed')) default 'submitted',
+  resolution_notes text,
+  submitted_at timestamptz default now(),
+  resolved_at timestamptz,
+  created_at timestamptz default now()
+);
+
+create table request_comments (
+  id uuid primary key default gen_random_uuid(),
+  work_request_id uuid references work_requests(id),
+  author_type text check (author_type in ('client', 'admin')),
+  author_name text,
+  body text not null,
+  created_at timestamptz default now()
+);
+
+create table client_updates (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid references clients(id),
+  client_project_id uuid references client_projects(id),
+  title text,
+  body text not null,
+  update_type text check (update_type in ('progress', 'milestone', 'deliverable', 'general')),
+  visible_to_client boolean default true,
+  created_at timestamptz default now()
+);
+
+create table sops (
+  id uuid primary key default gen_random_uuid(),
+  category text check (category in ('onboarding', 'delivery', 'support', 'sales', 'internal')),
+  title text not null,
+  steps jsonb not null,
+  trigger_event text,
+  auto_checklist boolean default true,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table sop_checklists (
+  id uuid primary key default gen_random_uuid(),
+  sop_id uuid references sops(id),
+  client_id uuid references clients(id),
+  project_id uuid references projects(id),
+  steps_completed jsonb,
+  status text check (status in ('active', 'completed', 'blocked')) default 'active',
+  started_at timestamptz default now(),
+  completed_at timestamptz
+);
+```
+
+---
+
+## Updated File Structure (Full System)
+
+```
+icodemybusiness.com (GitHub Pages)
+├── index.html                     -- Public landing page
+└── dashboard/                     -- YOUR internal ops dashboard
+    ├── index.html                 -- Daily command center
+    ├── login.html                 -- Admin auth
+    ├── leads.html                 -- Lead pipeline + follow-ups
+    ├── content.html               -- Content drafts (LinkedIn, YouTube, TikTok)
+    ├── schedule.html              -- Weekly/daily planner
+    ├── projects.html              -- Kanban board
+    ├── outreach.html              -- Affiliate partnerships
+    ├── metrics.html               -- Performance analytics
+    ├── messages.html              -- Unified inbox
+    ├── clients.html               -- NEW: Client management overview
+    ├── sops.html                  -- NEW: SOP library + active checklists
+    ├── requests.html              -- NEW: Client work requests to review
+    ├── styles.css
+    ├── app.js
+    ├── data.js
+    ├── render.js
+    └── config.js
+
+portal.icodemybusiness.com (separate deploy - Vercel/Netlify)
+├── index.html                     -- Client login
+├── dashboard.html                 -- Client project view
+├── requests.html                  -- Submit / track work requests
+├── deliverables.html              -- Review + approve deliverables
+├── messages.html                  -- Communication thread
+├── styles.css
+├── app.js
+└── data.js                        -- Same Supabase, different RLS policies
+```
