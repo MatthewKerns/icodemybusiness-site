@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | iCodeMyBusiness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">iC</div>
+    <span class="brand-text">iCodeMyBusiness</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-label">Overview</div>
+      <a href="index.html" class="nav-item active">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+        Dashboard
+      </a>
+      <a href="schedule.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+        Schedule
+      </a>
+      <a href="projects.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span>
+        Projects
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Growth</div>
+      <a href="leads.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        Leads
+        <span class="nav-badge">3</span>
+      </a>
+      <a href="content.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+        Content
+        <span class="nav-badge">2</span>
+      </a>
+      <a href="outreach.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+        Outreach
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Insights</div>
+      <a href="metrics.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+        Metrics
+      </a>
+      <a href="messages.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        Messages
+        <span class="nav-badge">5</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">External</div>
+      <a href="../index.html" class="nav-item">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
+        Public Site
+      </a>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="avatar">MK</div>
+      <div class="user-info">
+        <div class="user-name">Matthew Kerns</div>
+        <div class="user-role">Founder</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="sidebar-overlay"></div>
+
+<!-- Main Content -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="mobile-menu-btn">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <h1>Dashboard</h1>
+      <span class="page-subtitle">Your daily command center</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-date"></span>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Quick Stats -->
+    <div class="grid-4 mb-32">
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        </div>
+        <div class="stat-content">
+          <h3>Active Leads</h3>
+          <div class="stat-value">12</div>
+          <div class="stat-change up">+3 this week</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="stat-content">
+          <h3>Follow-ups Sent</h3>
+          <div class="stat-value">8</div>
+          <div class="stat-change up">+2 today</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon purple">
+          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <div class="stat-content">
+          <h3>Content Drafts</h3>
+          <div class="stat-value">4</div>
+          <div class="stat-change">2 ready to review</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon yellow">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="stat-content">
+          <h3>Meetings Today</h3>
+          <div class="stat-value">3</div>
+          <div class="stat-change">Next: 10:30 AM</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="section-header mb-16">
+      <h2>Quick Actions</h2>
+    </div>
+    <div class="quick-actions mb-32">
+      <a href="leads.html#upload" class="quick-action">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>Scan Card</span>
+      </a>
+      <a href="leads.html#new" class="quick-action">
+        <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        <span>Add Lead</span>
+      </a>
+      <a href="content.html" class="quick-action">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <span>Review Content</span>
+      </a>
+      <a href="messages.html" class="quick-action">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Messages</span>
+      </a>
+      <a href="schedule.html" class="quick-action">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>View Schedule</span>
+      </a>
+    </div>
+
+    <div class="grid-2 mb-32">
+      <!-- Today's Schedule -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Today's Schedule</h2>
+          <a href="schedule.html" class="btn btn-ghost btn-sm">View Full Schedule</a>
+        </div>
+        <div class="card-body">
+          <div class="schedule-block">
+            <div class="schedule-time">6:30 AM</div>
+            <div class="schedule-event exercise">
+              <div class="schedule-event-title">Morning Workout</div>
+              <div class="schedule-event-meta">45 min - Strength training</div>
+            </div>
+          </div>
+          <div class="schedule-block">
+            <div class="schedule-time">8:00 AM</div>
+            <div class="schedule-event dev">
+              <div class="schedule-event-title">Deep Work: Dashboard Dev</div>
+              <div class="schedule-event-meta">2.5 hours - Sprint tasks</div>
+            </div>
+          </div>
+          <div class="schedule-block">
+            <div class="schedule-time">10:30 AM</div>
+            <div class="schedule-event meeting">
+              <div class="schedule-event-title">Client Discovery Call</div>
+              <div class="schedule-event-meta">Sarah Chen - E-commerce platform</div>
+            </div>
+          </div>
+          <div class="schedule-block">
+            <div class="schedule-time">12:00 PM</div>
+            <div class="schedule-event personal">
+              <div class="schedule-event-title">Lunch / Family Time</div>
+              <div class="schedule-event-meta">Cook &amp; recharge</div>
+            </div>
+          </div>
+          <div class="schedule-block">
+            <div class="schedule-time">1:30 PM</div>
+            <div class="schedule-event content">
+              <div class="schedule-event-title">Content Recording</div>
+              <div class="schedule-event-meta">YouTube video - weekly script</div>
+            </div>
+          </div>
+          <div class="schedule-block">
+            <div class="schedule-time">3:00 PM</div>
+            <div class="schedule-event dev">
+              <div class="schedule-event-title">Dev: Client Project</div>
+              <div class="schedule-event-meta">2 hours - Arise Group feature build</div>
+            </div>
+          </div>
+          <div class="schedule-block">
+            <div class="schedule-time">5:30 PM</div>
+            <div class="schedule-event personal">
+              <div class="schedule-event-title">Family / Evening</div>
+              <div class="schedule-event-meta">Dinner, wind down</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lead Follow-ups -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Follow-ups to Review</h2>
+          <a href="leads.html" class="btn btn-ghost btn-sm">All Leads</a>
+        </div>
+        <div class="card-body">
+          <div class="lead-card">
+            <div class="lead-avatar">SC</div>
+            <div class="lead-info">
+              <div class="lead-name">Sarah Chen</div>
+              <div class="lead-company">GreenTech Solutions - CTO</div>
+              <div class="lead-details">
+                <span>Met: Networking event, Feb 28</span>
+              </div>
+            </div>
+            <div class="lead-actions">
+              <button class="btn btn-primary btn-sm btn-send-followup">Send Follow-up</button>
+              <button class="btn btn-ghost btn-sm">View Draft</button>
+            </div>
+          </div>
+
+          <div class="lead-card">
+            <div class="lead-avatar">JR</div>
+            <div class="lead-info">
+              <div class="lead-name">James Rodriguez</div>
+              <div class="lead-company">Meridian Consulting - Founder</div>
+              <div class="lead-details">
+                <span>Fathom: Discovery call, Mar 1</span>
+              </div>
+            </div>
+            <div class="lead-actions">
+              <button class="btn btn-primary btn-sm btn-send-followup">Send Follow-up</button>
+              <button class="btn btn-ghost btn-sm">View Draft</button>
+            </div>
+          </div>
+
+          <div class="lead-card">
+            <div class="lead-avatar">AP</div>
+            <div class="lead-info">
+              <div class="lead-name">Aisha Patel</div>
+              <div class="lead-company">NovaBuild - Operations Lead</div>
+              <div class="lead-details">
+                <span>Business card scan, Mar 1</span>
+              </div>
+            </div>
+            <div class="lead-actions">
+              <button class="btn btn-primary btn-sm btn-send-followup">Send Follow-up</button>
+              <button class="btn btn-ghost btn-sm">View Draft</button>
+            </div>
+          </div>
+
+          <div style="text-align: center; padding: 12px 0 0;">
+            <span class="text-sm text-muted">Suggested by Fathom meeting data + your strategy system</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2 mb-32">
+      <!-- Content to Review -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Content Ready to Review</h2>
+          <a href="content.html" class="btn btn-ghost btn-sm">All Content</a>
+        </div>
+        <div class="card-body">
+          <div class="content-preview">
+            <div class="content-preview-header">
+              <div class="content-preview-platform">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0077b5" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                LinkedIn Post
+              </div>
+              <span class="badge badge-blue">Today</span>
+            </div>
+            <div class="content-preview-body">
+              <p>Most founders think "automation" means replacing themselves.</p>
+              <p>Wrong. It means multiplying themselves.</p>
+              <p>Last week I helped a client turn a 3-hour manual process into a 15-minute review. They didn't lose control - they gained freedom...</p>
+            </div>
+            <div class="content-preview-footer">
+              <button class="btn btn-primary btn-sm btn-approve">Approve &amp; Schedule</button>
+              <button class="btn btn-secondary btn-sm">Edit</button>
+            </div>
+          </div>
+
+          <div class="content-preview">
+            <div class="content-preview-header">
+              <div class="content-preview-platform">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff0000" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                YouTube Script
+              </div>
+              <span class="badge badge-purple">This Week</span>
+            </div>
+            <div class="content-preview-body">
+              <p><strong>"Why Your Business Needs a Custom Dashboard (Not Another SaaS Tool)"</strong></p>
+              <p>Hook: "You're paying $500/mo for 6 different tools when you could have ONE system that does exactly what you need..."</p>
+            </div>
+            <div class="content-preview-footer">
+              <button class="btn btn-primary btn-sm btn-approve">Approve Script</button>
+              <button class="btn btn-secondary btn-sm">Edit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projects Snapshot -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Active Projects</h2>
+          <a href="projects.html" class="btn btn-ghost btn-sm">View Board</a>
+        </div>
+        <div class="card-body">
+          <ul class="item-list">
+            <li class="item-row">
+              <span class="item-dot blue"></span>
+              <div class="item-content">
+                <div class="item-title">iCodeMyBusiness Dashboard</div>
+                <div class="item-meta">Sprint 2 - Lead automation flow</div>
+              </div>
+              <span class="badge badge-blue">In Progress</span>
+            </li>
+            <li class="item-row">
+              <span class="item-dot green"></span>
+              <div class="item-content">
+                <div class="item-title">Arise Group AI Platform</div>
+                <div class="item-meta">Agent team integration phase</div>
+              </div>
+              <span class="badge badge-green">On Track</span>
+            </li>
+            <li class="item-row">
+              <span class="item-dot purple"></span>
+              <div class="item-content">
+                <div class="item-title">Client: GreenTech CRM</div>
+                <div class="item-meta">Discovery complete, starting BMAD</div>
+              </div>
+              <span class="badge badge-purple">Starting</span>
+            </li>
+            <li class="item-row">
+              <span class="item-dot yellow"></span>
+              <div class="item-content">
+                <div class="item-title">Content Pipeline System</div>
+                <div class="item-meta">Auto-draft engine v2</div>
+              </div>
+              <span class="badge badge-yellow">Planning</span>
+            </li>
+            <li class="item-row">
+              <span class="item-dot green"></span>
+              <div class="item-content">
+                <div class="item-title">Affiliate Partner Portal</div>
+                <div class="item-meta">MVP complete, testing</div>
+              </div>
+              <span class="badge badge-green">Testing</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages & Outreach Row -->
+    <div class="grid-2 mb-32">
+      <div class="card">
+        <div class="card-header">
+          <h2>Messages to Reply</h2>
+          <a href="messages.html" class="btn btn-ghost btn-sm">View All</a>
+        </div>
+        <div class="card-body">
+          <ul class="item-list">
+            <li class="item-row">
+              <div class="lead-avatar" style="width:36px;height:36px;font-size:12px;">DM</div>
+              <div class="item-content">
+                <div class="item-title">David Mitchell</div>
+                <div class="item-meta">LinkedIn: "Hey Matthew, loved your post about automation. Would love to chat about..."</div>
+              </div>
+              <a href="messages.html" class="btn btn-sm btn-secondary">Reply</a>
+            </li>
+            <li class="item-row">
+              <div class="lead-avatar" style="width:36px;height:36px;font-size:12px;">LW</div>
+              <div class="item-content">
+                <div class="item-title">Lisa Wang</div>
+                <div class="item-meta">Email: Re: Partnership opportunity - follow up on our call last week...</div>
+              </div>
+              <a href="messages.html" class="btn btn-sm btn-secondary">Reply</a>
+            </li>
+            <li class="item-row">
+              <div class="lead-avatar" style="width:36px;height:36px;font-size:12px;">TK</div>
+              <div class="item-content">
+                <div class="item-title">Tom Kim</div>
+                <div class="item-meta">LinkedIn: "Can you tell me more about the BMAD framework?"</div>
+              </div>
+              <a href="messages.html" class="btn btn-sm btn-secondary">Reply</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Affiliate Outreach</h2>
+          <a href="outreach.html" class="btn btn-ghost btn-sm">Manage Outreach</a>
+        </div>
+        <div class="card-body">
+          <ul class="item-list">
+            <li class="item-row">
+              <span class="item-dot green"></span>
+              <div class="item-content">
+                <div class="item-title">TechStack Weekly Newsletter</div>
+                <div class="item-meta">Pitch sent - awaiting response</div>
+              </div>
+              <span class="badge badge-yellow">Pending</span>
+            </li>
+            <li class="item-row">
+              <span class="item-dot blue"></span>
+              <div class="item-content">
+                <div class="item-title">BuilderPod Podcast</div>
+                <div class="item-meta">Episode scheduled for Mar 15</div>
+              </div>
+              <span class="badge badge-green">Confirmed</span>
+            </li>
+            <li class="item-row">
+              <span class="item-dot purple"></span>
+              <div class="item-content">
+                <div class="item-title">AI Tools Review Blog</div>
+                <div class="item-meta">Draft affiliate review ready</div>
+              </div>
+              <span class="badge badge-blue">Ready</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics Snapshot -->
+    <div class="card mb-32">
+      <div class="card-header">
+        <h2>Weekly Metrics Snapshot</h2>
+        <a href="metrics.html" class="btn btn-ghost btn-sm">Full Analytics</a>
+      </div>
+      <div class="card-body">
+        <div class="grid-4">
+          <div style="text-align:center; padding: 16px;">
+            <div style="font-size:32px; font-weight:800; color:var(--accent);">2,847</div>
+            <div class="text-sm text-muted" style="margin-top:4px;">LinkedIn Impressions</div>
+            <div class="stat-change up" style="font-size:12px;">+18% vs last week</div>
+          </div>
+          <div style="text-align:center; padding: 16px;">
+            <div style="font-size:32px; font-weight:800; color:var(--success);">1,205</div>
+            <div class="text-sm text-muted" style="margin-top:4px;">Website Visitors</div>
+            <div class="stat-change up" style="font-size:12px;">+12% vs last week</div>
+          </div>
+          <div style="text-align:center; padding: 16px;">
+            <div style="font-size:32px; font-weight:800; color:var(--purple);">342</div>
+            <div class="text-sm text-muted" style="margin-top:4px;">YouTube Views</div>
+            <div class="stat-change up" style="font-size:12px;">+24% vs last week</div>
+          </div>
+          <div style="text-align:center; padding: 16px;">
+            <div style="font-size:32px; font-weight:800; color:var(--warning);">67%</div>
+            <div class="text-sm text-muted" style="margin-top:4px;">Email Open Rate</div>
+            <div class="stat-change up" style="font-size:12px;">+5% vs last week</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
