@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A Claude Code plan mode output analyzing the data contract between three integrated business systems — Agent-OS, InfinityVault-OS, and iCodeMyBusiness.">
+    <meta property="og:title" content="Data Contract & Integration Analysis: How Three AI Systems Talk to Each Other">
+    <meta property="og:description" content="I asked Claude Code to examine how my AI agent layer integrates with two business systems. Here's the full analysis — API contracts, data models, and architecture.">
+    <meta property="og:type" content="article">
+    <title>Data Contract &amp; Integration Analysis | Built with Claude Code | iCodeMyBusiness</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="blog-header">
+        <div class="container">
+            <a href="../index.html" class="site-name">iCodeMyBusiness</a>
+            <nav>
+                <a href="../index.html">Home</a>
+                <a href="./">Blog</a>
+                <a href="https://calendly.com/matthewkerns/organic-audit" target="_blank">Book a Call</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Article Header -->
+    <section class="article-header">
+        <div class="container-narrow">
+            <a href="./" class="back-link">&larr; Back to Blog</a>
+            <span class="tag">Plan Mode</span>
+            <h1>Data Contract &amp; Integration Analysis: How Three AI Systems Talk to Each Other</h1>
+            <div class="meta">
+                <span>Matthew Kerns</span>
+                <span>March 12, 2026</span>
+                <span>12 min read</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Article Body -->
+    <section class="article-body">
+        <div class="container-narrow">
+
+            <!-- Intro -->
+            <div class="context-box">
+                <p><strong>What you're reading:</strong> This is a real Claude Code plan mode output. I asked Claude to examine the data contract between three of my systems, check for latest updates, and map out how everything integrates. This is the kind of analysis that would take a senior engineer hours — Claude mapped it out in minutes.</p>
+            </div>
+
+            <h2>The Problem</h2>
+
+            <p>I run multiple interconnected systems: an AI agent layer (Agent-OS), a company operations platform (InfinityVault-OS), and a client delivery system (iCodeMyBusiness). I needed to understand exactly how data flows between them — what's the contract, what are the boundaries, and where are the integration points.</p>
+
+            <p>I opened Claude Code plan mode and asked it to examine the data contract between Agent-OS and InfinityVault-OS, check for the latest updates, and explore the internal operations data model. Here's what came back.</p>
+
+            <!-- Key Findings -->
+            <h2>Key Findings</h2>
+
+            <div class="phase-header">
+                <h3>1. Agent-OS Data Contract with InfinityVault-OS</h3>
+            </div>
+
+            <p><strong>Contract Location:</strong> <code>packages/agent-os-contract/</code></p>
+
+            <p><strong>Architecture:</strong> Agent-OS serves as an AI agent layer that integrates with two business systems:</p>
+            <ul>
+                <li><strong>InfinityVault-OS:</strong> Company operations management (EOS framework)</li>
+                <li><strong>iCodeMyBusiness:</strong> Client work and project delivery</li>
+            </ul>
+
+            <p><strong>Data Contract Structure:</strong></p>
+            <ul>
+                <li>Types-only package with zero dependencies</li>
+                <li>Clear API endpoints defined for both systems</li>
+                <li>Domain boundary enforcement (each system owns specific data)</li>
+            </ul>
+
+            <div class="phase-header">
+                <h3>2. Data Models Being Exchanged</h3>
+            </div>
+
+            <h4>EOS Management Data (InfinityVault-OS &harr; Agent-OS)</h4>
+
+            <p><strong>Core Types:</strong></p>
+            <ul>
+                <li><strong>Rocks:</strong> 90-day company priorities with status tracking</li>
+                <li><strong>Issues:</strong> Company problems requiring resolution</li>
+                <li><strong>Tasks:</strong> Employee tasks derived from rocks/issues</li>
+                <li><strong>Plans:</strong> Daily/weekly/quarterly planning documents</li>
+                <li><strong>Vision:</strong> Company strategic direction</li>
+                <li><strong>Seats:</strong> Organizational roles and responsibilities</li>
+            </ul>
+
+            <p><strong>Key Endpoints:</strong></p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Endpoint</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GET/PUT</td>
+                        <td><code>/api/eos/rocks</code></td>
+                        <td>Rock management</td>
+                    </tr>
+                    <tr>
+                        <td>GET/PUT</td>
+                        <td><code>/api/eos/issues</code></td>
+                        <td>Issue tracking</td>
+                    </tr>
+                    <tr>
+                        <td>GET/POST/PUT</td>
+                        <td><code>/api/eos/tasks</code></td>
+                        <td>Task operations</td>
+                    </tr>
+                    <tr>
+                        <td>GET/POST</td>
+                        <td><code>/api/eos/plans</code></td>
+                        <td>Planning documents</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td><code>/api/eos/vision</code></td>
+                        <td>Company vision (read-only)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>iCodeMyBusiness Data (ICMB &harr; Agent-OS)</h4>
+
+            <p><strong>Core Types:</strong></p>
+            <ul>
+                <li><strong>Clients:</strong> Customer relationships with health tracking</li>
+                <li><strong>Projects:</strong> Client work with revenue and strategic value</li>
+                <li><strong>Deliverables:</strong> Specific outputs with deadlines</li>
+                <li><strong>Communications:</strong> Client interaction tracking</li>
+                <li><strong>Business Health:</strong> Aggregated metrics and alerts</li>
+            </ul>
+
+            <p><strong>Key Endpoints:</strong></p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Endpoint</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GET</td>
+                        <td><code>/api/icmb/clients</code></td>
+                        <td>Client management</td>
+                    </tr>
+                    <tr>
+                        <td>GET/PUT</td>
+                        <td><code>/api/icmb/projects</code></td>
+                        <td>Project tracking</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td><code>/api/icmb/deliverables</code></td>
+                        <td>Deliverable status</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td><code>/api/icmb/health</code></td>
+                        <td>Business metrics</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="phase-header">
+                <h3>3. Latest Agent-OS Updates</h3>
+            </div>
+
+            <h4>Multi-Company Briefing System</h4>
+            <ul>
+                <li>New <code>MultiCompanyBriefingAggregator</code> fetches data from both InfinityVault and iCodeMyBusiness</li>
+                <li>LLM-powered <code>NarrativeBriefingGenerator</code> creates persuasive daily briefings</li>
+                <li><code>BriefingConversationLoop</code> enables email-based briefing adjustments</li>
+                <li>Protection for unpaid projects from being dropped (growth strategy)</li>
+            </ul>
+
+            <h4>Email Reply Processing</h4>
+            <ul>
+                <li>Parses user replies to daily briefings using Claude LLM</li>
+                <li>Extracts rock/issue/todo status updates</li>
+                <li>Applies updates back to source systems</li>
+                <li>Supports bidirectional email conversations</li>
+            </ul>
+
+            <div class="phase-header">
+                <h3>4. iCodeMyBusiness Internal Operations</h3>
+            </div>
+
+            <h4>Three Kanban Board System</h4>
+            <ol>
+                <li><strong>Lead Generation Funnel:</strong> Awareness &rarr; Engaged &rarr; Call &rarr; Proposal</li>
+                <li><strong>Discovery &amp; Planning:</strong> Onboarding &rarr; Process Mapping &rarr; Design &rarr; Specs</li>
+                <li><strong>Implementation &amp; Delivery:</strong> Sprint &rarr; Progress &rarr; Testing &rarr; Review &rarr; Delivered</li>
+            </ol>
+
+            <h4>Comprehensive Data Model</h4>
+            <ul>
+                <li>8 major table groups tracking leads, clients, projects, SOPs, content</li>
+                <li>Integration points for Unipile, Stripe, Fathom, Calendly, Loom</li>
+                <li>Dashboard implementation at <code>/dashboard/</code> with 10 operational views</li>
+            </ul>
+
+            <h4>Arise Group AI Integration</h4>
+            <ul>
+                <li>Referenced as active work: "Agent Team Integration"</li>
+                <li>Building parallel AI agent system</li>
+                <li>This appears to be the connection to Agent-OS ecosystem</li>
+            </ul>
+
+            <!-- Architecture Diagram -->
+            <h2>Integration Architecture</h2>
+
+<pre><code>┌─────────────────────┐     ┌─────────────────────┐
+│  InfinityVault-OS   │     │   iCodeMyBusiness   │
+│  (Company Ops/EOS)  │     │  (Client Delivery)  │
+└──────────┬──────────┘     └──────────┬──────────┘
+           │                            │
+           │ API Contract               │ API Contract
+           │ (EOS Types)                │ (ICMB Types)
+           │                            │
+           └─────────┬──────────────────┘
+                     │
+           ┌─────────▼─────────┐
+           │    Agent-OS       │
+           │  (AI Agent Layer) │
+           │                   │
+           │ • Daily Briefings │
+           │ • Email Parsing   │
+           │ • Task Updates    │
+           │ • Multi-Company   │
+           │   Aggregation     │
+           └───────────────────┘</code></pre>
+
+            <!-- Critical Files -->
+            <h2>Critical Files for Implementation</h2>
+
+            <h4>Agent-OS Contract Files</h4>
+            <ul>
+                <li><code>packages/agent-os-contract/src/types/eos.types.ts</code></li>
+                <li><code>packages/agent-os-contract/src/types/icmb.types.ts</code></li>
+                <li><code>packages/agent-os-contract/src/api/eos.api.ts</code></li>
+                <li><code>packages/agent-os-contract/src/api/icmb.api.ts</code></li>
+            </ul>
+
+            <h4>Multi-Company Briefing Implementation</h4>
+            <ul>
+                <li><code>packages/personal-agent-os/src/types/multi-company-briefing.types.ts</code></li>
+                <li><code>packages/personal-agent-os/src/services/MultiCompanyBriefingAggregator.ts</code></li>
+                <li><code>backend/src/api/rest/webhooks/daily-briefing-reply-handler.ts</code></li>
+            </ul>
+
+            <h4>iCodeMyBusiness Operations</h4>
+            <ul>
+                <li><code>PLAN-data-integration.md</code></li>
+                <li><code>dashboard/</code> (10 operational views)</li>
+            </ul>
+
+            <!-- Verification -->
+            <h2>Verification Steps</h2>
+
+            <ol>
+                <li><strong>Check API Endpoints:</strong> Test the EOS and ICMB API endpoints to ensure they match the contract definitions</li>
+                <li><strong>Review Type Definitions:</strong> Verify that the types in <code>@agent-os/contract</code> match actual API responses</li>
+                <li><strong>Test Multi-Company Aggregation:</strong> Run the briefing aggregator to confirm it correctly fetches from both systems</li>
+                <li><strong>Validate Email Processing:</strong> Send test replies to daily briefings and verify status updates are applied</li>
+                <li><strong>Monitor Integration Points:</strong> Check logs for any contract violations or type mismatches</li>
+            </ol>
+
+            <!-- Next Steps -->
+            <h2>Next Steps</h2>
+
+            <p>Based on this analysis:</p>
+
+            <ol>
+                <li>Use the defined API contracts to build integrations between systems</li>
+                <li>Extend the multi-company briefing system with additional data sources</li>
+                <li>Implement the pending TODOs in the email reply processing system</li>
+                <li>Connect the iCodeMyBusiness dashboard to live data using the defined schemas</li>
+                <li>Ensure the Arise Group AI integration aligns with the Agent-OS contract specifications</li>
+            </ol>
+
+            <p>The data contract is well-defined and provides clear boundaries between the systems while enabling sophisticated multi-company data aggregation and AI-powered processing.</p>
+
+            <!-- Author -->
+            <div class="author-section">
+                <div class="author-info">
+                    <div class="name">Matthew Kerns</div>
+                    <div class="bio">Amazon-trained software engineer building AI-powered business systems. Founder of iCodeMyBusiness.</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="article-cta">
+        <div class="container">
+            <h2>Have an idea like this?</h2>
+            <p>Claude Code plan mode can analyze your entire system architecture in minutes. Or if you want someone to build the integrations for you:</p>
+            <div>
+                <a href="https://calendly.com/matthewkerns/organic-audit" target="_blank" class="btn btn-primary">Book a Discovery Call</a>
+                <a href="./" class="btn btn-secondary">Read More Plans</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://www.linkedin.com/in/mkerns1/" target="_blank">LinkedIn</a> &bull;
+                <a href="https://www.tiktok.com/@infinityvault" target="_blank">TikTok</a> &bull;
+                <a href="mailto:matthew@icodemybusiness.com">matthew@icodemybusiness.com</a> &bull;
+                <a href="../index.html#case-study">Case Study</a> &bull;
+                <a href="../index.html#packages">Pricing</a>
+            </div>
+            <p class="tagline">Built by someone who spent (and lost) their own money on ads.</p>
+            <p style="margin-top: 1rem; font-size: 0.85rem; color: #666;">
+                iCodeMyBusiness LLC | Organic Marketing Systems for E-Commerce Brands<br>
+                Stop burning money on ads. Build organic traffic that compounds.
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
