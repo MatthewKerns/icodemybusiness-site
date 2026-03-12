@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A full Claude Code plan mode output for building an AI-powered personal wellness management system — daily briefings, coaching chatbot, wellness tracking, and financial pulse monitoring.">
+    <meta property="og:title" content="Building an AI Wellness Coach: From Burnout to a Personal Operating System">
+    <meta property="og:description" content="I asked Claude Code to plan an AI wellness system. Here's the full plan mode output — every type definition, service, calculator, and design decision.">
+    <meta property="og:type" content="article">
+    <title>Building an AI Wellness Coach | Built with Claude Code | iCodeMyBusiness</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="blog-header">
+        <div class="container">
+            <a href="../index.html" class="site-name">iCodeMyBusiness</a>
+            <nav>
+                <a href="../index.html">Home</a>
+                <a href="./">Blog</a>
+                <a href="https://calendly.com/matthewkerns/organic-audit" target="_blank">Book a Call</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Article Header -->
+    <section class="article-header">
+        <div class="container-narrow">
+            <a href="./" class="back-link">&larr; Back to Blog</a>
+            <span class="tag">Plan Mode</span>
+            <h1>Building an AI Wellness Coach: From Burnout to a Personal Operating System</h1>
+            <div class="meta">
+                <span>Matthew Kerns</span>
+                <span>March 12, 2026</span>
+                <span>15 min read</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Article Body -->
+    <section class="article-body">
+        <div class="container-narrow">
+
+            <!-- Intro / Context -->
+            <div class="context-box">
+                <p><strong>What you're reading:</strong> This is a real Claude Code plan mode output. I described a problem, Claude mapped out the entire system architecture, and then I sent it off to build. This is the exact plan that became a working system.</p>
+            </div>
+
+            <h2>The Problem</h2>
+
+            <p>I'd been experiencing low energy and motivation from neglecting the basics — food, water, sunlight, walking, passion projects. Too much time passively consuming content. Not enough time doing the things that actually give you energy to do great work.</p>
+
+            <p>So I asked Claude Code to plan an AI-powered personal wellness management system. Here's what I wanted:</p>
+
+            <ol>
+                <li>A <strong>daily wellness briefing email</strong> each morning (separate from my existing business briefing)</li>
+                <li>A link to a <strong>coaching chatbot</strong> that helps overcome objections to self-care</li>
+                <li><strong>Wellness tracking</strong> via forms (multiple choice + free form) and conversational check-ins</li>
+                <li>A <strong>basic financial pulse</strong> — monthly revenue target, break-even tracking</li>
+                <li>The coaching bot connects self-care to the bigger vision: <em>take care of yourself &rarr; have energy &rarr; do amazing work &rarr; help people &rarr; financial reward</em></li>
+            </ol>
+
+            <p>I opened Claude Code, entered plan mode, described what I wanted, and this is what came back.</p>
+
+            <!-- What We're Building On -->
+            <h2>What We're Building On</h2>
+
+            <p>The existing <code>@agent-os/personal</code> package has production-ready infrastructure we can reuse directly. This is one of the best things about building with AI — you're not starting from scratch every time. Here's the mapping:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Existing Component</th>
+                        <th>Reuse For</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>DailyBriefingService pattern</td>
+                        <td>WellnessBriefingService orchestration</td>
+                    </tr>
+                    <tr>
+                        <td>PersonalKPIExtractor + calculator pattern</td>
+                        <td>WellnessKPIExtractor + wellness calculators</td>
+                    </tr>
+                    <tr>
+                        <td>InsightGenerator + insight modules pattern</td>
+                        <td>WellnessInsightGenerator + wellness insights</td>
+                    </tr>
+                    <tr>
+                        <td>EmailService (Resend)</td>
+                        <td>Send wellness briefing emails</td>
+                    </tr>
+                    <tr>
+                        <td>daily-briefing-email.ts template pattern</td>
+                        <td>Wellness briefing email template</td>
+                    </tr>
+                    <tr>
+                        <td>DailyBriefingReplyProcessor</td>
+                        <td>WellnessBriefingReplyProcessor</td>
+                    </tr>
+                    <tr>
+                        <td>EmailToAgentRouter</td>
+                        <td>Route wellness replies to coaching chat</td>
+                    </tr>
+                    <tr>
+                        <td>BackendChatServiceAdapter</td>
+                        <td>Connect coaching bot to chat system</td>
+                    </tr>
+                    <tr>
+                        <td>CalendarBriefingHelper</td>
+                        <td>Check schedule for cooking/grocery/walk time</td>
+                    </tr>
+                    <tr>
+                        <td>PersonalKPI interface</td>
+                        <td>Wellness KPI structure (same interface, new categories)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- File Structure -->
+            <h2>File Structure</h2>
+
+            <p>All new files go in <code>packages/personal-agent-os/src/wellness/</code>:</p>
+
+            <div class="file-tree">packages/personal-agent-os/src/wellness/
+├── types/
+│   ├── wellness.types.ts              <span class="comment"># Core wellness data types</span>
+│   ├── wellness-kpi.types.ts          <span class="comment"># Wellness KPI set (extends PersonalKPI pattern)</span>
+│   ├── wellness-briefing.types.ts     <span class="comment"># Wellness briefing structure</span>
+│   └── wellness-checkin.types.ts      <span class="comment"># Check-in form types (multiple choice + free form)</span>
+│
+├── services/
+│   ├── WellnessBriefingService.ts     <span class="comment"># Main orchestrator (mirrors DailyBriefingService)</span>
+│   ├── WellnessKPIExtractor.ts        <span class="comment"># Calculate wellness KPIs from check-in data</span>
+│   ├── WellnessDataStore.ts           <span class="comment"># Store/retrieve wellness check-in data</span>
+│   ├── WellnessCoachingAgent.ts       <span class="comment"># Coaching chatbot with system prompt + persona</span>
+│   └── WellnessBriefingReplyProcessor.ts  <span class="comment"># Process replies to wellness emails</span>
+│
+├── kpi-calculators/
+│   ├── NutritionCalculator.ts         <span class="comment"># Food, groceries, cooking time</span>
+│   ├── HydrationCalculator.ts         <span class="comment"># Water intake</span>
+│   ├── MovementCalculator.ts          <span class="comment"># Walking, outdoor time, sunlight</span>
+│   ├── EnergyCalculator.ts            <span class="comment"># Sleep quality, energy levels, screen time</span>
+│   ├── PassionProjectCalculator.ts    <span class="comment"># Time on personal projects</span>
+│   └── FinancialPulseCalculator.ts    <span class="comment"># Monthly revenue target, momentum</span>
+│
+├── insights/
+│   ├── WellnessInsightGenerator.ts    <span class="comment"># Aggregate wellness insights</span>
+│   ├── NutritionInsights.ts           <span class="comment"># "You're running low on groceries"</span>
+│   ├── MovementInsights.ts            <span class="comment"># "You haven't been outside in 2 days"</span>
+│   ├── EnergyInsights.ts              <span class="comment"># "High screen time yesterday"</span>
+│   ├── PassionProjectInsights.ts      <span class="comment"># "3 days since you worked on your project"</span>
+│   └── FinancialInsights.ts           <span class="comment"># "On track to break even this month"</span>
+│
+├── templates/
+│   └── wellness-briefing-email.ts     <span class="comment"># HTML + plain text wellness email</span>
+│
+└── __tests__/
+    ├── wellness.types.test.ts
+    ├── WellnessBriefingService.test.ts
+    ├── WellnessKPIExtractor.test.ts
+    ├── WellnessCoachingAgent.test.ts
+    ├── WellnessDataStore.test.ts
+    ├── kpi-calculators/
+    │   ├── NutritionCalculator.test.ts
+    │   ├── HydrationCalculator.test.ts
+    │   ├── MovementCalculator.test.ts
+    │   ├── EnergyCalculator.test.ts
+    │   ├── PassionProjectCalculator.test.ts
+    │   └── FinancialPulseCalculator.test.ts
+    └── insights/
+        └── WellnessInsightGenerator.test.ts</div>
+
+            <!-- Phase 1 -->
+            <div class="phase-header">
+                <h3>Phase 1: Types &amp; Data Model</h3>
+            </div>
+
+            <h4>wellness/types/wellness.types.ts — Core Data Types</h4>
+
+<pre><code>// Wellness domain categories
+type WellnessCategory =
+  | 'nutrition'
+  | 'hydration'
+  | 'movement'
+  | 'energy'
+  | 'passion_project'
+  | 'financial_pulse';
+
+// Wellness check-in entry (one per day, can be updated)
+interface WellnessCheckIn {
+  date: string;              // ISO date
+  userId: string;
+  entries: WellnessEntry[];  // Individual category entries
+  overallMood: MoodLevel;    // 1-5 scale
+  freeFormNotes?: string;    // Anything else on their mind
+  submittedAt: number;       // timestamp
+  source: 'form' | 'chat' | 'email_reply';
+}
+
+type MoodLevel = 1 | 2 | 3 | 4 | 5;
+
+// Individual wellness entry
+interface WellnessEntry {
+  category: WellnessCategory;
+  data: NutritionData | HydrationData | MovementData
+      | EnergyData | PassionProjectData | FinancialPulseData;
+}</code></pre>
+
+            <h4>wellness/types/wellness-checkin.types.ts — Form Structure</h4>
+
+            <p>Every check-in category has multiple choice fields (quick to fill) plus an optional free-form notes field (for context the bot can use later):</p>
+
+<pre><code>// Nutrition check-in (multiple choice + free form)
+interface NutritionData {
+  mealsEaten: 0 | 1 | 2 | 3;
+  calorieEstimate: 'way_too_low' | 'low' | 'about_right' | 'high';
+  groceriesStocked: 'empty' | 'running_low' | 'decent' | 'well_stocked';
+  cookedToday: boolean;
+  needsGroceryRun: boolean;
+  notes?: string;
+}
+
+interface HydrationData {
+  glasses: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  feeling: 'dehydrated' | 'ok' | 'good' | 'great';
+  notes?: string;
+}
+
+interface MovementData {
+  wentOutside: boolean;
+  walkMinutes: number;
+  sunlightMinutes: number;
+  bedroomTimeHours: number;  // Hours spent lying in bed (not sleeping)
+  notes?: string;
+}
+
+interface EnergyData {
+  sleepHours: number;
+  sleepQuality: 'terrible' | 'poor' | 'ok' | 'good' | 'great';
+  energyLevel: 1 | 2 | 3 | 4 | 5;
+  screenTimeHours: number;   // Non-work screen time
+  notes?: string;
+}
+
+interface PassionProjectData {
+  workedOnProject: boolean;
+  minutesSpent: number;
+  projectName?: string;
+  whatDidYouDo?: string;
+  notes?: string;
+}
+
+interface FinancialPulseData {
+  monthlyTarget: number;
+  currentRevenue: number;
+  momentum: 'declining' | 'flat' | 'growing';
+  notes?: string;
+}</code></pre>
+
+            <h4>wellness/types/wellness-kpi.types.ts — Wellness KPI Set</h4>
+
+            <p>12 KPIs across 6 categories (2 per category), all reusing the existing <code>PersonalKPI</code> interface:</p>
+
+<pre><code>import { PersonalKPI } from '../../types/kpi.types';
+
+interface WellnessKPISet {
+  // Nutrition (2)
+  dailyMealCount: PersonalKPI;       // Target: 3 meals/day
+  groceryReadiness: PersonalKPI;     // Target: decent or well_stocked
+
+  // Hydration (2)
+  dailyWaterIntake: PersonalKPI;     // Target: 8 glasses
+  hydrationConsistency: PersonalKPI; // Target: ≥6 glasses for 5+ of last 7 days
+
+  // Movement (2)
+  dailyWalkMinutes: PersonalKPI;     // Target: ≥30 min
+  outdoorDaysStreak: PersonalKPI;    // Target: went outside every day
+
+  // Energy (2)
+  sleepQualityScore: PersonalKPI;    // Target: good or great
+  screenTimeControl: PersonalKPI;    // Target: ≤2 hours non-work
+
+  // Passion Projects (2)
+  weeklyProjectHours: PersonalKPI;   // Target: ≥5 hours/week
+  projectConsistency: PersonalKPI;   // Target: worked on project ≥4 of last 7 days
+
+  // Financial Pulse (2)
+  monthlyRevenueProgress: PersonalKPI;  // Target: on pace for monthly target
+  revenueDirection: PersonalKPI;        // Target: growing momentum
+}</code></pre>
+
+            <h4>wellness/types/wellness-briefing.types.ts — Briefing Structure</h4>
+
+<pre><code>interface WellnessBriefing {
+  date: string;
+  greeting: string;                 // Personalized, empathetic greeting
+  wellnessScore: WellnessScore;     // Overall wellness snapshot
+  kpis: WellnessKPISet;
+  insights: WellnessInsight[];      // Actionable wellness insights
+  coachingPrompt: string;           // Today's coaching nudge
+  chatLink: string;                 // Link to coaching chatbot
+  calendarInsight?: string;         // "You have free time at 2pm — perfect for a walk"
+  visionReminder: string;           // Connection to bigger purpose
+}
+
+interface WellnessScore {
+  overall: 'thriving' | 'doing_ok' | 'needs_attention' | 'struggling';
+  categoryScores: Record&lt;WellnessCategory, 'green' | 'yellow' | 'red'&gt;;
+  streakDays: number;               // Consecutive days of check-ins
+}
+
+interface WellnessInsight {
+  category: WellnessCategory;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  message: string;                  // "You haven't been outside in 2 days"
+  action: string;                   // "Just walk for 10 minutes right now"
+  motivationalHook?: string;        // "You always feel better after even a short walk"
+}</code></pre>
+
+            <!-- Phase 2 -->
+            <div class="phase-header">
+                <h3>Phase 2: Data Storage &amp; KPI Calculators</h3>
+            </div>
+
+            <h4>WellnessDataStore</h4>
+
+            <ul>
+                <li>Store daily check-in data (initially in-memory / JSON file, later Convex)</li>
+                <li>Retrieve check-in history for KPI calculations (last 7 days, last 30 days)</li>
+                <li>Update partial check-ins (user can log meals throughout the day)</li>
+            </ul>
+
+            <h4>KPI Calculators</h4>
+
+            <p>One calculator per category, following the exact pattern of existing calculators like <code>RockExecutionCalculator</code>:</p>
+
+            <ul>
+                <li>Each takes check-in history as input</li>
+                <li>Returns <code>PersonalKPI</code> objects with <code>currentValue</code>, <code>targetValue</code>, <code>trend</code>, <code>status</code>, <code>insight</code></li>
+                <li>Thresholds defined per KPI (e.g., &ge;3 meals = <code>on_track</code>, 2 = <code>at_risk</code>, &le;1 = <code>off_track</code>)</li>
+            </ul>
+
+            <!-- Phase 3 -->
+            <div class="phase-header">
+                <h3>Phase 3: Insight Generation</h3>
+            </div>
+
+            <p>Following the existing <code>InsightGenerator</code> pattern. Key insight templates:</p>
+
+            <ul>
+                <li><strong>Nutrition:</strong> "You've eaten {meals} meals today. Your fridge is {status}. {action}"</li>
+                <li><strong>Movement:</strong> "You haven't been outside in {days} days. {nudge}" / "Great streak! {days} days of walking."</li>
+                <li><strong>Energy:</strong> "You spent {hours}h on YouTube yesterday. That's {trend} from your average."</li>
+                <li><strong>Passion:</strong> "{days} days since you last worked on {project}. Even 30 minutes counts."</li>
+                <li><strong>Financial:</strong> "You're at ${current} of your ${target} target. {momentum_message}"</li>
+            </ul>
+
+            <p>Each insight generator produces insights with a <code>motivationalHook</code> — a short statement connecting the action to the user's bigger vision.</p>
+
+            <!-- Phase 4 -->
+            <div class="phase-header">
+                <h3>Phase 4: The Coaching Agent</h3>
+            </div>
+
+            <p>This is the heart of the system. The <code>WellnessCoachingAgent</code> system prompt encodes:</p>
+
+            <p><strong>Core belief:</strong> Taking care of yourself is not optional — it's the foundation for everything you want to achieve.</p>
+
+            <p><strong>User's vision:</strong> Help many people, build something incredible, achieve financial independence.</p>
+
+            <p><strong>Objection handling framework:</strong></p>
+            <ul>
+                <li><em>"I don't feel like it"</em> &rarr; "You never feel like it before. You always feel better after. Just start with 5 minutes."</li>
+                <li><em>"I'll do it tomorrow"</em> &rarr; "You said that yesterday. Today IS the day. What's one small thing right now?"</li>
+                <li><em>"It doesn't matter"</em> &rarr; "Your energy directly impacts your client work. Taking care of yourself IS your job."</li>
+            </ul>
+
+            <p><strong>Conversation style:</strong> Direct, compassionate, no-BS. Like a coach who genuinely cares.</p>
+
+            <p><strong>Data-informed:</strong> References actual check-in data ("You've only had 1 meal today. That's why you feel foggy.")</p>
+
+            <p><strong>Action-oriented:</strong> Always ends with a concrete next step, not just motivation.</p>
+
+            <p><strong>Vision connection:</strong> Regularly connects back to: self-care &rarr; energy &rarr; great work &rarr; helping people &rarr; financial reward.</p>
+
+            <p>The agent will:</p>
+            <ol>
+                <li>Load the user's recent wellness data (last 7 days)</li>
+                <li>Load today's briefing insights</li>
+                <li>Use the LLM (via <code>@agent-os/core</code> LLM managers) with the coaching system prompt</li>
+                <li>Handle conversation via both email replies and web chat</li>
+                <li>Store conversation context for continuity</li>
+            </ol>
+
+            <!-- Phase 5 -->
+            <div class="phase-header">
+                <h3>Phase 5: Briefing Service &amp; Email Template</h3>
+            </div>
+
+            <h4>WellnessBriefingService</h4>
+            <ul>
+                <li>Mirrors <code>DailyBriefingService</code> orchestration pattern</li>
+                <li>Fetches wellness check-in data</li>
+                <li>Runs KPI extractors and insight generators</li>
+                <li>Checks calendar for available time slots (via existing <code>CalendarBriefingHelper</code>)</li>
+                <li>Generates personalized greeting and coaching prompt</li>
+                <li>Produces <code>WellnessBriefing</code> object</li>
+            </ul>
+
+            <h4>Email Template</h4>
+            <ul>
+                <li>HTML + plain text versions (same pattern as <code>daily-briefing-email.ts</code>)</li>
+                <li>Visual wellness score (color-coded categories)</li>
+                <li>Top 3 insights with action items</li>
+                <li>Chat link prominently placed</li>
+                <li>"Reply to this email to talk with your coach" instruction</li>
+                <li>Vision reminder at the bottom</li>
+                <li>Warm, personal tone — not corporate</li>
+            </ul>
+
+            <!-- Phase 6 -->
+            <div class="phase-header">
+                <h3>Phase 6: Reply Processing &amp; Chat Integration</h3>
+            </div>
+
+            <ul>
+                <li>Mirrors <code>DailyBriefingReplyProcessor</code></li>
+                <li>Parses email replies using existing <code>ReplyParser</code> from <code>@agent-os/core</code></li>
+                <li>Routes to <code>WellnessCoachingAgent</code> for response</li>
+                <li>Can extract check-in data from natural language: <em>"I ate 2 meals, drank 4 glasses of water, went for a 20 min walk"</em></li>
+            </ul>
+
+            <!-- Phase 7 -->
+            <div class="phase-header">
+                <h3>Phase 7: Export &amp; Integration</h3>
+            </div>
+
+            <p>Update <code>packages/personal-agent-os/src/index.ts</code> to export the wellness module.</p>
+
+            <!-- Implementation Order -->
+            <h2>Implementation Order</h2>
+
+            <p>Dependency-driven — each step unlocks the next:</p>
+
+            <ol>
+                <li><strong>Types</strong> (no dependencies) — All type files</li>
+                <li><strong>WellnessDataStore</strong> (depends on types) — Storage layer</li>
+                <li><strong>KPI Calculators</strong> (depends on types + data store) — All 6 calculators</li>
+                <li><strong>WellnessKPIExtractor</strong> (depends on calculators) — Orchestrates all calculators</li>
+                <li><strong>Insight Generators</strong> (depends on KPIs) — All 5 insight modules + aggregator</li>
+                <li><strong>WellnessCoachingAgent</strong> (depends on data store + insights) — Coaching bot</li>
+                <li><strong>WellnessBriefingService</strong> (depends on all above) — Main orchestrator</li>
+                <li><strong>Email Template</strong> (depends on briefing types) — HTML/text generation</li>
+                <li><strong>WellnessBriefingReplyProcessor</strong> (depends on coaching agent) — Email reply handling</li>
+                <li><strong>Integration</strong> (depends on all above) — Exports, wiring to email/chat systems</li>
+            </ol>
+
+            <!-- Verification -->
+            <h2>Verification Plan</h2>
+
+            <ol>
+                <li>Unit tests for each calculator (check thresholds, edge cases, trend calculations)</li>
+                <li>Unit tests for insight generators (verify correct insights for different data states)</li>
+                <li>Unit tests for coaching agent (verify system prompt, objection handling)</li>
+                <li>Integration test: Generate a full wellness briefing from mock check-in data</li>
+                <li>Integration test: Generate email HTML and verify it renders correctly</li>
+                <li>Integration test: Process an email reply and verify it routes to coaching agent</li>
+                <li>Manual verification: Run <code>npm run build</code> and <code>npm run check</code> — no type errors</li>
+                <li>Manual verification: Run <code>npm run test</code> — &ge;85% coverage on new code</li>
+            </ol>
+
+            <!-- Key Design Decisions -->
+            <h2>Key Design Decisions</h2>
+
+            <ol>
+                <li><strong>Reuse PersonalKPI interface</strong> — Don't create a new KPI type. The existing interface (<code>currentValue</code>, <code>targetValue</code>, <code>trend</code>, <code>status</code>, <code>insight</code>) works perfectly for wellness metrics.</li>
+                <li><strong>Separate briefing</strong> — Own email, own schedule, own thread. Clean domain separation.</li>
+                <li><strong>In-memory data store initially</strong> — Start simple. The check-in data can move to Convex later. Don't over-engineer storage before we have real usage patterns.</li>
+                <li><strong>Coaching prompt is the secret sauce</strong> — Invest heavily in crafting the system prompt. It needs to genuinely understand the user's psychology, not just be a generic wellness bot.</li>
+                <li><strong>Calendar awareness</strong> — Use existing <code>CalendarBriefingHelper</code> and <code>AvailabilityCheckTool</code> to find time for cooking, grocery shopping, and walks. This makes the system actually useful, not just nagging.</li>
+            </ol>
+
+            <!-- Author -->
+            <div class="author-section">
+                <div class="author-info">
+                    <div class="name">Matthew Kerns</div>
+                    <div class="bio">Amazon-trained software engineer building AI-powered business systems. Founder of iCodeMyBusiness.</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="article-cta">
+        <div class="container">
+            <h2>Have an idea like this?</h2>
+            <p>Claude Code plan mode can map out your entire system in minutes. Or if you want someone to build it for you:</p>
+            <div>
+                <a href="https://calendly.com/matthewkerns/organic-audit" target="_blank" class="btn btn-primary">Book a Discovery Call</a>
+                <a href="./" class="btn btn-secondary">Read More Plans</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://www.linkedin.com/in/mkerns1/" target="_blank">LinkedIn</a> &bull;
+                <a href="https://www.tiktok.com/@infinityvault" target="_blank">TikTok</a> &bull;
+                <a href="mailto:matthew@icodemybusiness.com">matthew@icodemybusiness.com</a> &bull;
+                <a href="../index.html#case-study">Case Study</a> &bull;
+                <a href="../index.html#packages">Pricing</a>
+            </div>
+            <p class="tagline">Built by someone who spent (and lost) their own money on ads.</p>
+            <p style="margin-top: 1rem; font-size: 0.85rem; color: #666;">
+                iCodeMyBusiness LLC | Organic Marketing Systems for E-Commerce Brands<br>
+                Stop burning money on ads. Build organic traffic that compounds.
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
