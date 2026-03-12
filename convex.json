@@ -1,0 +1,11 @@
+{
+  "functions": "convex/",
+  "authConfig": {
+    "providers": [
+      {
+        "domain": "https://clerk.com",
+        "provider": "clerk"
+      }
+    ]
+  }
+}

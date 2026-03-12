@@ -1,0 +1,35 @@
+{
+  "name": "icodemybusiness-site",
+  "version": "1.0.0",
+  "description": "iCodeMyBusiness - Full-stack business automation platform",
+  "type": "module",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "convex dev",
+    "api": "node api/src/server.js",
+    "dashboard": "npx http-server dashboard -p 3000",
+    "build": "npm run build:convex",
+    "build:convex": "convex deploy",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["automation", "ai", "business", "convex"],
+  "author": "Matthew Kerns",
+  "license": "ISC",
+  "dependencies": {
+    "convex": "^1.32.0",
+    "express": "^4.18.2",
+    "socket.io": "^4.6.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "http-server": "^14.1.1",
+    "nodemon": "^3.0.2",
+    "typescript": "^5.3.3"
+  }
+}
