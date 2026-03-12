@@ -197,8 +197,8 @@ npx convex dev --clear
 ## 📞 Support
 
 - **Documentation**: Check `/docs` folder
-- **Agent-OS Contract**: See PLAN-data-integration.md
-- **Voice Agent Design**: See docs/voice-agent-platform-design-review.md
+- **Agent-OS Contract**: See data-integration.md
+- **Voice Agent Design**: See ../voice-agent/platform-design.md
 
 ## 🎉 Next Steps
 
