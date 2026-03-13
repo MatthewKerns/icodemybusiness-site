@@ -53,7 +53,19 @@ Internal reference for all free resources and lead magnets we provide.
 
 ---
 
-## 5. About Matthew Story
+## 5. Claude Series: Project Management with Claude (Content Series)
+
+- **Format:** Recurring blog posts + short social clips (LinkedIn, TikTok)
+- **Concept:** One continuous project management example that builds across episodes
+- **What it covers:** Using Claude Projects, API automation, MCP, Agent Skills — all through managing a real client project
+- **Cadence:** Batch 5-10 posts, publish daily
+- **Each episode ties to an Anthropic Academy course** for deeper learning
+- **Full plan:** `/planning/claude-series-project-management.md`
+- **Goal:** Demonstrate expertise, drive discovery calls, build community trust
+
+---
+
+## 6. About Matthew Story
 
 - **Format:** Long-form page at `/blog/about-matthew.html`
 - **What it covers:** Ex-Amazon background, burnout-to-recovery journey, company vision
