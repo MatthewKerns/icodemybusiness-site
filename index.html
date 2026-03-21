@@ -32,6 +32,7 @@
             background: #050505;
             color: var(--text-primary);
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         /* ── Navigation ── */
@@ -1294,6 +1295,8 @@
         /* ── Responsive ── */
         @media (max-width: 768px) {
             .direction { padding-top: 140px; }
+            .direction-header, .mock-section { padding-left: 16px; padding-right: 16px; }
+            .direction-nav { padding: 12px 16px; }
             .nav-inner { flex-direction: column; align-items: flex-start; }
             .d7-hero { grid-template-columns: 1fr; }
             .d7-services { grid-template-columns: 1fr 1fr; }
