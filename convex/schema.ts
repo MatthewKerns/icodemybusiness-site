@@ -7,6 +7,20 @@ import { v } from "convex/values";
 
 export default defineSchema(
   {
+    // Leads table: stores email captures with source attribution and scoring
+    leads: defineTable({
+      email: v.string(),
+      name: v.optional(v.string()),
+      source: v.optional(v.string()),
+      variant: v.optional(v.string()),
+      score: v.number(),
+      sessionId: v.optional(v.string()),
+      createdAt: v.number(),
+    })
+      .index("by_email", ["email"])
+      .index("by_source", ["source"])
+      .index("by_sessionId", ["sessionId"]),
+
     documents: defineTable({
       fieldOne: v.string(),
       fieldTwo: v.object({
