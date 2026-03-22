@@ -7,6 +7,4 @@ _bmad
 _bmad-output
 tests
 *.md
-.env
-.env.local
-.env.production
+.env*

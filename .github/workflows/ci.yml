@@ -27,7 +27,11 @@ jobs:
         run: npm ci
 
       - name: Lint (ESLint + TypeScript)
+        # Also enforces phase boundary rules via no-restricted-imports in .eslintrc.cjs
         run: npm run lint
+
+      - name: Type-check
+        run: npx tsc --noEmit
 
       - name: Unit tests
         run: npm test
