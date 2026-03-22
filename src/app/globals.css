@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* iCodeMyBusiness design tokens */
+    --color-bg-primary: #000000;
+    --color-bg-secondary: #0A0A0A;
+    --color-bg-tertiary: #141414;
+    --color-gold-default: #D4AF37;
+    --color-gold-light: #E8C84A;
+    --color-gold-dim: #A08628;
+    --color-gold-glow: rgba(212, 175, 55, 0.15);
+    --color-blue-default: #3AA6FF;
+    --color-blue-dark: #2B7FC7;
+    --color-blue-light: #5CB5FF;
+    --color-text-primary: #E6ECF1;
+    --color-text-muted: #9AA7B2;
+    --color-text-dim: #6B7885;
+    --color-border-default: #2A3441;
+    --color-border-gold: rgba(212, 175, 55, 0.3);
+
+    /* shadcn/ui compatibility — dark theme as default */
+    --background: 0 0% 0%;
+    --foreground: 210 20% 92%;
+    --card: 0 0% 4%;
+    --card-foreground: 210 20% 92%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 210 20% 92%;
+    --primary: 45 64% 53%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 8%;
+    --secondary-foreground: 210 20% 92%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 210 12% 65%;
+    --accent: 0 0% 8%;
+    --accent-foreground: 210 20% 92%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 18% 21%;
+    --input: 210 18% 21%;
+    --ring: 207 100% 61%;
+    --radius: 0.75rem;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary antialiased font-body min-h-full;
+  }
+
+  *:focus-visible {
+    @apply outline-none ring-2 ring-blue-light ring-offset-2 ring-offset-bg-primary;
+  }
+
+  /* iOS input zoom prevention */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
