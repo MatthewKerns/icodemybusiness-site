@@ -85,7 +85,7 @@ export function SplashScreen() {
           initial="hidden"
           animate="visible"
           variants={lineVariants}
-          className="text-h2 font-body italic text-gold-dim"
+          className="text-display font-body italic text-gold"
         >
           make a difference.
         </motion.p>

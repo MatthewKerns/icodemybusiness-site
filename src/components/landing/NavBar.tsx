@@ -9,9 +9,9 @@ import { Menu, X } from "lucide-react";
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/consulting", label: "Consulting" },
-  { href: "/subscriptions", label: "Subscriptions" },
-  { href: "/free-resources", label: "Free Tools" },
-  { href: "/offers", label: "Services" },
+  { href: "/subscribe", label: "Subscriptions" },
+  { href: "/free-tools", label: "Free Tools" },
+  { href: "/services", label: "Services" },
 ] as const;
 
 export function NavBar() {
@@ -39,9 +39,18 @@ export function NavBar() {
       window.removeEventListener("splash-visibility", handleSplashVisibility);
   }, [isHome]);
 
-  // Focus trap for mobile menu
+  // Focus trap + scroll lock for mobile menu
   useEffect(() => {
     if (!mobileOpen) return;
+
+    // Lock body scroll
+    document.body.style.overflow = "hidden";
+
+    // Move focus into the menu
+    const closeBtn = menuRef.current?.querySelector<HTMLElement>(
+      'button[aria-label="Close menu"]'
+    );
+    closeBtn?.focus();
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -67,7 +76,10 @@ export function NavBar() {
     }
 
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
   }, [mobileOpen]);
 
   // Close mobile menu on route change
@@ -115,7 +127,7 @@ export function NavBar() {
 
           {/* Desktop CTA */}
           <Link
-            href="/consulting#book"
+            href="/consulting#booking"
             className="hidden rounded-lg bg-gold px-5 py-2.5 text-sm font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] md:inline-block"
           >
             Book a Call
@@ -179,7 +191,7 @@ export function NavBar() {
 
           <div className="p-4">
             <Link
-              href="/consulting#book"
+              href="/consulting#booking"
               onClick={closeMobile}
               className="flex h-12 items-center justify-center rounded-lg bg-gold text-base font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
             >

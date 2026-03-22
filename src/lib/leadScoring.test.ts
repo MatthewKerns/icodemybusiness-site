@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { scoreLead } from "../leadScoring";
+import { scoreLead } from "./leadScoring";
 
 describe("scoreLead", () => {
   it('returns 15 for "referral"', () => {

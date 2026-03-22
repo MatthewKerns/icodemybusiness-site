@@ -3,11 +3,15 @@
 import Link from "next/link";
 
 export default function Error({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  // Log error for observability (Sentry integration in Story 6.4)
+  console.error("[Error Boundary]", error);
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-bg-primary px-4 text-center">
       <p className="font-accent text-6xl font-bold text-error">!</p>

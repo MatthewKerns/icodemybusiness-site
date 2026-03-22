@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useId } from "react";
+import { useState, useRef, useId, useCallback } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,20 @@ interface EmailCaptureProps {
   subtitle?: string;
 }
 
+function getSessionId(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    let sessionId = localStorage.getItem("icmb_session_id") ?? undefined;
+    if (!sessionId) {
+      sessionId = crypto.randomUUID();
+      localStorage.setItem("icmb_session_id", sessionId);
+    }
+    return sessionId;
+  } catch {
+    return undefined;
+  }
+}
+
 export function EmailCapture({
   variant = "full",
   source,
@@ -26,13 +40,16 @@ export function EmailCapture({
   const [error, setError] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
   const [showGlow, setShowGlow] = useState(false);
+  const [isReturning, setIsReturning] = useState(false);
+  const submittingRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const errorId = useId();
+  const labelId = useId();
   const createLead = useMutation(api.leads.createLead);
 
   function validate(value: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(value);
+    return emailRegex.test(value) && value.length <= 254;
   }
 
   function handleBlur() {
@@ -46,36 +63,40 @@ export function EmailCapture({
     if (error) setError("");
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!validate(email)) {
-      setError("Enter a valid email address");
-      inputRef.current?.focus();
-      return;
-    }
-
-    setStatus("loading");
-    setError("");
-
-    try {
-      let sessionId: string | undefined;
-      if (typeof window !== "undefined") {
-        sessionId = localStorage.getItem("icmb_session_id") ?? undefined;
-        if (!sessionId) {
-          sessionId = crypto.randomUUID();
-          localStorage.setItem("icmb_session_id", sessionId);
-        }
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (submittingRef.current) return;
+      if (!validate(email)) {
+        setError("Enter a valid email address");
+        inputRef.current?.focus();
+        return;
       }
 
-      await createLead({ email, source, sessionId });
-      setStatus("success");
-      setShowGlow(true);
-      setTimeout(() => setShowGlow(false), 1500);
-    } catch {
-      setError("Something went wrong. Please try again.");
-      setStatus("idle");
-    }
-  }
+      submittingRef.current = true;
+      setStatus("loading");
+      setError("");
+
+      try {
+        const sessionId = getSessionId();
+        const result = await createLead({ email, source, sessionId });
+
+        // Check if this was an existing lead (Convex returns existing _id)
+        // The mutation returns the ID either way, but existing leads won't get a welcome email
+        // We can detect this by checking if the result looks like an existing record
+        // For now, we show a slightly different message for clarity
+        setStatus("success");
+        setShowGlow(true);
+        setTimeout(() => setShowGlow(false), 1500);
+      } catch {
+        setError("Something went wrong. Please try again.");
+        setStatus("idle");
+      } finally {
+        submittingRef.current = false;
+      }
+    },
+    [email, source, createLead]
+  );
 
   if (status === "success") {
     return (
@@ -94,7 +115,7 @@ export function EmailCapture({
             <Check className="h-5 w-5 text-success" />
           </div>
           <p className="font-medium text-text-primary">
-            Check your email!
+            You&apos;re in! Explore your free tools below.
           </p>
         </div>
 
@@ -134,15 +155,21 @@ export function EmailCapture({
         )}
       >
         <div className="relative flex-1">
+          <label id={labelId} htmlFor="email-capture-input" className="sr-only">
+            Email address
+          </label>
           <input
+            id="email-capture-input"
             ref={inputRef}
             type="email"
             required
+            maxLength={254}
             value={email}
             onChange={(e) => handleChange(e.target.value)}
             onBlur={handleBlur}
             placeholder="you@example.com"
             className={inputClasses}
+            aria-labelledby={labelId}
             aria-describedby={error ? errorId : undefined}
             aria-invalid={!!error}
           />

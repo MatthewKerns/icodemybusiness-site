@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useId } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 interface FAQItem {
   question: string;
@@ -14,48 +14,36 @@ interface FAQAccordionProps {
   items: FAQItem[];
 }
 
-function FAQRow({ item, index }: { item: FAQItem; index: number }) {
-  const [open, setOpen] = useState(false);
-  const baseId = useId();
-  const triggerId = `${baseId}-trigger`;
-  const panelId = `${baseId}-panel`;
+function FAQRow({ item }: { item: FAQItem }) {
+  const prefersReducedMotion = useReducedMotion();
 
   return (
-    <div
+    <details
       className={cn(
-        "rounded-xl border bg-bg-secondary transition-colors",
-        open ? "border-gold-dim" : "border-border"
+        "group rounded-xl border bg-bg-secondary transition-colors",
+        "open:border-gold-dim border-border"
       )}
     >
-      <button
-        id={triggerId}
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        aria-expanded={open}
-        aria-controls={panelId}
-        className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
-      >
+      <summary className="flex w-full cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-left [&::-webkit-details-marker]:hidden">
         <span className="text-base font-medium text-text-primary">
           {item.question}
         </span>
         <ChevronDown
           className={cn(
             "h-5 w-5 shrink-0 text-gold transition-transform duration-200",
-            open && "rotate-180"
+            "group-open:rotate-180"
           )}
         />
-      </button>
+      </summary>
 
-      <div
-        id={panelId}
-        role="region"
-        aria-labelledby={triggerId}
-        className={cn(
-          "grid transition-all duration-200",
-          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-        )}
-      >
-        <div className="overflow-hidden">
+      <AnimatePresence>
+        <motion.div
+          initial={prefersReducedMotion ? false : { height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
+          className="overflow-hidden"
+        >
           <div className="px-6 pb-5">
             <p className="text-sm leading-relaxed text-text-muted">
               {item.answer}
@@ -69,17 +57,17 @@ function FAQRow({ item, index }: { item: FAQItem; index: number }) {
               </a>
             )}
           </div>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </AnimatePresence>
+    </details>
   );
 }
 
 export function FAQAccordion({ items }: FAQAccordionProps) {
   return (
     <div className="flex flex-col gap-3">
-      {items.map((item, i) => (
-        <FAQRow key={i} item={item} index={i} />
+      {items.map((item) => (
+        <FAQRow key={item.question} item={item} />
       ))}
     </div>
   );
