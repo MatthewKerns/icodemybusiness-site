@@ -76,7 +76,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Social links */}
+          {/* Social + Community */}
           <div>
             <p className="mb-3 text-sm font-medium text-text-primary">
               Connect
@@ -95,6 +95,15 @@ export function Footer() {
                 </a>
               ))}
             </div>
+            <a
+              href="https://www.skool.com/icodemybusiness"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-gold-dim px-4 py-2 text-sm font-medium text-gold transition-all hover:border-gold hover:shadow-[0_0_20px_rgba(212,175,55,0.15)]"
+            >
+              Join the Inner Circle
+              <span aria-hidden="true">&rarr;</span>
+            </a>
           </div>
         </div>
 

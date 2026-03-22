@@ -2,7 +2,12 @@ import { cn } from "@/lib/utils";
 import { ConsultingHero } from "@/components/landing/ConsultingHero";
 import { BonusStack } from "@/components/landing/BonusStack";
 import { FAQAccordion } from "@/components/landing/FAQAccordion";
+import { CalendlyEmbed } from "@/components/shared/CalendlyEmbed";
+import { CommunityBanner } from "@/components/landing/CommunityBanner";
 import { ClipboardCheck, Users, Rocket } from "lucide-react";
+
+const CALENDLY_URL =
+  process.env.NEXT_PUBLIC_CALENDLY_URL ?? "https://calendly.com/icodemybusiness";
 
 const FAQ_ITEMS = [
   {
@@ -172,6 +177,9 @@ export default function ConsultingPage() {
           </div>
         </section>
 
+        {/* Community */}
+        <CommunityBanner />
+
         {/* Scarcity indicator */}
         <section className="py-6 text-center">
           <p className="font-accent text-sm text-text-muted">
@@ -190,11 +198,8 @@ export default function ConsultingPage() {
               Book your AI Launchpad session or join the waitlist below
             </p>
 
-            <div className="mt-8 rounded-xl border border-border bg-bg-secondary p-8 text-center">
-              {/* Email capture component will be integrated here */}
-              <p className="text-sm text-text-dim">
-                Email capture component will be integrated here
-              </p>
+            <div className="mt-8">
+              <CalendlyEmbed url={CALENDLY_URL} />
             </div>
           </div>
         </section>
