@@ -1,5 +1,6 @@
 import { mutation } from "./_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
+import { internal } from "./_generated/api";
 import { scoreLead } from "./lib/leadScoring";
 
 export const createLead = mutation({
@@ -11,9 +12,14 @@ export const createLead = mutation({
     sessionId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const email = args.email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new ConvexError("Invalid email address");
+    }
+
     const existing = await ctx.db
       .query("leads")
-      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .withIndex("by_email", (q) => q.eq("email", email))
       .first();
 
     if (existing) {
@@ -22,8 +28,8 @@ export const createLead = mutation({
 
     const score = scoreLead(args.source);
 
-    return await ctx.db.insert("leads", {
-      email: args.email,
+    const leadId = await ctx.db.insert("leads", {
+      email,
       name: args.name,
       source: args.source,
       variant: args.variant,
@@ -31,5 +37,12 @@ export const createLead = mutation({
       sessionId: args.sessionId,
       createdAt: Date.now(),
     });
+
+    await ctx.scheduler.runAfter(0, internal.email.sendWelcomeEmail, {
+      email,
+      name: args.name,
+    });
+
+    return leadId;
   },
 });
