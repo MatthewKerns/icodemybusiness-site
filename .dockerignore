@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.github
+_legacy
+_bmad
+_bmad-output
+tests
+*.md
+.env
+.env.local
+.env.production
