@@ -1,8 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
-import { ConvexClientProvider } from "./ConvexClientProvider";
-import { ClerkProvider } from "@clerk/nextjs";
+import { Providers } from "@/components/shared/Providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,6 +19,12 @@ export const metadata: Metadata = {
   title: "iCodeMyBusiness",
   description:
     "Save time. Make money. AI-powered consulting and automation tools for business owners.",
+  openGraph: {
+    title: "iCodeMyBusiness",
+    description:
+      "Save time. Make money. AI-powered consulting and automation tools for business owners.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -30,9 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body>
-        <ClerkProvider>
-          <ConvexClientProvider>{children}</ConvexClientProvider>
-        </ClerkProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
