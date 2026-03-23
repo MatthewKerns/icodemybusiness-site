@@ -5,3 +5,10 @@ When working on Convex code, **always read `convex/_generated/ai/guidelines.md` 
 
 Convex agent skills for common tasks can be installed by running `npx convex ai-files install`.
 <!-- convex-ai-end -->
+
+## Deployment
+
+- **Hosting:** Dokploy (Docker-based)
+- **Staging:** Every push to `main` auto-deploys to `staging.icodemybusiness.com`
+- **Build:** Uses `Dockerfile` (multi-stage: deps → build → runner with standalone output)
+- **Note:** `docker-compose.yml` exists for local dev / env reference but Dokploy should be configured to use `Dockerfile` directly, not docker-compose
