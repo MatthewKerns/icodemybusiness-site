@@ -109,7 +109,7 @@ export function SplashScreen() {
           }
           className="inline-block"
         >
-          click here
+          Enter site
         </motion.span>
       </motion.button>
     </div>

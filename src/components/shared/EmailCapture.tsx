@@ -16,6 +16,8 @@ interface EmailCaptureProps {
   source?: string;
   headline?: string;
   subtitle?: string;
+  buttonLabel?: string;
+  successMessage?: string;
 }
 
 export function EmailCapture({
@@ -23,6 +25,8 @@ export function EmailCapture({
   source,
   headline = "Get free AI tools instantly",
   subtitle = "Enter your email for immediate access. No credit card. No catch.",
+  buttonLabel = "Get Free Access",
+  successMessage = "You\u2019re in! Explore your free tools below.",
 }: EmailCaptureProps) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
@@ -99,7 +103,7 @@ export function EmailCapture({
             <Check className="h-5 w-5 text-success" />
           </div>
           <p className="font-medium text-text-primary">
-            You&apos;re in! Explore your free tools below.
+            {successMessage}
           </p>
         </div>
 
@@ -180,7 +184,7 @@ export function EmailCapture({
           {status === "loading" ? (
             <Loader2 className="mx-auto h-5 w-5 animate-spin" />
           ) : (
-            "Get Free Access"
+            buttonLabel
           )}
         </button>
       </form>

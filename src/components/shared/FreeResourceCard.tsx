@@ -42,6 +42,7 @@ interface FreeResourceCardProps {
   description: string;
   ctaLabel: string;
   ctaHref: string;
+  onCtaClick?: () => void;
   downloaded?: boolean;
 }
 
@@ -51,6 +52,7 @@ export function FreeResourceCard({
   icon: Icon,
   ctaLabel,
   ctaHref,
+  onCtaClick,
   downloaded = false,
 }: FreeResourceCardProps) {
   return (
@@ -84,6 +86,13 @@ export function FreeResourceCard({
           <Check className="h-4 w-4" aria-hidden="true" />
           Sent to email
         </div>
+      ) : onCtaClick ? (
+        <button
+          onClick={onCtaClick}
+          className="mt-3 inline-flex min-h-[44px] items-center text-sm font-medium text-blue transition-colors hover:text-blue-light"
+        >
+          {ctaLabel} →
+        </button>
       ) : (
         <a
           href={ctaHref}

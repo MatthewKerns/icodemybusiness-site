@@ -215,6 +215,8 @@ export default function OffersPage() {
               source="offers-page"
               headline="Get notified when I open new client spots"
               subtitle="I take on a limited number of projects at a time. Drop your email and I'll let you know when a slot opens up."
+              buttonLabel="Notify Me"
+              successMessage="You're on the list! We'll notify you when a spot opens."
             />
           </div>
         </section>

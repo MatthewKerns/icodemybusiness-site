@@ -187,6 +187,7 @@ export default function FreeResourcesPage() {
                 downloaded={hasAccess}
                 ctaLabel={hasAccess ? "Check Email" : "Get Free"}
                 ctaHref={hasAccess ? resource.href : "#"}
+                onCtaClick={!isAuthenticated ? handleGetAccess : undefined}
               />
             ))}
           </div>

@@ -107,7 +107,7 @@ export default function ConsultingPage() {
                     <span className="font-accent text-2xl font-bold text-gold">
                       {step.number}
                     </span>
-                    <step.icon className="h-5 w-5 text-text-dim" />
+                    <step.icon className="h-5 w-5 text-text-dim" aria-hidden="true" />
                   </div>
                   <h3 className="mt-4 text-h3 font-semibold text-text-primary">
                     {step.title}

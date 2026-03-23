@@ -73,8 +73,11 @@ export function CalendlyEmbed({ url, email, name }: CalendlyEmbedProps) {
     return (
       <div
         ref={containerRef}
-        className="flex min-h-[200px] items-center justify-center rounded-xl border border-border bg-bg-secondary p-8"
+        className="flex min-h-[200px] flex-col items-center justify-center gap-4 rounded-xl border border-border bg-bg-secondary p-8 text-center"
       >
+        <p className="text-sm text-text-secondary">
+          The booking calendar couldn&apos;t load. You can still schedule directly:
+        </p>
         <a
           href={url}
           target="_blank"
@@ -93,11 +96,15 @@ export function CalendlyEmbed({ url, email, name }: CalendlyEmbedProps) {
       {state !== "loaded" && (
         <div
           className={cn(
-            "absolute inset-0 rounded-xl border border-border bg-bg-secondary",
+            "absolute inset-0 flex items-center justify-center rounded-xl border border-border bg-bg-secondary",
             "animate-pulse bg-gold-dim/10"
           )}
           aria-hidden="true"
-        />
+        >
+          <span className="text-sm text-text-secondary/60">
+            Loading booking calendar&hellip;
+          </span>
+        </div>
       )}
 
       {/* Iframe — rendered once loading begins */}
@@ -115,8 +122,15 @@ export function CalendlyEmbed({ url, email, name }: CalendlyEmbedProps) {
         />
       )}
 
-      {/* Minimum height for skeleton when not yet loaded */}
-      {state === "pending" && <div style={{ height: CALENDLY_MIN_HEIGHT }} />}
+      {/* Placeholder with hint text when waiting for scroll */}
+      {state === "pending" && (
+        <div
+          className="flex items-center justify-center text-sm text-text-secondary/60"
+          style={{ height: CALENDLY_MIN_HEIGHT }}
+        >
+          Loading booking calendar&hellip;
+        </div>
+      )}
     </div>
   );
 }

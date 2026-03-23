@@ -3,7 +3,6 @@ import { ImmersiveHero } from "@/components/landing/ImmersiveHero";
 import { StoryBlock } from "@/components/landing/StoryBlock";
 import { OfferGrid } from "@/components/landing/OfferGrid";
 import { SocialProofBar } from "@/components/landing/SocialProofBar";
-import { TestimonialSection } from "@/components/landing/TestimonialSection";
 import { EmailCapture } from "@/components/shared/EmailCapture";
 import { CommunityBanner } from "@/components/landing/CommunityBanner";
 
@@ -68,9 +67,6 @@ export default function Home() {
 
           {/* Credibility metrics */}
           <SocialProofBar />
-
-          {/* Testimonials — placeholder until real ones are earned */}
-          <TestimonialSection />
 
           {/* Community */}
           <CommunityBanner />
