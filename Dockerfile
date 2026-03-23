@@ -21,6 +21,7 @@ ENV NEXT_PUBLIC_SENTRY_DSN=""
 ENV NEXT_PUBLIC_SITE_URL=""
 ENV NEXT_PUBLIC_CALENDLY_URL=""
 
+RUN npx convex codegen
 RUN npm run build
 
 # Stage 3: Production runner
