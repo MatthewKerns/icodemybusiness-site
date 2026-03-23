@@ -1,6 +1,5 @@
 import { mutation, query } from "./_generated/server";
 import { v, ConvexError } from "convex/values";
-import { internal } from "./_generated/api";
 import { scoreLead } from "./lib/leadScoring";
 import { rateLimit } from "./lib/rateLimits";
 
@@ -52,11 +51,6 @@ export const createLead = mutation({
       sessionId: args.sessionId,
       clerkUserId: args.clerkUserId,
       createdAt: Date.now(),
-    });
-
-    await ctx.scheduler.runAfter(0, internal.email.sendWelcomeEmail, {
-      email,
-      name: args.name,
     });
 
     return leadId;

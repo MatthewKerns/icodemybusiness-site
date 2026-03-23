@@ -37,12 +37,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${inter.variable} ${jetbrainsMono.variable}`}>
       <body>
-        <a
-          href="#main-content"
-          className="fixed left-4 top-4 z-[100] -translate-y-full rounded bg-gold px-4 py-2 text-black transition-transform focus:translate-y-0"
-        >
-          Skip to content
-        </a>
         <Providers>
           <NavBar />
           {children}

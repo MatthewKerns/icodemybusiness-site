@@ -20,21 +20,20 @@ export const sendWelcomeEmail = internalAction({
     const fromAddress =
       process.env.RESEND_FROM_EMAIL ?? "hello@icodemybusiness.com";
 
-    try {
-      const html = await render(WelcomeEmail({ email: args.email, name: args.name }));
+    const html = await render(WelcomeEmail({ email: args.email, name: args.name }));
 
-      await resend.emails.send({
-        from: `iCodeMyBusiness <${fromAddress}>`,
-        to: args.email,
-        subject: "Welcome to iCodeMyBusiness — Your Free Tools Are Ready",
-        html,
-        headers: {
-          "X-Priority": "1",
-          Importance: "high",
-        },
-      });
-    } catch (error) {
-      console.error("Failed to send welcome email:", error);
+    const { data, error } = await resend.emails.send({
+      from: `iCodeMyBusiness <${fromAddress}>`,
+      to: [args.email],
+      subject: "Welcome to iCodeMyBusiness — Your Free Tools Are Ready",
+      html,
+    });
+
+    if (error) {
+      console.error("Failed to send welcome email:", error.message, error.name);
+      return;
     }
+
+    console.log("Welcome email sent:", data?.id);
   },
 });

@@ -82,7 +82,7 @@ export function FreeResourceCard({
       {downloaded ? (
         <div className="mt-3 flex items-center gap-1.5 text-sm text-success">
           <Check className="h-4 w-4" aria-hidden="true" />
-          Downloaded
+          Sent to email
         </div>
       ) : (
         <a

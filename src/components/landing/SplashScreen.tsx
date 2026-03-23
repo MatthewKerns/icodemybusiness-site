@@ -54,13 +54,6 @@ export function SplashScreen() {
       role="banner"
       className="relative flex h-screen flex-col items-center justify-center bg-bg-primary"
     >
-      <a
-        href="#main-content"
-        className="absolute left-4 top-4 -translate-y-full rounded bg-gold px-4 py-2 text-black transition-transform focus:translate-y-0"
-      >
-        Skip to content
-      </a>
-
       <div className="flex flex-col items-center gap-2">
         <motion.h1
           custom={0}

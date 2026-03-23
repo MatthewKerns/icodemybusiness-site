@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SignOutButton, useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
-import { Menu, X } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -16,6 +17,7 @@ const NAV_LINKS = [
 
 export function NavBar() {
   const pathname = usePathname();
+  const { isSignedIn } = useUser();
   const isHome = pathname === "/";
   const [visible, setVisible] = useState(!isHome);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -125,13 +127,25 @@ export function NavBar() {
             ))}
           </div>
 
-          {/* Desktop CTA */}
-          <Link
-            href="/consulting#booking"
-            className="hidden rounded-lg bg-gold px-5 py-2.5 text-sm font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] md:inline-block"
-          >
-            Book a Call
-          </Link>
+          {/* Desktop CTA + Sign Out */}
+          <div className="hidden items-center gap-4 md:flex">
+            <Link
+              href="/consulting#booking"
+              className="rounded-lg bg-gold px-5 py-2.5 text-sm font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+            >
+              Book a Call
+            </Link>
+            {isSignedIn && (
+              <SignOutButton>
+                <button
+                  className="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:text-gold"
+                  aria-label="Sign out"
+                >
+                  <LogOut className="h-5 w-5" />
+                </button>
+              </SignOutButton>
+            )}
+          </div>
 
           {/* Mobile hamburger */}
           <button
@@ -189,7 +203,7 @@ export function NavBar() {
             ))}
           </div>
 
-          <div className="p-4">
+          <div className="flex flex-col gap-3 p-4">
             <Link
               href="/consulting#booking"
               onClick={closeMobile}
@@ -197,6 +211,16 @@ export function NavBar() {
             >
               Book a Call
             </Link>
+            {isSignedIn && (
+              <SignOutButton>
+                <button
+                  className="flex h-12 items-center justify-center gap-2 rounded-lg border border-border text-base font-medium text-text-muted transition-colors hover:text-gold"
+                >
+                  <LogOut className="h-5 w-5" />
+                  Sign Out
+                </button>
+              </SignOutButton>
+            )}
           </div>
         </div>
       )}
