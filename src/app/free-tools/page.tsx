@@ -1,24 +1,17 @@
 "use client";
 
-import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { useSessionId } from "@/hooks/useSessionId";
 import { EmailCapture } from "@/components/shared/EmailCapture";
 import {
   FreeResourceCard,
   FREE_RESOURCES,
 } from "@/components/shared/FreeResourceCard";
+import { useLeadAccess } from "@/hooks/useLeadAccess";
 
 export default function FreeResourcesPage() {
-  const sessionId = useSessionId();
+  const { status } = useLeadAccess();
 
-  const lead = useQuery(
-    api.leads.getLeadBySessionId,
-    sessionId ? { sessionId } : "skip"
-  );
-
-  const isLoading = lead === undefined;
-  const hasAccess = lead !== null && lead !== undefined;
+  const isLoading = status === "loading";
+  const hasAccess = status === "has-access";
 
   if (isLoading) {
     return (
@@ -79,10 +72,12 @@ export default function FreeResourcesPage() {
             {FREE_RESOURCES.map((resource) => (
               <FreeResourceCard
                 key={resource.toolName}
-                {...resource}
+                icon={resource.icon}
+                toolName={resource.toolName}
+                description={resource.description}
                 downloaded={hasAccess}
                 ctaLabel={hasAccess ? "Access Now" : "Get Free"}
-                ctaHref={hasAccess ? resource.ctaHref : "#email-capture"}
+                ctaHref={hasAccess ? resource.href : "#email-capture"}
               />
             ))}
           </div>

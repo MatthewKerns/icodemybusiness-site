@@ -21,12 +21,12 @@ export function useEnsureUser() {
     if (convexUser !== undefined) return;
 
     const adminId = process.env.NEXT_PUBLIC_ADMIN_CLERK_USER_ID;
-    void createUser({
+    createUser({
       clerkUserId: clerkUser.id,
       email: clerkUser.primaryEmailAddress?.emailAddress ?? "",
       name: clerkUser.fullName ?? undefined,
       role: adminId && clerkUser.id === adminId ? "admin" : undefined,
-    });
+    }).catch(console.error);
   }, [isSignedIn, clerkUser, convexUser, createUser]);
 
   return convexUser;

@@ -7,6 +7,20 @@ import { TestimonialSection } from "@/components/landing/TestimonialSection";
 import { EmailCapture } from "@/components/shared/EmailCapture";
 import { CommunityBanner } from "@/components/landing/CommunityBanner";
 
+function HeroContent() {
+  return (
+    <>
+      <h2 className="text-h1 font-bold text-text-primary">
+        Premium Consulting &amp; AI Automation
+      </h2>
+      <p className="mt-4 max-w-2xl text-text-muted">
+        Helping business owners save time and make money with AI-powered
+        tools, consulting, and automation systems.
+      </p>
+    </>
+  );
+}
+
 export default function Home() {
   return (
     <>
@@ -19,26 +33,14 @@ export default function Home() {
           {/* Desktop Hero — visible at lg+ */}
           <section className="hidden lg:block">
             <ImmersiveHero>
-              <h2 className="text-h1 font-bold text-text-primary">
-                Premium Consulting &amp; AI Automation
-              </h2>
-              <p className="mt-4 max-w-2xl text-text-muted">
-                Helping business owners save time and make money with AI-powered
-                tools, consulting, and automation systems.
-              </p>
+              <HeroContent />
             </ImmersiveHero>
           </section>
 
           {/* Mobile Hero + Story Blocks — visible below lg */}
           <section className="lg:hidden">
             <div className="py-12">
-              <h2 className="text-h1 font-bold text-text-primary">
-                Premium Consulting &amp; AI Automation
-              </h2>
-              <p className="mt-4 max-w-2xl text-text-muted">
-                Helping business owners save time and make money with AI-powered
-                tools, consulting, and automation systems.
-              </p>
+              <HeroContent />
             </div>
 
             <StoryBlock

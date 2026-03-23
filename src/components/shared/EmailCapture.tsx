@@ -105,7 +105,15 @@ export function EmailCapture({
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {FREE_RESOURCES.map((resource) => (
-            <FreeResourceCard key={resource.toolName} {...resource} />
+            <FreeResourceCard
+              key={resource.toolName}
+              icon={resource.icon}
+              toolName={resource.toolName}
+              description={resource.description}
+              downloaded
+              ctaLabel="Access Now"
+              ctaHref={resource.href}
+            />
           ))}
         </div>
       </div>

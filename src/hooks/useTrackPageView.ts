@@ -18,13 +18,13 @@ export function useTrackPageView(): void {
     if (pathname === lastTrackedPath.current) return;
     lastTrackedPath.current = pathname;
 
-    void trackPageView({
+    trackPageView({
       page: pathname,
       userId: userId ?? undefined,
       referrer: (typeof document !== "undefined" ? document.referrer : "") || undefined,
       source: source ?? undefined,
       variant: variant ?? undefined,
       timestamp: Date.now(),
-    });
+    }).catch(console.error);
   }, [pathname, trackPageView, userId, source, variant]);
 }

@@ -9,8 +9,7 @@ export interface FreeResource {
   icon: LucideIcon;
   toolName: string;
   description: string;
-  ctaLabel: string;
-  ctaHref: string;
+  href: string;
 }
 
 export const FREE_RESOURCES: FreeResource[] = [
@@ -19,24 +18,21 @@ export const FREE_RESOURCES: FreeResource[] = [
     description:
       "Organize your business with the Entrepreneurial Operating System framework.",
     icon: FileText,
-    ctaLabel: "Get Free",
-    ctaHref: "#eos-spreadsheet",
+    href: "#eos-spreadsheet",
   },
   {
     toolName: "Habits Tracker Management Skill",
     description:
       "Build and track productive habits that compound into business growth.",
     icon: BarChart3,
-    ctaLabel: "Get Free",
-    ctaHref: "#habits-tracker",
+    href: "#habits-tracker",
   },
   {
     toolName: "Client Delivery / Work Tracking Skill",
     description:
       "Keep projects on track with structured delivery and progress tracking.",
     icon: ClipboardCheck,
-    ctaLabel: "Get Free",
-    ctaHref: "#client-delivery",
+    href: "#client-delivery",
   },
 ];
 
