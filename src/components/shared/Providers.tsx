@@ -5,6 +5,9 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ConvexReactClient } from "convex/react";
 import { useAuth } from "@clerk/nextjs";
+import { PostHogProvider } from "@/components/shared/PostHogProvider";
+import { PageViewTracker } from "@/components/shared/PageViewTracker";
+import { useEnsureUser } from "@/hooks/useEnsureUser";
 
 if (!process.env.NEXT_PUBLIC_CONVEX_URL) {
   throw new Error(
@@ -22,8 +25,8 @@ function ConvexClerkProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// PostHog placeholder — will be added in Story 6.4
-function PostHogProvider({ children }: { children: ReactNode }) {
+function EnsureUser({ children }: { children: ReactNode }) {
+  useEnsureUser();
   return <>{children}</>;
 }
 
@@ -31,7 +34,10 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <ClerkProvider>
       <ConvexClerkProvider>
-        <PostHogProvider>{children}</PostHogProvider>
+        <EnsureUser>
+          <PageViewTracker />
+          <PostHogProvider>{children}</PostHogProvider>
+        </EnsureUser>
       </ConvexClerkProvider>
     </ClerkProvider>
   );
