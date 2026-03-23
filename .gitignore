@@ -28,8 +28,8 @@ out/
 dist/
 build/
 
-# Convex
-convex/_generated/
+# Convex (generated AI guidelines only — type stubs are committed for Docker builds)
+convex/_generated/ai/
 
 # Claude
 .claude/

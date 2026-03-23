@@ -10,10 +10,6 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Convex codegen requires CONVEX_DEPLOYMENT to generate type stubs
-ARG CONVEX_DEPLOYMENT
-ENV CONVEX_DEPLOYMENT=${CONVEX_DEPLOYMENT}
-
 # next build reads these at build time; provide defaults so the build succeeds
 # even without real secrets (actual values are injected at runtime)
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=""
@@ -24,8 +20,6 @@ ENV NEXT_PUBLIC_POSTHOG_HOST=""
 ENV NEXT_PUBLIC_SENTRY_DSN=""
 ENV NEXT_PUBLIC_SITE_URL=""
 ENV NEXT_PUBLIC_CALENDLY_URL=""
-
-RUN npx convex codegen
 RUN npm run build
 
 # Stage 3: Production runner
