@@ -142,7 +142,7 @@ export function EmailCapture({
       )}
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={(e) => void handleSubmit(e)}
         aria-label="Email signup"
         className={cn(
           variant === "compact"

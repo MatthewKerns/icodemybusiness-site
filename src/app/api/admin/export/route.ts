@@ -9,7 +9,7 @@ import { api } from "../../../../../convex/_generated/api";
  * to prevent CSV injection in spreadsheet applications.
  */
 function sanitizeCsvValue(value: string): string {
-  if (/^[=+@\-]/.test(value)) {
+  if (/^[=+@-]/.test(value)) {
     return "'" + value;
   }
   return value;

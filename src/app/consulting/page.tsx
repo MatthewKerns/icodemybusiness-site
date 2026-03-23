@@ -147,9 +147,9 @@ export default function ConsultingPage() {
                 The Measurable Progress Guarantee
               </h3>
               <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
-                Implement the system we build together. If you don't see
+                Implement the system we build together. If you don&apos;t see
                 measurable improvement within 30 days — time saved, leads
-                generated, or revenue increased — I'll do a follow-up session at
+                generated, or revenue increased — I&apos;ll do a follow-up session at
                 no cost.
               </p>
             </div>
