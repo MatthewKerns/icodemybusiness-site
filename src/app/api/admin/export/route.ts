@@ -4,6 +4,8 @@ import { convex } from "@/lib/convex-client";
 import { isAdmin } from "@/lib/auth";
 import { api } from "../../../../../convex/_generated/api";
 
+export const dynamic = "force-dynamic";
+
 /**
  * Prefix cell values that start with formula-triggering characters
  * to prevent CSV injection in spreadsheet applications.

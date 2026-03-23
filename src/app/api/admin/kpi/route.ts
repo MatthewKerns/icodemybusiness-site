@@ -4,6 +4,8 @@ import { convex } from "@/lib/convex-client";
 import { isAdmin } from "@/lib/auth";
 import { api } from "../../../../../convex/_generated/api";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const { userId } = await auth();
   if (!userId) {
