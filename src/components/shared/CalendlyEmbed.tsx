@@ -67,7 +67,13 @@ export function CalendlyEmbed({ url, email, name }: CalendlyEmbedProps) {
     setState("loaded");
   }, []);
 
-  const iframeSrc = buildCalendlyUrl(url, email, name);
+  // Guard against empty URL (e.g. during static page generation when env var is unset)
+  let iframeSrc: string;
+  try {
+    iframeSrc = buildCalendlyUrl(url, email, name);
+  } catch {
+    iframeSrc = url || "#";
+  }
 
   if (state === "error") {
     return (
