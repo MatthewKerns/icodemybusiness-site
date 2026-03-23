@@ -9,17 +9,25 @@ import { PostHogProvider } from "@/components/shared/PostHogProvider";
 import { PageViewTracker } from "@/components/shared/PageViewTracker";
 import { useEnsureUser } from "@/hooks/useEnsureUser";
 
-if (!process.env.NEXT_PUBLIC_CONVEX_URL) {
-  throw new Error(
-    "NEXT_PUBLIC_CONVEX_URL is not set. Add it to .env.local — see .env.example."
-  );
-}
+const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
-const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL);
+// Lazy-init: avoid crashing during next build static page generation
+let _convex: ConvexReactClient | null = null;
+function getConvexClient(): ConvexReactClient {
+  if (!_convex) {
+    if (!convexUrl) {
+      throw new Error(
+        "NEXT_PUBLIC_CONVEX_URL is not set. Add it to .env.local — see .env.example."
+      );
+    }
+    _convex = new ConvexReactClient(convexUrl);
+  }
+  return _convex;
+}
 
 function ConvexClerkProvider({ children }: { children: ReactNode }) {
   return (
-    <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+    <ConvexProviderWithClerk client={getConvexClient()} useAuth={useAuth}>
       {children}
     </ConvexProviderWithClerk>
   );
