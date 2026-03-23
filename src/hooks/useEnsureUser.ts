@@ -20,10 +20,12 @@ export function useEnsureUser() {
     // convexUser is undefined while loading, null means not found
     if (convexUser !== undefined) return;
 
+    const adminId = process.env.NEXT_PUBLIC_ADMIN_CLERK_USER_ID;
     void createUser({
       clerkUserId: clerkUser.id,
       email: clerkUser.primaryEmailAddress?.emailAddress ?? "",
       name: clerkUser.fullName ?? undefined,
+      role: adminId && clerkUser.id === adminId ? "admin" : undefined,
     });
   }, [isSignedIn, clerkUser, convexUser, createUser]);
 

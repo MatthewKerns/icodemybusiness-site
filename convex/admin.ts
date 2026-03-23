@@ -1,6 +1,7 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
 import { filterByDateRange } from "./lib/dateFilter";
+import { requireRole } from "./lib/auth";
 
 const PLAN_PRICES: Record<string, number> = {
   starter: 19.99,
@@ -14,10 +15,7 @@ export const exportLeads = query({
     endDate: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Unauthorized");
-    }
+    await requireRole(ctx, "admin");
 
     const allLeads = await ctx.db.query("leads").collect();
     const leads = filterByDateRange(allLeads, "createdAt", args.startDate, args.endDate);
@@ -32,10 +30,7 @@ export const getKpiSummary = query({
     endDate: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Unauthorized");
-    }
+    await requireRole(ctx, "admin");
 
     // Leads
     const allLeads = await ctx.db.query("leads").collect();

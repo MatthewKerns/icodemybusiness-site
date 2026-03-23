@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v, ConvexError } from "convex/values";
+import { requireRole } from "./lib/auth";
 
 export const createUser = mutation({
   args: v.object({
@@ -7,6 +8,7 @@ export const createUser = mutation({
     email: v.string(),
     name: v.optional(v.string()),
     source: v.optional(v.string()),
+    role: v.optional(v.string()),
   }),
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -22,6 +24,7 @@ export const createUser = mutation({
       clerkUserId: args.clerkUserId,
       email: args.email,
       name: args.name,
+      role: args.role,
       source: args.source,
       createdAt: Date.now(),
     });
@@ -37,6 +40,28 @@ export const getUserByClerkId = query({
       .query("users")
       .withIndex("by_clerkUserId", (q) => q.eq("clerkUserId", args.clerkUserId))
       .first();
+  },
+});
+
+export const setUserRole = mutation({
+  args: {
+    clerkUserId: v.string(),
+    role: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireRole(ctx, "admin");
+
+    const target = await ctx.db
+      .query("users")
+      .withIndex("by_clerkUserId", (q) => q.eq("clerkUserId", args.clerkUserId))
+      .first();
+
+    if (!target) {
+      throw new ConvexError("User not found");
+    }
+
+    await ctx.db.patch(target._id, { role: args.role });
+    return target._id;
   },
 });
 

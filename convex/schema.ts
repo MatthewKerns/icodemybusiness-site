@@ -15,6 +15,7 @@ export default defineSchema(
       clerkUserId: v.string(),
       email: v.string(),
       name: v.optional(v.string()),
+      role: v.optional(v.string()), // "admin" | future roles; undefined = "user"
       createdAt: v.number(),
       source: v.optional(v.string()),
     }).index("by_clerkUserId", ["clerkUserId"]),
