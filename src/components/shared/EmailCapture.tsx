@@ -4,6 +4,8 @@ import { useState, useRef, useId, useCallback } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { cn } from "@/lib/utils";
+import { parseConvexError } from "@/lib/errors";
+import { useSessionId } from "@/hooks/useSessionId";
 import { Check, Loader2 } from "lucide-react";
 import { FreeResourceCard, FREE_RESOURCES } from "./FreeResourceCard";
 
@@ -16,20 +18,6 @@ interface EmailCaptureProps {
   subtitle?: string;
 }
 
-function getSessionId(): string | undefined {
-  if (typeof window === "undefined") return undefined;
-  try {
-    let sessionId = localStorage.getItem("icmb_session_id") ?? undefined;
-    if (!sessionId) {
-      sessionId = crypto.randomUUID();
-      localStorage.setItem("icmb_session_id", sessionId);
-    }
-    return sessionId;
-  } catch {
-    return undefined;
-  }
-}
-
 export function EmailCapture({
   variant = "full",
   source,
@@ -40,11 +28,11 @@ export function EmailCapture({
   const [error, setError] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
   const [showGlow, setShowGlow] = useState(false);
-  const [isReturning, setIsReturning] = useState(false);
   const submittingRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const errorId = useId();
   const labelId = useId();
+  const sessionId = useSessionId();
   const createLead = useMutation(api.leads.createLead);
 
   function validate(value: string): boolean {
@@ -66,6 +54,7 @@ export function EmailCapture({
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+      if (status === "loading") return;
       if (submittingRef.current) return;
       if (!validate(email)) {
         setError("Enter a valid email address");
@@ -78,24 +67,19 @@ export function EmailCapture({
       setError("");
 
       try {
-        const sessionId = getSessionId();
-        const result = await createLead({ email, source, sessionId });
+        await createLead({ email, source, sessionId: sessionId ?? undefined });
 
-        // Check if this was an existing lead (Convex returns existing _id)
-        // The mutation returns the ID either way, but existing leads won't get a welcome email
-        // We can detect this by checking if the result looks like an existing record
-        // For now, we show a slightly different message for clarity
         setStatus("success");
         setShowGlow(true);
         setTimeout(() => setShowGlow(false), 1500);
-      } catch {
-        setError("Something went wrong. Please try again.");
+      } catch (err: unknown) {
+        setError(parseConvexError(err));
         setStatus("idle");
       } finally {
         submittingRef.current = false;
       }
     },
-    [email, source, createLead]
+    [email, source, sessionId, createLead, status]
   );
 
   if (status === "success") {
@@ -121,7 +105,7 @@ export function EmailCapture({
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {FREE_RESOURCES.map((resource) => (
-            <FreeResourceCard key={resource.name} {...resource} />
+            <FreeResourceCard key={resource.toolName} {...resource} />
           ))}
         </div>
       </div>
