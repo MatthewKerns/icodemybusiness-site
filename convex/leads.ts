@@ -1,7 +1,8 @@
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v, ConvexError } from "convex/values";
 import { internal } from "./_generated/api";
 import { scoreLead } from "./lib/leadScoring";
+import { rateLimit } from "./lib/rateLimits";
 
 export const createLead = mutation({
   args: {
@@ -10,11 +11,25 @@ export const createLead = mutation({
     source: v.optional(v.string()),
     variant: v.optional(v.string()),
     sessionId: v.optional(v.string()),
+    clerkUserId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const email = args.email.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
       throw new ConvexError("Invalid email address");
+    }
+
+    const rateLimitKey = `${args.sessionId ?? "anon"}:${email}`;
+    const { ok, retryAt } = await rateLimit(ctx, {
+      name: "emailCapture",
+      key: rateLimitKey,
+    });
+    if (!ok) {
+      throw new ConvexError({
+        kind: "RateLimited" as const,
+        message: "Too many attempts. Please try again in a moment.",
+        retryAt: retryAt ?? Date.now() + 60_000,
+      });
     }
 
     const existing = await ctx.db
@@ -35,6 +50,7 @@ export const createLead = mutation({
       variant: args.variant,
       score,
       sessionId: args.sessionId,
+      clerkUserId: args.clerkUserId,
       createdAt: Date.now(),
     });
 
@@ -44,5 +60,17 @@ export const createLead = mutation({
     });
 
     return leadId;
+  },
+});
+
+export const getLeadBySessionId = query({
+  args: {
+    sessionId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("leads")
+      .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
+      .first();
   },
 });
