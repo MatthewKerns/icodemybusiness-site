@@ -2,6 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { v, ConvexError } from "convex/values";
 import { scoreLead } from "./lib/leadScoring";
 import { rateLimit } from "./lib/rateLimits";
+import { validateEmail } from "./lib/validators";
 
 export const createLead = mutation({
   args: {
@@ -13,10 +14,7 @@ export const createLead = mutation({
     clerkUserId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const email = args.email.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-      throw new ConvexError("Invalid email address");
-    }
+    const email = validateEmail(args.email);
 
     const rateLimitKey = `${args.sessionId ?? "anon"}:${email}`;
     const { ok, retryAt } = await rateLimit(ctx, {
