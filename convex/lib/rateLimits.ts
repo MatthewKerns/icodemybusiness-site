@@ -1,11 +1,10 @@
 import { defineRateLimits } from "convex-helpers/server/rateLimit";
-
-const HOUR = 60 * 60 * 1000;
+import { EMAIL_CAPTURE_RATE, HOUR } from "./constants";
 
 export const { checkRateLimit, rateLimit, resetRateLimit } = defineRateLimits({
   emailCapture: {
     kind: "fixed window",
-    rate: 3,
+    rate: EMAIL_CAPTURE_RATE,
     period: HOUR,
   },
 });
