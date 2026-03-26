@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
 /**
@@ -168,4 +168,34 @@ export function getErrorMessage(error: unknown): string {
     return error;
   }
   return "An unexpected error occurred";
+}
+
+/**
+ * Higher-order function that wraps an API route handler with automatic error handling.
+ * Any errors thrown in the handler will be caught and converted to proper error responses.
+ *
+ * @param handler - The API route handler to wrap
+ * @param context - Optional context for error logging
+ * @returns Wrapped handler with error handling
+ *
+ * @example
+ * export const POST = withErrorHandler(async (request: NextRequest) => {
+ *   // Your route logic here
+ *   // Throw ApiError instances for expected errors
+ *   throw new ValidationError("Invalid input");
+ *
+ *   return NextResponse.json({ success: true });
+ * });
+ */
+export function withErrorHandler<T extends unknown[] = []>(
+  handler: (request: NextRequest, ...args: T) => Promise<NextResponse>,
+  context?: Record<string, unknown>
+) {
+  return async (request: NextRequest, ...args: T): Promise<NextResponse> => {
+    try {
+      return await handler(request, ...args);
+    } catch (error) {
+      return errorResponse(error, context);
+    }
+  };
 }
