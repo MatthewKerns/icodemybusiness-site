@@ -1,13 +1,31 @@
 "use client";
 
-import { useState, useRef, useId, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useMutation } from "convex/react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { api } from "../../../convex/_generated/api";
 import { cn } from "@/lib/utils";
 import { parseConvexError } from "@/lib/errors";
 import { useSessionId } from "@/hooks/useSessionId";
 import { Check, Loader2 } from "lucide-react";
 import { FreeResourceCard, FREE_RESOURCES } from "./FreeResourceCard";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { emailSchema } from "@/lib/schemas";
+
+// Form schema for email capture
+const emailCaptureSchema = z.object({
+  email: emailSchema,
+});
+
+type EmailCaptureFormValues = z.infer<typeof emailCaptureSchema>;
 
 type EmailCaptureVariant = "full" | "compact";
 
@@ -28,62 +46,48 @@ export function EmailCapture({
   buttonLabel = "Get Free Access",
   successMessage = "You\u2019re in! Explore your free tools below.",
 }: EmailCaptureProps) {
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
   const [showGlow, setShowGlow] = useState(false);
+  const [serverError, setServerError] = useState("");
   const submittingRef = useRef(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const errorId = useId();
-  const labelId = useId();
   const sessionId = useSessionId();
   const createLead = useMutation(api.leads.createLead);
 
-  function validate(value: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(value) && value.length <= 254;
-  }
-
-  function handleBlur() {
-    if (email && !validate(email)) {
-      setError("Enter a valid email address");
-    }
-  }
-
-  function handleChange(value: string) {
-    setEmail(value);
-    if (error) setError("");
-  }
+  const form = useForm<EmailCaptureFormValues>({
+    resolver: zodResolver(emailCaptureSchema),
+    defaultValues: {
+      email: "",
+    },
+    mode: "onBlur",
+  });
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
+    async (values: EmailCaptureFormValues) => {
       if (status === "loading") return;
       if (submittingRef.current) return;
-      if (!validate(email)) {
-        setError("Enter a valid email address");
-        inputRef.current?.focus();
-        return;
-      }
 
       submittingRef.current = true;
       setStatus("loading");
-      setError("");
+      setServerError("");
 
       try {
-        await createLead({ email, source, sessionId: sessionId ?? undefined });
+        await createLead({
+          email: values.email,
+          source,
+          sessionId: sessionId ?? undefined,
+        });
 
         setStatus("success");
         setShowGlow(true);
         setTimeout(() => setShowGlow(false), 1500);
       } catch (err: unknown) {
-        setError(parseConvexError(err));
+        setServerError(parseConvexError(err));
         setStatus("idle");
       } finally {
         submittingRef.current = false;
       }
     },
-    [email, source, sessionId, createLead, status]
+    [source, sessionId, createLead, status]
   );
 
   if (status === "success") {
@@ -124,11 +128,6 @@ export function EmailCapture({
     );
   }
 
-  const inputClasses = cn(
-    "h-12 w-full rounded-lg border bg-bg-tertiary px-4 text-base text-text-primary placeholder:text-text-dim transition-colors focus:outline-none focus:ring-2 focus:ring-blue-light",
-    error ? "border-error" : "border-border"
-  );
-
   const buttonClasses =
     "h-12 shrink-0 rounded-lg bg-gold px-6 font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] disabled:opacity-60";
 
@@ -141,53 +140,55 @@ export function EmailCapture({
         </div>
       )}
 
-      <form
-        onSubmit={(e) => void handleSubmit(e)}
-        aria-label="Email signup"
-        className={cn(
-          variant === "compact"
-            ? "flex flex-col gap-2 sm:flex-row"
-            : "flex flex-col gap-3"
-        )}
-      >
-        <div className="relative flex-1">
-          <label id={labelId} htmlFor="email-capture-input" className="sr-only">
-            Email address
-          </label>
-          <input
-            id="email-capture-input"
-            ref={inputRef}
-            type="email"
-            required
-            maxLength={254}
-            value={email}
-            onChange={(e) => handleChange(e.target.value)}
-            onBlur={handleBlur}
-            placeholder="you@example.com"
-            className={inputClasses}
-            aria-labelledby={labelId}
-            aria-describedby={error ? errorId : undefined}
-            aria-invalid={!!error}
-          />
-          {error && (
-            <p id={errorId} className="mt-1 text-sm text-error">
-              {error}
-            </p>
+      <Form {...form}>
+        <form
+          onSubmit={(e) => void form.handleSubmit(handleSubmit)(e)}
+          aria-label="Email signup"
+          className={cn(
+            variant === "compact"
+              ? "flex flex-col gap-2 sm:flex-row"
+              : "flex flex-col gap-3"
           )}
-        </div>
-
-        <button
-          type="submit"
-          disabled={status === "loading"}
-          className={buttonClasses}
         >
-          {status === "loading" ? (
-            <Loader2 className="mx-auto h-5 w-5 animate-spin" />
-          ) : (
-            buttonLabel
-          )}
-        </button>
-      </form>
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem className="relative flex-1">
+                <label htmlFor="email-capture-input" className="sr-only">
+                  Email address
+                </label>
+                <FormControl>
+                  <input
+                    {...field}
+                    id="email-capture-input"
+                    type="email"
+                    placeholder="you@example.com"
+                    className="h-12 w-full rounded-lg border border-border bg-bg-tertiary px-4 text-base text-text-primary placeholder:text-text-dim transition-colors focus:outline-none focus:ring-2 focus:ring-blue-light aria-[invalid=true]:border-error"
+                    disabled={status === "loading"}
+                  />
+                </FormControl>
+                <FormMessage className="mt-1 text-sm" />
+                {serverError && (
+                  <p className="mt-1 text-sm text-error">{serverError}</p>
+                )}
+              </FormItem>
+            )}
+          />
+
+          <button
+            type="submit"
+            disabled={status === "loading"}
+            className={buttonClasses}
+          >
+            {status === "loading" ? (
+              <Loader2 className="mx-auto h-5 w-5 animate-spin" />
+            ) : (
+              buttonLabel
+            )}
+          </button>
+        </form>
+      </Form>
     </div>
   );
 }

@@ -16,6 +16,7 @@ import type * as lib_auth from "../lib/auth.js";
 import type * as lib_dateFilter from "../lib/dateFilter.js";
 import type * as lib_leadScoring from "../lib/leadScoring.js";
 import type * as lib_rateLimits from "../lib/rateLimits.js";
+import type * as lib_validators from "../lib/validators.js";
 import type * as pageViews from "../pageViews.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as users from "../users.js";
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   "lib/dateFilter": typeof lib_dateFilter;
   "lib/leadScoring": typeof lib_leadScoring;
   "lib/rateLimits": typeof lib_rateLimits;
+  "lib/validators": typeof lib_validators;
   pageViews: typeof pageViews;
   subscriptions: typeof subscriptions;
   users: typeof users;
