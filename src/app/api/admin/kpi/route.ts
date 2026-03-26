@@ -3,16 +3,21 @@ import { auth } from "@clerk/nextjs/server";
 import { convex } from "@/lib/convex-client";
 import { isAdmin } from "@/lib/auth";
 import { api } from "../../../../../convex/_generated/api";
+import {
+  withErrorHandler,
+  AuthError,
+  ForbiddenError,
+} from "@/lib/api-error-handler";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: NextRequest) {
+export const GET = withErrorHandler(async (request: NextRequest) => {
   const { userId } = await auth();
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw new AuthError();
   }
   if (!(await isAdmin(userId))) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    throw new ForbiddenError();
   }
 
   const searchParams = request.nextUrl.searchParams;
@@ -40,4 +45,4 @@ export async function GET(request: NextRequest) {
         "https://dashboard.stripe.com/subscriptions",
     },
   });
-}
+});

@@ -3,6 +3,12 @@ import { auth } from "@clerk/nextjs/server";
 import { convex } from "@/lib/convex-client";
 import { isAdmin } from "@/lib/auth";
 import { api } from "../../../../../convex/_generated/api";
+import {
+  withErrorHandler,
+  AuthError,
+  ForbiddenError,
+  ValidationError,
+} from "@/lib/api-error-handler";
 
 export const dynamic = "force-dynamic";
 
@@ -17,13 +23,13 @@ function sanitizeCsvValue(value: string): string {
   return value;
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withErrorHandler(async (request: NextRequest) => {
   const { userId } = await auth();
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw new AuthError();
   }
   if (!(await isAdmin(userId))) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    throw new ForbiddenError();
   }
 
   const searchParams = request.nextUrl.searchParams;
@@ -35,9 +41,8 @@ export async function GET(request: NextRequest) {
   if (startDate) {
     const parsed = Number(startDate);
     if (isNaN(parsed)) {
-      return NextResponse.json(
-        { error: "Invalid startDate — must be a numeric timestamp" },
-        { status: 400 }
+      throw new ValidationError(
+        "Invalid startDate — must be a numeric timestamp"
       );
     }
     queryArgs.startDate = parsed;
@@ -45,9 +50,8 @@ export async function GET(request: NextRequest) {
   if (endDate) {
     const parsed = Number(endDate);
     if (isNaN(parsed)) {
-      return NextResponse.json(
-        { error: "Invalid endDate — must be a numeric timestamp" },
-        { status: 400 }
+      throw new ValidationError(
+        "Invalid endDate — must be a numeric timestamp"
       );
     }
     queryArgs.endDate = parsed;
@@ -105,4 +109,4 @@ export async function GET(request: NextRequest) {
       "Content-Disposition": `attachment; filename="leads-export-${Date.now()}.csv"`,
     },
   });
-}
+});
