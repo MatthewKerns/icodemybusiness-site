@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v, ConvexError } from "convex/values";
+import { Id } from "./_generated/dataModel";
 import { requireRole } from "./lib/auth";
 
 export const createDeliverable = mutation({
@@ -46,7 +47,7 @@ export const updateDeliverable = mutation({
     const updates: {
       name?: string;
       description?: string;
-      fileId?: string;
+      fileId?: Id<"_storage">;
       status?: string;
       uploadedAt?: number;
     } = {};

@@ -70,9 +70,10 @@ export const listProjects = query({
         throw new ConvexError("Forbidden");
       }
 
+      const clientId = args.clientId;
       let query = ctx.db
         .query("projects")
-        .withIndex("by_clientId", (q) => q.eq("clientId", args.clientId));
+        .withIndex("by_clientId", (q) => q.eq("clientId", clientId));
 
       const projects = await query.collect();
 
@@ -86,9 +87,10 @@ export const listProjects = query({
 
     // If filtering by status only
     if (args.status) {
+      const status = args.status;
       const projects = await ctx.db
         .query("projects")
-        .withIndex("by_status", (q) => q.eq("status", args.status))
+        .withIndex("by_status", (q) => q.eq("status", status))
         .collect();
 
       // Non-admin users can only see their own projects
