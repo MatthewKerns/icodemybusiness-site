@@ -1,3 +1,9 @@
+import {
+  LEAD_SCORE_REFERRAL,
+  LEAD_SCORE_YOUTUBE,
+  LEAD_SCORE_DEFAULT,
+} from "./constants";
+
 /**
  * Pure lead scoring function. Zero npm dependencies.
  * Duplicated from convex/lib/leadScoring.ts for client-side use
@@ -6,10 +12,10 @@
 export function scoreLead(source?: string): number {
   switch (source) {
     case "referral":
-      return 15;
+      return LEAD_SCORE_REFERRAL;
     case "youtube":
-      return 10;
+      return LEAD_SCORE_YOUTUBE;
     default:
-      return 5;
+      return LEAD_SCORE_DEFAULT;
   }
 }
