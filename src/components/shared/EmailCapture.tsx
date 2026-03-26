@@ -8,6 +8,8 @@ import { parseConvexError } from "@/lib/errors";
 import { useSessionId } from "@/hooks/useSessionId";
 import { Check, Loader2 } from "lucide-react";
 import { FreeResourceCard, FREE_RESOURCES } from "./FreeResourceCard";
+import { ConvexErrorBoundary } from "./ConvexErrorBoundary";
+import { FormErrorBoundary } from "./FormErrorBoundary";
 
 type EmailCaptureVariant = "full" | "compact";
 
@@ -20,7 +22,11 @@ interface EmailCaptureProps {
   successMessage?: string;
 }
 
-export function EmailCapture({
+/**
+ * Core EmailCapture component (unwrapped)
+ * Exported for testing and cases where error boundaries are not needed
+ */
+export function EmailCaptureComponent({
   variant = "full",
   source,
   headline = "Get free AI tools instantly",
@@ -189,5 +195,23 @@ export function EmailCapture({
         </button>
       </form>
     </div>
+  );
+}
+
+/**
+ * EmailCapture component wrapped with error boundaries
+ * - ConvexErrorBoundary: Catches unexpected Convex mutation errors
+ * - FormErrorBoundary: Catches form-specific errors
+ *
+ * Inline error handling is preserved for better UX, error boundaries
+ * serve as a safety net for unexpected errors
+ */
+export function EmailCapture(props: EmailCaptureProps) {
+  return (
+    <ConvexErrorBoundary>
+      <FormErrorBoundary formName="Email Capture">
+        <EmailCaptureComponent {...props} />
+      </FormErrorBoundary>
+    </ConvexErrorBoundary>
   );
 }
