@@ -1,5 +1,9 @@
-const WEBHOOK_RATE_LIMIT = 100; // requests per minute
-const WEBHOOK_RATE_WINDOW = 60_000; // 1 minute in ms
+import {
+  WEBHOOK_RATE_LIMIT,
+  WEBHOOK_RATE_WINDOW,
+  WEBHOOK_MAP_MAX_SIZE,
+} from "./constants";
+
 const webhookRequestLog = new Map<string, number[]>();
 
 export function isWebhookRateLimited(ip: string): boolean {
@@ -12,7 +16,7 @@ export function isWebhookRateLimited(ip: string): boolean {
   webhookRequestLog.set(ip, recent);
 
   // Clean up stale IPs periodically (keep map from growing unbounded)
-  if (webhookRequestLog.size > 10_000) {
+  if (webhookRequestLog.size > WEBHOOK_MAP_MAX_SIZE) {
     const keys = Array.from(webhookRequestLog.keys());
     for (const key of keys) {
       const vals = webhookRequestLog.get(key);
