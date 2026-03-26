@@ -10,6 +10,7 @@ import { EmailCapture } from "@/components/shared/EmailCapture";
 import { FAQAccordion } from "@/components/landing/FAQAccordion";
 import { CommunityBanner } from "@/components/landing/CommunityBanner";
 import { EmbeddedCheckoutDialog } from "@/components/subscribe/EmbeddedCheckoutDialog";
+import { ConvexErrorBoundary } from "@/components/shared/ConvexErrorBoundary";
 import { CreditCard } from "lucide-react";
 
 const TIERS = [
@@ -77,10 +78,16 @@ const FAQ_ITEMS = [
   },
 ];
 
-export default function SubscriptionsPage() {
-  const router = useRouter();
+/**
+ * Pricing section component that uses Convex subscription query.
+ * Wrapped with ConvexErrorBoundary to gracefully degrade on query errors.
+ */
+function PricingSectionCore({
+  onTierClick,
+}: {
+  onTierClick: (plan: string) => void;
+}) {
   const { user, isSignedIn } = useUser();
-  const [checkoutPlan, setCheckoutPlan] = useState<string | null>(null);
 
   const subscription = useQuery(
     api.subscriptions.getActiveSubscription,
@@ -95,19 +102,109 @@ export default function SubscriptionsPage() {
     }
   }, []);
 
-  const handleTierClick = useCallback(
+  const handleTierClickInternal = useCallback(
     (plan: string) => {
       if (!isSignedIn) {
-        router.push("/sign-in?redirect_url=/subscribe");
+        onTierClick(plan);
         return;
       }
       if (subscription?.plan === plan || subscription) {
         void handleManageBilling();
         return;
       }
+      onTierClick(plan);
+    },
+    [isSignedIn, subscription, onTierClick, handleManageBilling]
+  );
+
+  return (
+    <>
+      <div className="grid gap-8 md:grid-cols-3">
+        {TIERS.map((tier) => {
+          const isCurrentPlan =
+            subscription?.status === "active" &&
+            subscription?.plan === tier.plan;
+
+          return (
+            <div key={tier.name} className="relative">
+              {isCurrentPlan && (
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2">
+                  <span className="rounded-full border border-success bg-success/10 px-3 py-1 text-xs font-medium text-success">
+                    Current Plan
+                  </span>
+                </div>
+              )}
+              <PricingTier
+                {...tier}
+                ctaLabel={
+                  isCurrentPlan
+                    ? "Manage Billing"
+                    : subscription
+                      ? "Switch Plan"
+                      : "Get Started"
+                }
+                onCtaClick={() => handleTierClickInternal(tier.plan)}
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      {subscription && (
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={() => void handleManageBilling()}
+            className="flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-medium text-text-muted transition-colors hover:border-gold-dim hover:text-gold"
+          >
+            <CreditCard className="h-4 w-4" />
+            Manage Billing &amp; Invoices
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+
+/**
+ * Pricing section wrapped with ConvexErrorBoundary.
+ * Falls back to basic pricing tiers (no subscription status) if query fails.
+ */
+function PricingSection({ onTierClick }: { onTierClick: (plan: string) => void }) {
+  // Fallback: Show pricing tiers without subscription status
+  const fallback = (
+    <div className="grid gap-8 md:grid-cols-3">
+      {TIERS.map((tier) => (
+        <PricingTier
+          key={tier.name}
+          {...tier}
+          ctaLabel="Get Started"
+          onCtaClick={() => onTierClick(tier.plan)}
+        />
+      ))}
+    </div>
+  );
+
+  return (
+    <ConvexErrorBoundary fallback={fallback}>
+      <PricingSectionCore onTierClick={onTierClick} />
+    </ConvexErrorBoundary>
+  );
+}
+
+export default function SubscriptionsPage() {
+  const router = useRouter();
+  const { isSignedIn } = useUser();
+  const [checkoutPlan, setCheckoutPlan] = useState<string | null>(null);
+
+  const handleTierClick = useCallback(
+    (plan: string) => {
+      if (!isSignedIn) {
+        router.push("/sign-in?redirect_url=/subscribe");
+        return;
+      }
       setCheckoutPlan(plan);
     },
-    [isSignedIn, subscription, router, handleManageBilling]
+    [isSignedIn, router]
   );
 
   return (
@@ -129,48 +226,7 @@ export default function SubscriptionsPage() {
 
       {/* Pricing Tiers */}
       <section className="mx-auto max-w-7xl py-12 lg:py-20">
-        <div className="grid gap-8 md:grid-cols-3">
-          {TIERS.map((tier) => {
-            const isCurrentPlan =
-              subscription?.status === "active" &&
-              subscription?.plan === tier.plan;
-
-            return (
-              <div key={tier.name} className="relative">
-                {isCurrentPlan && (
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2">
-                    <span className="rounded-full border border-success bg-success/10 px-3 py-1 text-xs font-medium text-success">
-                      Current Plan
-                    </span>
-                  </div>
-                )}
-                <PricingTier
-                  {...tier}
-                  ctaLabel={
-                    isCurrentPlan
-                      ? "Manage Billing"
-                      : subscription
-                        ? "Switch Plan"
-                        : "Get Started"
-                  }
-                  onCtaClick={() => handleTierClick(tier.plan)}
-                />
-              </div>
-            );
-          })}
-        </div>
-
-        {subscription && (
-          <div className="mt-8 flex justify-center">
-            <button
-              onClick={() => void handleManageBilling()}
-              className="flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-medium text-text-muted transition-colors hover:border-gold-dim hover:text-gold"
-            >
-              <CreditCard className="h-4 w-4" />
-              Manage Billing &amp; Invoices
-            </button>
-          </div>
-        )}
+        <PricingSection onTierClick={handleTierClick} />
       </section>
 
       {/* Email Capture */}
