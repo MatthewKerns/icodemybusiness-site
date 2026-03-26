@@ -26,6 +26,7 @@ export const updateSubscriptionStatus = mutation({
     userId: v.string(),
     status: v.string(),
     stripeSubscriptionId: v.optional(v.string()),
+    plan: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const subscription = await ctx.db
@@ -37,11 +38,14 @@ export const updateSubscriptionStatus = mutation({
       throw new ConvexError("Subscription not found");
     }
 
-    const updates: { status: string; stripeSubscriptionId?: string } = {
+    const updates: { status: string; stripeSubscriptionId?: string; plan?: string } = {
       status: args.status,
     };
     if (args.stripeSubscriptionId !== undefined) {
       updates.stripeSubscriptionId = args.stripeSubscriptionId;
+    }
+    if (args.plan !== undefined) {
+      updates.plan = args.plan;
     }
 
     await ctx.db.patch(subscription._id, updates);

@@ -1,11 +1,21 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { PricingTier } from "@/components/landing/PricingTier";
 import { EmailCapture } from "@/components/shared/EmailCapture";
 import { FAQAccordion } from "@/components/landing/FAQAccordion";
 import { CommunityBanner } from "@/components/landing/CommunityBanner";
+import { EmbeddedCheckoutDialog } from "@/components/subscribe/EmbeddedCheckoutDialog";
+import { CreditCard } from "lucide-react";
 
 const TIERS = [
   {
     name: "Starter",
+    plan: "starter",
     price: "$19.99",
     description: "Get started with AI workflows",
     features: [
@@ -17,6 +27,7 @@ const TIERS = [
   },
   {
     name: "Pro",
+    plan: "pro",
     price: "$34.99",
     description: "Scale your AI-powered business",
     recommended: true,
@@ -30,6 +41,7 @@ const TIERS = [
   },
   {
     name: "Enterprise",
+    plan: "enterprise",
     price: "$49.99",
     description: "Full-service AI transformation",
     features: [
@@ -66,6 +78,38 @@ const FAQ_ITEMS = [
 ];
 
 export default function SubscriptionsPage() {
+  const router = useRouter();
+  const { user, isSignedIn } = useUser();
+  const [checkoutPlan, setCheckoutPlan] = useState<string | null>(null);
+
+  const subscription = useQuery(
+    api.subscriptions.getActiveSubscription,
+    user?.id ? { userId: user.id } : "skip"
+  );
+
+  const handleManageBilling = useCallback(async () => {
+    const res = await fetch("/api/stripe/portal", { method: "POST" });
+    if (res.ok) {
+      const { url } = await res.json();
+      window.location.href = url;
+    }
+  }, []);
+
+  const handleTierClick = useCallback(
+    (plan: string) => {
+      if (!isSignedIn) {
+        router.push("/sign-in?redirect_url=/subscribe");
+        return;
+      }
+      if (subscription?.plan === plan || subscription) {
+        void handleManageBilling();
+        return;
+      }
+      setCheckoutPlan(plan);
+    },
+    [isSignedIn, subscription, router, handleManageBilling]
+  );
+
   return (
     <main
       id="main-content"
@@ -86,10 +130,47 @@ export default function SubscriptionsPage() {
       {/* Pricing Tiers */}
       <section className="mx-auto max-w-7xl py-12 lg:py-20">
         <div className="grid gap-8 md:grid-cols-3">
-          {TIERS.map((tier) => (
-            <PricingTier key={tier.name} {...tier} />
-          ))}
+          {TIERS.map((tier) => {
+            const isCurrentPlan =
+              subscription?.status === "active" &&
+              subscription?.plan === tier.plan;
+
+            return (
+              <div key={tier.name} className="relative">
+                {isCurrentPlan && (
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2">
+                    <span className="rounded-full border border-success bg-success/10 px-3 py-1 text-xs font-medium text-success">
+                      Current Plan
+                    </span>
+                  </div>
+                )}
+                <PricingTier
+                  {...tier}
+                  ctaLabel={
+                    isCurrentPlan
+                      ? "Manage Billing"
+                      : subscription
+                        ? "Switch Plan"
+                        : "Get Started"
+                  }
+                  onCtaClick={() => handleTierClick(tier.plan)}
+                />
+              </div>
+            );
+          })}
         </div>
+
+        {subscription && (
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={() => void handleManageBilling()}
+              className="flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-medium text-text-muted transition-colors hover:border-gold-dim hover:text-gold"
+            >
+              <CreditCard className="h-4 w-4" />
+              Manage Billing &amp; Invoices
+            </button>
+          </div>
+        )}
       </section>
 
       {/* Email Capture */}
@@ -115,6 +196,15 @@ export default function SubscriptionsPage() {
           <FAQAccordion items={FAQ_ITEMS} />
         </div>
       </section>
+
+      {/* Checkout Dialog */}
+      <EmbeddedCheckoutDialog
+        plan={checkoutPlan}
+        open={!!checkoutPlan}
+        onOpenChange={(open) => {
+          if (!open) setCheckoutPlan(null);
+        }}
+      />
     </main>
   );
 }

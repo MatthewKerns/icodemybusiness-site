@@ -10,6 +10,7 @@ interface PricingTierProps {
   recommended?: boolean;
   ctaHref?: string;
   ctaLabel?: string;
+  onCtaClick?: () => void;
 }
 
 export function PricingTier({
@@ -20,7 +21,15 @@ export function PricingTier({
   recommended = false,
   ctaHref = "#email-capture",
   ctaLabel = "Get Started",
+  onCtaClick,
 }: PricingTierProps) {
+  const ctaClasses = cn(
+    "mt-6 flex h-12 items-center justify-center rounded-lg font-medium transition-shadow",
+    recommended
+      ? "bg-gold text-black hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+      : "border border-border text-text-primary hover:border-gold-dim hover:text-gold"
+  );
+
   return (
     <div
       className={cn(
@@ -53,17 +62,15 @@ export function PricingTier({
         ))}
       </ul>
 
-      <Link
-        href={ctaHref}
-        className={cn(
-          "mt-6 flex h-12 items-center justify-center rounded-lg font-medium transition-shadow",
-          recommended
-            ? "bg-gold text-black hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
-            : "border border-border text-text-primary hover:border-gold-dim hover:text-gold"
-        )}
-      >
-        {ctaLabel}
-      </Link>
+      {onCtaClick ? (
+        <button onClick={onCtaClick} className={ctaClasses}>
+          {ctaLabel}
+        </button>
+      ) : (
+        <Link href={ctaHref} className={ctaClasses}>
+          {ctaLabel}
+        </Link>
+      )}
     </div>
   );
 }

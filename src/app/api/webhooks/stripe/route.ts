@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { convex } from "@/lib/convex-client";
 import { api } from "../../../../../convex/_generated/api";
 import { constructWebhookEvent } from "@/services/stripe";
+import { stripe } from "@/services/stripe";
+import { planFromPriceId } from "@/lib/stripe-plans";
 
 export const dynamic = "force-dynamic";
 
@@ -42,11 +44,21 @@ export async function POST(request: NextRequest) {
           );
         }
 
+        // Derive plan from the Stripe price ID
+        let plan = "pro"; // fallback
+        if (subscriptionId) {
+          const sub = await stripe.subscriptions.retrieve(subscriptionId);
+          const priceId = sub.items.data[0]?.price?.id;
+          if (priceId) {
+            plan = planFromPriceId(priceId);
+          }
+        }
+
         await convex.mutation(api.subscriptions.createSubscription, {
           userId,
           stripeCustomerId: customerId,
           stripeSubscriptionId: subscriptionId,
-          plan: "pro",
+          plan,
           status: "active",
         });
 
@@ -72,10 +84,22 @@ export async function POST(request: NextRequest) {
             : undefined;
 
         if (customerId && subscription.metadata?.userId) {
+          // Derive plan from the current price
+          const updatedPriceId = subscription.items.data[0]?.price?.id;
+          let updatedPlan: string | undefined;
+          if (updatedPriceId) {
+            try {
+              updatedPlan = planFromPriceId(updatedPriceId);
+            } catch {
+              console.warn(`Unknown price ID in subscription update: ${updatedPriceId}`);
+            }
+          }
+
           await convex.mutation(api.subscriptions.updateSubscriptionStatus, {
             userId: subscription.metadata.userId,
             status: subscription.status,
             stripeSubscriptionId: subscription.id,
+            plan: updatedPlan,
           });
 
           await convex.mutation(api.auditLog.logAuditEvent, {
