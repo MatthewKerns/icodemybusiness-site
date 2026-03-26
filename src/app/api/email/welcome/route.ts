@@ -3,24 +3,30 @@ import { auth } from "@clerk/nextjs/server";
 import { Resend } from "resend";
 import { render } from "@react-email/render";
 import { WelcomeEmail } from "@/emails/WelcomeEmail";
+import {
+  withErrorHandler,
+  AuthError,
+  ValidationError,
+  ApiError,
+  InternalError,
+} from "@/lib/api-error-handler";
 
-export async function POST(request: NextRequest) {
+export const POST = withErrorHandler(async (request: NextRequest) => {
   const { userId } = await auth();
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw new AuthError();
   }
 
   const body = await request.json();
   const { email, name } = body as { email: string; name?: string };
 
   if (!email || typeof email !== "string") {
-    return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    throw new ValidationError("Email is required");
   }
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.error("RESEND_API_KEY is not configured — skipping welcome email");
-    return NextResponse.json({ error: "Email service not configured" }, { status: 503 });
+    throw new ApiError("Email service not configured", 503, "SERVICE_UNAVAILABLE");
   }
 
   const resend = new Resend(apiKey);
@@ -36,9 +42,8 @@ export async function POST(request: NextRequest) {
   });
 
   if (error) {
-    console.error("Failed to send welcome email:", error.message, error.name);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    throw new InternalError(error.message);
   }
 
   return NextResponse.json({ id: data?.id });
-}
+});
