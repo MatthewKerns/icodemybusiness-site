@@ -69,6 +69,60 @@ export default defineSchema(
       .index("by_eventType", ["eventType"])
       .index("by_timestamp", ["timestamp"]),
 
+    // Projects table: stores client project records with status and timeline
+    projects: defineTable({
+      title: v.string(),
+      description: v.optional(v.string()),
+      clientId: v.string(),
+      status: v.string(),
+      progress: v.number(),
+      startDate: v.number(),
+      endDate: v.optional(v.number()),
+      createdAt: v.number(),
+    })
+      .index("by_clientId", ["clientId"])
+      .index("by_status", ["status"]),
+
+    // Milestones table: stores project milestones with ordering and status
+    milestones: defineTable({
+      projectId: v.id("projects"),
+      title: v.string(),
+      description: v.optional(v.string()),
+      status: v.string(),
+      dueDate: v.number(),
+      order: v.number(),
+      createdAt: v.number(),
+    })
+      .index("by_projectId", ["projectId"])
+      .index("by_projectId_order", ["projectId", "order"]),
+
+    // Deliverables table: stores project deliverable files with status tracking
+    deliverables: defineTable({
+      projectId: v.id("projects"),
+      milestoneId: v.optional(v.id("milestones")),
+      name: v.string(),
+      description: v.optional(v.string()),
+      fileId: v.optional(v.id("_storage")),
+      status: v.string(),
+      uploadedAt: v.optional(v.number()),
+      createdAt: v.number(),
+    })
+      .index("by_projectId", ["projectId"])
+      .index("by_milestoneId", ["milestoneId"]),
+
+    // APPEND-ONLY
+    // Activities table: immutable record of project events and updates
+    activities: defineTable({
+      projectId: v.id("projects"),
+      actorId: v.string(),
+      eventType: v.string(),
+      description: v.string(),
+      timestamp: v.number(),
+    })
+      .index("by_projectId", ["projectId"])
+      .index("by_projectId_timestamp", ["projectId", "timestamp"])
+      .index("by_timestamp", ["timestamp"]),
+
   },
   { schemaValidation: true }
 );
