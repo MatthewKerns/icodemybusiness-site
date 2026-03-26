@@ -8,6 +8,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { cn } from "@/lib/utils";
 import { CreditCard, LogOut, Menu, X } from "lucide-react";
+import { ConvexErrorBoundary } from "../shared/ConvexErrorBoundary";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -17,14 +18,18 @@ const NAV_LINKS = [
   { href: "/services", label: "Services" },
 ] as const;
 
-export function NavBar() {
-  const pathname = usePathname();
+/**
+ * Billing button component that uses Convex subscription query.
+ * Wrapped with ConvexErrorBoundary to gracefully hide on query errors.
+ */
+function BillingButtonCore({
+  variant = "desktop",
+  onMobileBillingClick,
+}: {
+  variant?: "desktop" | "mobile";
+  onMobileBillingClick?: () => void;
+}) {
   const { isSignedIn, user } = useUser();
-  const isHome = pathname === "/";
-  const [visible, setVisible] = useState(!isHome);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const hamburgerRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const subscription = useQuery(
     api.subscriptions.getActiveSubscription,
@@ -38,6 +43,62 @@ export function NavBar() {
       window.location.href = url;
     }
   }, []);
+
+  // Only show billing button if user is signed in AND has an active subscription
+  if (!isSignedIn || !subscription) {
+    return null;
+  }
+
+  if (variant === "desktop") {
+    return (
+      <button
+        onClick={() => void handleManageBilling()}
+        className="flex h-10 items-center gap-1.5 rounded-lg border border-border px-3 text-sm text-text-muted transition-colors hover:border-gold-dim hover:text-gold"
+        aria-label="Manage billing"
+      >
+        <CreditCard className="h-4 w-4" />
+        Billing
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => {
+        onMobileBillingClick?.();
+        void handleManageBilling();
+      }}
+      className="flex h-12 items-center justify-center gap-2 rounded-lg border border-border text-base font-medium text-text-muted transition-colors hover:text-gold"
+    >
+      <CreditCard className="h-5 w-5" />
+      Manage Billing
+    </button>
+  );
+}
+
+/**
+ * Billing button wrapped with ConvexErrorBoundary.
+ * Falls back to null (hides billing button) if subscription query fails.
+ */
+function BillingButton(props: {
+  variant?: "desktop" | "mobile";
+  onMobileBillingClick?: () => void;
+}) {
+  return (
+    <ConvexErrorBoundary fallback={null}>
+      <BillingButtonCore {...props} />
+    </ConvexErrorBoundary>
+  );
+}
+
+export function NavBar() {
+  const pathname = usePathname();
+  const { isSignedIn } = useUser();
+  const isHome = pathname === "/";
+  const [visible, setVisible] = useState(!isHome);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   // Listen for splash visibility events from SplashScreen
   useEffect(() => {
@@ -150,16 +211,7 @@ export function NavBar() {
             >
               Book a Call
             </Link>
-            {isSignedIn && subscription && (
-              <button
-                onClick={() => void handleManageBilling()}
-                className="flex h-10 items-center gap-1.5 rounded-lg border border-border px-3 text-sm text-text-muted transition-colors hover:border-gold-dim hover:text-gold"
-                aria-label="Manage billing"
-              >
-                <CreditCard className="h-4 w-4" />
-                Billing
-              </button>
-            )}
+            <BillingButton variant="desktop" />
             {isSignedIn && (
               <SignOutButton>
                 <button
@@ -236,18 +288,7 @@ export function NavBar() {
             >
               Book a Call
             </Link>
-            {isSignedIn && subscription && (
-              <button
-                onClick={() => {
-                  closeMobile();
-                  void handleManageBilling();
-                }}
-                className="flex h-12 items-center justify-center gap-2 rounded-lg border border-border text-base font-medium text-text-muted transition-colors hover:text-gold"
-              >
-                <CreditCard className="h-5 w-5" />
-                Manage Billing
-              </button>
-            )}
+            <BillingButton variant="mobile" onMobileBillingClick={closeMobile} />
             {isSignedIn && (
               <SignOutButton>
                 <button
