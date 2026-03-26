@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
 /**
- * Standard error response shape for API routes
+ * Standard error response shape for API routes.
+ *
+ * All API error responses follow this consistent structure to make
+ * client-side error handling predictable.
+ *
+ * @property error - Human-readable error message
+ * @property code - Optional error code for programmatic handling (e.g., "VALIDATION_ERROR")
+ * @property details - Optional additional details about the error (e.g., validation errors)
  */
 export interface ErrorResponse {
   error: string;
@@ -11,7 +18,17 @@ export interface ErrorResponse {
 }
 
 /**
- * Custom API error class with HTTP status code support
+ * Custom API error class with HTTP status code support.
+ *
+ * Base class for all API errors. Extends the native Error class with
+ * additional properties for HTTP status codes, error codes, and details.
+ * Use the specialized subclasses (ValidationError, AuthError, etc.) for
+ * common HTTP error scenarios.
+ *
+ * @param message - Human-readable error message
+ * @param statusCode - HTTP status code (default: 500)
+ * @param code - Optional error code for programmatic handling
+ * @param details - Optional additional error details
  */
 export class ApiError extends Error {
   constructor(
@@ -26,7 +43,13 @@ export class ApiError extends Error {
 }
 
 /**
- * Validation error for invalid input (400)
+ * Validation error for invalid input (400).
+ *
+ * Thrown when client input fails validation. The details parameter
+ * can contain specific validation errors for each field.
+ *
+ * @param message - Human-readable validation error message
+ * @param details - Optional validation details (e.g., field-level errors)
  */
 export class ValidationError extends ApiError {
   constructor(message: string, details?: unknown) {
@@ -36,7 +59,12 @@ export class ValidationError extends ApiError {
 }
 
 /**
- * Authentication error for missing or invalid auth (401)
+ * Authentication error for missing or invalid auth (401).
+ *
+ * Thrown when a request lacks valid authentication credentials.
+ * Use this for missing tokens, expired sessions, or invalid credentials.
+ *
+ * @param message - Human-readable auth error message (default: "Unauthorized")
  */
 export class AuthError extends ApiError {
   constructor(message: string = "Unauthorized") {
@@ -46,7 +74,12 @@ export class AuthError extends ApiError {
 }
 
 /**
- * Authorization error for insufficient permissions (403)
+ * Authorization error for insufficient permissions (403).
+ *
+ * Thrown when an authenticated user lacks permission to access a resource.
+ * Differs from AuthError (401) in that the user is authenticated but not authorized.
+ *
+ * @param message - Human-readable authorization error message (default: "Forbidden")
  */
 export class ForbiddenError extends ApiError {
   constructor(message: string = "Forbidden") {
@@ -56,7 +89,12 @@ export class ForbiddenError extends ApiError {
 }
 
 /**
- * Not found error for missing resources (404)
+ * Not found error for missing resources (404).
+ *
+ * Thrown when a requested resource does not exist. This could be
+ * a missing database record, file, or API endpoint.
+ *
+ * @param message - Human-readable not found message (default: "Resource not found")
  */
 export class NotFoundError extends ApiError {
   constructor(message: string = "Resource not found") {
@@ -66,7 +104,12 @@ export class NotFoundError extends ApiError {
 }
 
 /**
- * Rate limit error (429)
+ * Rate limit error (429).
+ *
+ * Thrown when a client exceeds the allowed request rate. This helps
+ * protect the API from abuse and ensures fair resource allocation.
+ *
+ * @param message - Human-readable rate limit message (default: "Too many requests. Please try again later.")
  */
 export class RateLimitError extends ApiError {
   constructor(message: string = "Too many requests. Please try again later.") {
@@ -76,7 +119,14 @@ export class RateLimitError extends ApiError {
 }
 
 /**
- * Internal server error (500)
+ * Internal server error (500).
+ *
+ * Thrown when an unexpected error occurs on the server. This indicates
+ * a problem with the server-side code or infrastructure, not client input.
+ * Details can include stack traces or error context for debugging.
+ *
+ * @param message - Human-readable error message (default: "Internal server error")
+ * @param details - Optional error details for debugging
  */
 export class InternalError extends ApiError {
   constructor(message: string = "Internal server error", details?: unknown) {
@@ -151,14 +201,31 @@ export function errorResponse(
 }
 
 /**
- * Checks if an error is an ApiError instance
+ * Type guard to check if an error is an ApiError instance.
+ *
+ * Useful for narrowing error types in catch blocks to access
+ * ApiError-specific properties like statusCode and code.
+ *
+ * @param error - Error to check
+ * @returns True if the error is an ApiError instance
  */
 export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError;
 }
 
 /**
- * Extracts error message from unknown error types
+ * Extracts a human-readable error message from unknown error types.
+ *
+ * Handles different error shapes that can be thrown in JavaScript:
+ *   - Error instances: Returns the message property
+ *   - String errors: Returns the string directly
+ *   - Other types: Returns a generic fallback message
+ *
+ * This helper centralizes error message extraction logic so it doesn't
+ * need to be repeated throughout the codebase.
+ *
+ * @param error - Error of unknown type
+ * @returns Human-readable error message string
  */
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
