@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 interface CalendlyEmbedProps {
   url: string;
@@ -24,7 +25,11 @@ function buildCalendlyUrl(base: string, email?: string, name?: string): string {
   return url.toString();
 }
 
-export function CalendlyEmbed({ url, email, name }: CalendlyEmbedProps) {
+/**
+ * Core CalendlyEmbed component (unwrapped)
+ * Exported for testing and cases where error boundaries are not needed
+ */
+export function CalendlyEmbedComponent({ url, email, name }: CalendlyEmbedProps) {
   const [state, setState] = useState<"pending" | "loading" | "loaded" | "error">("pending");
   const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -138,5 +143,36 @@ export function CalendlyEmbed({ url, email, name }: CalendlyEmbedProps) {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * CalendlyEmbed component wrapped with ErrorBoundary
+ * - ErrorBoundary: Catches unexpected errors in iframe loading/rendering
+ *
+ * Inline error handling is preserved for timeout and loading states,
+ * error boundary serves as a safety net for unexpected errors
+ */
+export function CalendlyEmbed(props: CalendlyEmbedProps) {
+  return (
+    <ErrorBoundary
+      fallback={
+        <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 rounded-xl border border-border bg-bg-secondary p-8 text-center">
+          <p className="text-sm text-text-secondary">
+            The booking calendar couldn&apos;t load. You can still schedule directly:
+          </p>
+          <a
+            href={props.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-gold px-6 py-3 font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+          >
+            Book directly on Calendly &rarr;
+          </a>
+        </div>
+      }
+    >
+      <CalendlyEmbedComponent {...props} />
+    </ErrorBoundary>
   );
 }
