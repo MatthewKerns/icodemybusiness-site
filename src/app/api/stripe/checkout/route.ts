@@ -2,22 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createCheckoutSession } from "@/services/stripe";
 import { priceIdForPlan } from "@/lib/stripe-plans";
+import {
+  withErrorHandler,
+  AuthError,
+  ValidationError,
+  InternalError,
+} from "@/lib/api-error-handler";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(request: NextRequest) {
+export const POST = withErrorHandler(async (request: NextRequest) => {
   const { userId } = await auth();
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw new AuthError();
   }
 
   const body = await request.json();
   const { plan } = body as { plan?: string };
 
   if (!plan || !["starter", "pro", "enterprise"].includes(plan)) {
-    return NextResponse.json(
-      { error: "Invalid plan. Must be starter, pro, or enterprise." },
-      { status: 400 }
+    throw new ValidationError(
+      "Invalid plan. Must be starter, pro, or enterprise."
     );
   }
 
@@ -25,10 +30,7 @@ export async function POST(request: NextRequest) {
   try {
     priceId = priceIdForPlan(plan);
   } catch {
-    return NextResponse.json(
-      { error: "Plan not configured. Please contact support." },
-      { status: 500 }
-    );
+    throw new InternalError("Plan not configured. Please contact support.");
   }
 
   const user = await currentUser();
@@ -45,4 +47,4 @@ export async function POST(request: NextRequest) {
   });
 
   return NextResponse.json({ clientSecret: session.client_secret });
-}
+});

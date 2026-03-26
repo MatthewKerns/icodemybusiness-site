@@ -3,13 +3,18 @@ import { auth } from "@clerk/nextjs/server";
 import { convex } from "@/lib/convex-client";
 import { api } from "../../../../../convex/_generated/api";
 import { stripe } from "@/services/stripe";
+import {
+  withErrorHandler,
+  AuthError,
+  NotFoundError,
+} from "@/lib/api-error-handler";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(request: NextRequest) {
+export const POST = withErrorHandler(async (request: NextRequest) => {
   const { userId } = await auth();
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw new AuthError();
   }
 
   const subscription = await convex.query(api.subscriptions.getActiveSubscription, {
@@ -17,10 +22,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (!subscription) {
-    return NextResponse.json(
-      { error: "No active subscription found" },
-      { status: 404 }
-    );
+    throw new NotFoundError("No active subscription found");
   }
 
   const origin = request.nextUrl.origin;
@@ -33,4 +35,4 @@ export async function POST(request: NextRequest) {
   });
 
   return NextResponse.json({ url: portalSession.url });
-}
+});

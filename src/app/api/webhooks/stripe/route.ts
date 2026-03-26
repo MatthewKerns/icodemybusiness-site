@@ -4,13 +4,18 @@ import { api } from "../../../../../convex/_generated/api";
 import { constructWebhookEvent } from "@/services/stripe";
 import { stripe } from "@/services/stripe";
 import { planFromPriceId } from "@/lib/stripe-plans";
+import {
+  withErrorHandler,
+  ValidationError,
+  InternalError,
+} from "@/lib/api-error-handler";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(request: NextRequest) {
+export const POST = withErrorHandler(async (request: NextRequest) => {
   const signature = request.headers.get("stripe-signature");
   if (!signature) {
-    return NextResponse.json({ error: "Missing signature" }, { status: 400 });
+    throw new ValidationError("Missing signature");
   }
 
   const body = await request.text();
@@ -19,9 +24,7 @@ export async function POST(request: NextRequest) {
   try {
     event = constructWebhookEvent(body, signature);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    console.error("Stripe webhook signature verification failed:", message);
-    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+    throw new ValidationError("Invalid signature");
   }
 
   try {
@@ -37,10 +40,8 @@ export async function POST(request: NextRequest) {
             : undefined;
 
         if (!userId || !customerId) {
-          console.error("Missing userId or customerId in checkout session");
-          return NextResponse.json(
-            { error: "Missing userId or customerId in session metadata" },
-            { status: 400 }
+          throw new ValidationError(
+            "Missing userId or customerId in session metadata"
           );
         }
 
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
             try {
               updatedPlan = planFromPriceId(updatedPriceId);
             } catch {
-              console.warn(`Unknown price ID in subscription update: ${updatedPriceId}`);
+              // Ignore unknown price IDs
             }
           }
 
@@ -142,13 +143,8 @@ export async function POST(request: NextRequest) {
         break;
     }
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    console.error(`Error processing Stripe event ${event?.type ?? "unknown"}:`, message);
-    return NextResponse.json(
-      { error: "Webhook handler failed" },
-      { status: 500 }
-    );
+    throw new InternalError("Webhook handler failed");
   }
 
   return NextResponse.json({ received: true }, { status: 200 });
-}
+});
