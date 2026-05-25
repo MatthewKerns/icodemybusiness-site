@@ -1,0 +1,54 @@
+name: Deploy apex page to GitHub Pages
+
+# Why this workflow exists:
+# The repo holds both the apex landing page (index.html) AND unrelated
+# scaffolding (Next.js src/, Convex backend, Python _legacy/api_gateway/venv/,
+# auto-claude assets, etc.). The default legacy Jekyll/full-tree Pages builder
+# either trips on node_modules symlinks or exceeds the artifact size limit when
+# uploading the whole repo. This workflow stages ONLY the static apex files
+# into _site/ and uploads that narrow artifact.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - CNAME
+      - .nojekyll
+      - .github/workflows/deploy-apex.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage Pages artifact
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          [ -f CNAME ] && cp CNAME _site/ || true
+          [ -f .nojekyll ] && cp .nojekyll _site/ || true
+          echo "Artifact contents:"
+          ls -la _site/
+
+      - uses: actions/configure-pages@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
