@@ -20,14 +20,15 @@
  */
 
 import {
-  FEATURED_TESTIMONIAL,
+  FEATURED_TESTIMONIALS,
   TESTIMONIALS,
   TESTIMONIAL_STATS,
   type Testimonial,
 } from "./testimonials-data";
 
 export interface TestimonialFeed {
-  featured: Testimonial;
+  /** The two big, photo-forward hero quotes. */
+  featured: Testimonial[];
   testimonials: Testimonial[];
   stats: typeof TESTIMONIAL_STATS;
   /** Where this data came from, so the UI can label drafts vs. live. */
@@ -52,7 +53,7 @@ export async function getTestimonialFeed(): Promise<TestimonialFeed> {
   }
 
   return {
-    featured: FEATURED_TESTIMONIAL,
+    featured: FEATURED_TESTIMONIALS,
     testimonials: TESTIMONIALS,
     stats: TESTIMONIAL_STATS,
     source: "local-draft",

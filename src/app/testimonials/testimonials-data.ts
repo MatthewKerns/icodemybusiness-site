@@ -32,19 +32,42 @@ export interface Testimonial {
   status: TestimonialStatus;
   /** Headline result, surfaced as a chip on the card. */
   highlight?: string;
+  /**
+   * Path to the person's photo (e.g. "/testimonials/dana-whitfield.jpg",
+   * served from /public). Left undefined for drafts — the UI renders a gold
+   * initials avatar in the same slot until a real headshot is dropped in.
+   */
+  image?: string;
 }
 
-/** The single hero quote — our sharpest articulation of the promise. */
-export const FEATURED_TESTIMONIAL: Testimonial = {
-  quote:
-    "I came to Matthew with six spreadsheets, three standing meetings, and a plan to hire two people I couldn't really afford. Eight weeks later I had one dashboard that ran my whole operation, the meetings were gone, and I never made the hires. He charged me less than my last agency's *invoice* and delivered more than their last three combined. This is the first time technology has felt like leverage instead of overhead.",
-  author: "Dana Whitfield",
-  role: "Founder & CEO",
-  company: "Meridian Field Services",
-  rating: 5,
-  status: "draft",
-  highlight: "Replaced 2 planned hires + 6 spreadsheets",
-};
+/**
+ * The two hero quotes — our sharpest articulations of the promise. These get
+ * the big, photo-forward showcase treatment at the top of the page.
+ */
+export const FEATURED_TESTIMONIALS: Testimonial[] = [
+  {
+    quote:
+      "I came to Matthew with six spreadsheets, three standing meetings, and a plan to hire two people I couldn't really afford. Eight weeks later I had one dashboard that ran my whole operation, the meetings were gone, and I never made the hires. He charged me less than my last agency's invoice and delivered more than their last three combined. This is the first time technology has felt like leverage instead of overhead.",
+    author: "Dana Whitfield",
+    role: "Founder & CEO",
+    company: "Meridian Field Services",
+    rating: 5,
+    status: "draft",
+    highlight: "Replaced 2 planned hires + 6 spreadsheets",
+    image: undefined, // /testimonials/dana-whitfield.jpg
+  },
+  {
+    quote:
+      "I've hired big-name agencies and burned six figures learning that bigger invoices don't mean better software. Matthew shipped working product every single Friday, explained every decision in plain English, and built something my team actually loves using. He didn't just deliver a project — he became the engineer I wish I'd had from day one. I tell every founder I know: start here.",
+    author: "Marcus Bell",
+    role: "Managing Partner",
+    company: "Bell + Co. Digital",
+    rating: 5,
+    status: "draft",
+    highlight: "Shipped working software every Friday",
+    image: undefined, // /testimonials/marcus-bell.jpg
+  },
+];
 
 /** Supporting wall of proof. Each maps to a real capability we sell. */
 export const TESTIMONIALS: Testimonial[] = [
@@ -61,9 +84,9 @@ export const TESTIMONIALS: Testimonial[] = [
   {
     quote:
       "The process audit paid for itself before we wrote a single line of code. He mapped 23 workflows and found $47K a year we were quietly burning on work software could do. Then he automated the top three in a month. I've worked with $300/hr firms that never once told me the truth this plainly.",
-    author: "Marcus Bell",
+    author: "Sofia Ndiaye",
     role: "Managing Partner",
-    company: "Bell + Co. Digital",
+    company: "Atlas Creative Group",
     rating: 5,
     status: "draft",
     highlight: "$47K/yr in waste found in 2 weeks",
@@ -113,6 +136,6 @@ export const TESTIMONIALS: Testimonial[] = [
 /** Aggregate stats — also recalibrated by the mango sync as quotes verify. */
 export const TESTIMONIAL_STATS = {
   averageRating: 5.0,
-  totalReviews: TESTIMONIALS.length + 1,
+  totalReviews: TESTIMONIALS.length + FEATURED_TESTIMONIALS.length,
   wouldRecommend: 100,
 } as const;

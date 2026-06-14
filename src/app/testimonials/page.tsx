@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Star, Quote, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -57,6 +58,77 @@ function StarRow({ rating }: { rating: number }) {
         />
       ))}
     </div>
+  );
+}
+
+function initialsFor(name: string): string {
+  return name
+    .split(/\s+/)
+    .map((w) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+/**
+ * Photo slot for a person. Renders the real headshot when `image` is set;
+ * otherwise a gold initials avatar fills the exact same space so the layout
+ * is photo-ready the moment a real picture is dropped into /public.
+ */
+function Avatar({ name, image }: { name: string; image?: string }) {
+  return (
+    <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-border-gold bg-bg-tertiary">
+      {image ? (
+        <Image
+          src={image}
+          alt={`Portrait of ${name}`}
+          fill
+          className="object-cover"
+          sizes="(min-width: 768px) 7rem, 6rem"
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center">
+          <span className="font-accent text-2xl font-bold text-gold md:text-3xl">
+            {initialsFor(name)}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Big, photo-forward hero testimonial. */
+function BigTestimonial({ t }: { t: Testimonial }) {
+  return (
+    <figure className="flex h-full flex-col gap-6 rounded-2xl border border-border-gold bg-bg-secondary p-8 transition-shadow duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.15)] md:p-10">
+      <div className="flex items-center gap-5">
+        <div className="w-24 shrink-0 md:w-28">
+          <Avatar name={t.author} image={t.image} />
+        </div>
+        <div className="min-w-0">
+          <StarRow rating={t.rating} />
+          <p className="mt-2 text-base font-semibold text-text-primary">
+            {t.author}
+          </p>
+          <p className="truncate text-sm text-text-dim">
+            {t.role}
+            {t.company ? ` · ${t.company}` : ""}
+          </p>
+        </div>
+      </div>
+
+      {t.highlight && (
+        <span className="inline-flex w-fit rounded-full border border-border-gold bg-gold-glow px-3 py-1 font-accent text-xs text-gold">
+          {t.highlight}
+        </span>
+      )}
+
+      <Quote className="h-8 w-8 shrink-0 text-gold" aria-hidden />
+      <blockquote className="text-lg leading-relaxed text-text-primary md:text-xl">
+        &ldquo;{t.quote}&rdquo;
+      </blockquote>
+    </figure>
   );
 }
 
@@ -159,26 +231,13 @@ export default async function TestimonialsPage() {
             </div>
           </section>
 
-          {/* Featured testimonial */}
+          {/* Two big, photo-forward featured testimonials */}
           <section className="pb-12 md:pb-20">
-            <figure className="mx-auto max-w-4xl rounded-2xl border border-border-gold bg-bg-secondary p-8 md:p-12 animate-pulse-glow">
-              <Quote className="h-10 w-10 text-gold" aria-hidden />
-              <blockquote className="mt-6 text-xl leading-relaxed text-text-primary md:text-2xl">
-                &ldquo;{featured.quote}&rdquo;
-              </blockquote>
-              <figcaption className="mt-8 flex flex-wrap items-center justify-between gap-4">
-                <div>
-                  <p className="text-base font-semibold text-text-primary">
-                    {featured.author}
-                  </p>
-                  <p className="text-sm text-text-dim">
-                    {featured.role}
-                    {featured.company ? ` · ${featured.company}` : ""}
-                  </p>
-                </div>
-                <StarRow rating={featured.rating} />
-              </figcaption>
-            </figure>
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
+              {featured.map((t) => (
+                <BigTestimonial key={t.author} t={t} />
+              ))}
+            </div>
           </section>
 
           {/* Wall of testimonials */}
