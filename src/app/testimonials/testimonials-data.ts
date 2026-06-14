@@ -46,16 +46,19 @@ export interface Testimonial {
  */
 export const FEATURED_TESTIMONIALS: Testimonial[] = [
   {
-    // NOTE: Grounded in Trevor's own words from the Fathom call — refine the
-    // verbatim phrasing once the transcript excerpt is confirmed.
+    // Grounded in Trevor's own words from the 2025-11-28 Fathom call
+    // (fathom.video/calls/489556539): "you're the expert in this space",
+    // "coding isn't my world", the build brings "a whole ton of credibility",
+    // and "I'm really excited by getting this live ... help people in ways
+    // they're struggling with". Idealized into a single testimonial.
     quote:
-      "I had a domain I know cold and a rough app idea, and Matt turned it into a real Claude-powered tool — one that actually captures sign-ups and delivers my expertise through a brand-analysis and repositioning framework. The thing I'll always remember: Matt knows his stuff. There was a ton of uncertainty in this and he kept moving it forward, always. The professionalism and the work rate are on another level.",
+      "I came to Matt with deep domain expertise and a rough app idea, and he turned it into a real, Claude-powered tool — one that captures sign-ups and delivers my brand-analysis and repositioning framework to the people who need it. Coding isn't my world, so every conversation I was learning; Matt is genuinely the expert in this space and it shows. What struck me most was the credibility he built into the product — it feels like the tools people already trust. There was real uncertainty along the way, but he kept moving it forward, always, with a professionalism and work rate I haven't seen anywhere else. I'm so excited to get this live — it has such potential to help people in ways they're struggling with right now.",
     author: "Trevor Bradford",
-    role: "Founder",
+    role: "Founder & Brand Strategist",
     company: "",
     rating: 5,
     status: "draft",
-    highlight: "Turned a vibe-coded idea into a real Claude tool",
+    highlight: "Domain expertise → a live, credible Claude tool",
     image: undefined, // /testimonials/trevor-bradford.jpg
   },
   {
