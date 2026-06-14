@@ -52,24 +52,24 @@ export const FEATURED_TESTIMONIALS: Testimonial[] = [
     // and "I'm really excited by getting this live ... help people in ways
     // they're struggling with". Idealized into a single testimonial.
     quote:
-      "I came to Matt with deep domain expertise and a rough app idea, and he turned it into a real, Claude-powered tool — one that captures sign-ups and delivers my brand-analysis and repositioning framework to the people who need it. Coding isn't my world, so every conversation I was learning; Matt is genuinely the expert in this space and it shows. What struck me most was the credibility he built into the product — it feels like the tools people already trust. There was real uncertainty along the way, but he kept moving it forward, always, with a professionalism and work rate I haven't seen anywhere else. I'm so excited to get this live — it has such potential to help people in ways they're struggling with right now.",
+      "I came to Matt with deep domain expertise and a rough app idea, and he turned it into a real, Claude-powered tool — one that captures sign-ups and delivers my brand-analysis and repositioning framework to the people who need it. What made the difference is that Matt isn't only a developer: he's run his own private-label ecommerce brand, so he actually understood my world. That rare combination of ecommerce owner and software developer cut months off the path to a profitable product. Coding isn't my world, so every conversation I was learning — Matt is genuinely the expert in this space, right down to the credibility he built into the product. There was real uncertainty along the way, but he kept moving it forward, always, with a professionalism and work rate I haven't seen anywhere else. I'm so excited to get this live.",
     author: "Trevor Bradford",
-    role: "Founder & Brand Strategist",
+    role: "Ecommerce Brand Owner & Founder Advisor",
     company: "",
     rating: 5,
     status: "draft",
-    highlight: "Domain expertise → a live, credible Claude tool",
+    highlight: "Ecommerce + dev combo cut months off launch",
     image: undefined, // /testimonials/trevor-bradford.jpg
   },
   {
     quote:
-      "Ten years ago I was a professional software developer myself, so I don't hand out praise like this lightly. Matt is the individual contributor every team wishes they had — give him a simple target and he stays on task and on point with little to no instruction. He thinks outside the box and skates to where the puck is going, not where it is: always on top of the latest releases and what's happening in the space, and he turns that into a real edge for the project. And he's a massive value-add beyond the code — he lifts the morale of the whole team. A true leader who encourages people and asks the right questions so we all grow together toward the objective.",
+      "Ten years ago I was a professional software developer myself, so I don't hand out praise like this lightly. And as an ecommerce brand owner who now advises other founders, I can tell you Matt's edge is genuinely rare: he's run his own private-label brand and he can build the software — and that combination massively shortened our timeline to a profitable product. Give him a simple target and he stays on task and on point with little to no instruction. He thinks outside the box and skates to where the puck is going, not where it is — always on top of the latest releases and what's happening in the space. And he's a massive value-add beyond the code: he lifts the morale of the whole team and is a true leader who asks the right questions so we all grow together toward the objective.",
     author: "Andrew Erickson",
-    role: "Founder · Former Software Engineer",
+    role: "Ecommerce Brand Owner & Advisor · Former Software Engineer",
     company: "",
     rating: 5,
     status: "draft",
-    highlight: "On-target IC who skates to where the puck's going",
+    highlight: "Private-label + dev = faster path to profit",
     image: undefined, // /testimonials/andrew-erickson.jpg
   },
 ];
