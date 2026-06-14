@@ -63,13 +63,13 @@ export const FEATURED_TESTIMONIALS: Testimonial[] = [
   },
   {
     quote:
-      "Matt is the rare engineer who's as sharp on the business as he is on the build. He listened, asked the questions no one else thought to ask, and shipped something I could actually put in front of customers. Every conversation moved the project forward. I've stopped looking for a developer — I just call Matt.",
+      "Ten years ago I was a professional software developer myself, so I don't hand out praise like this lightly. Matt is the individual contributor every team wishes they had — give him a simple target and he stays on task and on point with little to no instruction. He thinks outside the box and skates to where the puck is going, not where it is: always on top of the latest releases and what's happening in the space, and he turns that into a real edge for the project. And he's a massive value-add beyond the code — he lifts the morale of the whole team. A true leader who encourages people and asks the right questions so we all grow together toward the objective.",
     author: "Andrew Erickson",
-    role: "Founder",
+    role: "Founder · Former Software Engineer",
     company: "",
     rating: 5,
     status: "draft",
-    highlight: "Business-savvy engineering, shipped fast",
+    highlight: "On-target IC who skates to where the puck's going",
     image: undefined, // /testimonials/andrew-erickson.jpg
   },
 ];
