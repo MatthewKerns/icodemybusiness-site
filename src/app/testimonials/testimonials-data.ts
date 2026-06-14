@@ -46,26 +46,28 @@ export interface Testimonial {
  */
 export const FEATURED_TESTIMONIALS: Testimonial[] = [
   {
+    // NOTE: Grounded in Trevor's own words from the Fathom call — refine the
+    // verbatim phrasing once the transcript excerpt is confirmed.
     quote:
-      "I came to Matthew with six spreadsheets, three standing meetings, and a plan to hire two people I couldn't really afford. Eight weeks later I had one dashboard that ran my whole operation, the meetings were gone, and I never made the hires. He charged me less than my last agency's invoice and delivered more than their last three combined. This is the first time technology has felt like leverage instead of overhead.",
-    author: "Dana Whitfield",
-    role: "Founder & CEO",
-    company: "Meridian Field Services",
+      "I had a domain I know cold and a rough app idea, and Matt turned it into a real Claude-powered tool — one that actually captures sign-ups and delivers my expertise through a brand-analysis and repositioning framework. The thing I'll always remember: Matt knows his stuff. There was a ton of uncertainty in this and he kept moving it forward, always. The professionalism and the work rate are on another level.",
+    author: "Trevor Bradford",
+    role: "Founder",
+    company: "",
     rating: 5,
     status: "draft",
-    highlight: "Replaced 2 planned hires + 6 spreadsheets",
-    image: undefined, // /testimonials/dana-whitfield.jpg
+    highlight: "Turned a vibe-coded idea into a real Claude tool",
+    image: undefined, // /testimonials/trevor-bradford.jpg
   },
   {
     quote:
-      "I've hired big-name agencies and burned six figures learning that bigger invoices don't mean better software. Matthew shipped working product every single Friday, explained every decision in plain English, and built something my team actually loves using. He didn't just deliver a project — he became the engineer I wish I'd had from day one. I tell every founder I know: start here.",
-    author: "Marcus Bell",
-    role: "Managing Partner",
-    company: "Bell + Co. Digital",
+      "Matt is the rare engineer who's as sharp on the business as he is on the build. He listened, asked the questions no one else thought to ask, and shipped something I could actually put in front of customers. Every conversation moved the project forward. I've stopped looking for a developer — I just call Matt.",
+    author: "Andrew Erickson",
+    role: "Founder",
+    company: "",
     rating: 5,
     status: "draft",
-    highlight: "Shipped working software every Friday",
-    image: undefined, // /testimonials/marcus-bell.jpg
+    highlight: "Business-savvy engineering, shipped fast",
+    image: undefined, // /testimonials/andrew-erickson.jpg
   },
 ];
 
