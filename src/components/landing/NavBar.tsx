@@ -18,6 +18,9 @@ const NAV_LINKS = [
   { href: "/services", label: "Services" },
 ] as const;
 
+// Primary CTA — free 15-minute intro call
+const CTA_LINK = { href: "/book", label: "Book a Free Call" } as const;
+
 /**
  * Billing button component that uses Convex subscription query.
  * Wrapped with ConvexErrorBoundary to gracefully hide on query errors.
@@ -206,10 +209,10 @@ export function NavBar() {
           {/* Desktop CTA + Sign Out */}
           <div className="hidden items-center gap-4 md:flex">
             <Link
-              href="/consulting#booking"
+              href={CTA_LINK.href}
               className="rounded-lg bg-gold px-5 py-2.5 text-sm font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
             >
-              Book a Call
+              {CTA_LINK.label}
             </Link>
             <BillingButton variant="desktop" />
             {isSignedIn && (
@@ -282,11 +285,11 @@ export function NavBar() {
 
           <div className="flex flex-col gap-3 p-4">
             <Link
-              href="/consulting#booking"
+              href={CTA_LINK.href}
               onClick={closeMobile}
               className="flex h-12 items-center justify-center rounded-lg bg-gold text-base font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
             >
-              Book a Call
+              {CTA_LINK.label}
             </Link>
             <BillingButton variant="mobile" onMobileBillingClick={closeMobile} />
             {isSignedIn && (
