@@ -21,7 +21,7 @@ const Top3IssuesAgent = dynamic(
 function HeroContent() {
   return (
     <>
-      <h2 className="text-h1 font-bold text-text-primary">
+      <h2 className="text-h1 font-semibold text-text-primary">
         Premium Consulting &amp; AI Automation
       </h2>
       <p className="mt-4 max-w-2xl text-text-muted">

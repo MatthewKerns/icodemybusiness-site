@@ -86,6 +86,7 @@ module.exports = {
       },
       fontFamily: {
         body: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
+        display: ["var(--font-eb-garamond)", "EB Garamond", "Georgia", "serif"],
         accent: ["var(--font-jetbrains)", "JetBrains Mono", "monospace"],
       },
       fontSize: {

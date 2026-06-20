@@ -56,6 +56,18 @@
     @apply bg-bg-primary text-text-primary antialiased font-body min-h-full;
   }
 
+  /* Headings use the display serif (EB Garamond); body stays Inter.
+     Explicit font-* utilities (e.g. the splash's font-body) still override this. */
+  h1,
+  h2,
+  h3,
+  .text-display,
+  .text-h1,
+  .text-h2,
+  .text-h3 {
+    font-family: var(--font-eb-garamond), "EB Garamond", Georgia, serif;
+  }
+
   *:focus-visible {
     @apply outline-none ring-2 ring-blue-light ring-offset-2 ring-offset-bg-primary;
   }
