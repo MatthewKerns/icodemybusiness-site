@@ -35,6 +35,19 @@ export const createLead = mutation({
       .first();
 
     if (existing) {
+      // Re-link the existing lead to the current session / Clerk user so that
+      // access checks (keyed on these) succeed for returning visitors whose
+      // email is already on file but whose browser session has changed.
+      const patch: { sessionId?: string; clerkUserId?: string } = {};
+      if (args.sessionId && args.sessionId !== existing.sessionId) {
+        patch.sessionId = args.sessionId;
+      }
+      if (args.clerkUserId && args.clerkUserId !== existing.clerkUserId) {
+        patch.clerkUserId = args.clerkUserId;
+      }
+      if (Object.keys(patch).length > 0) {
+        await ctx.db.patch(existing._id, patch);
+      }
       return existing._id;
     }
 
@@ -63,6 +76,18 @@ export const getLeadBySessionId = query({
     return await ctx.db
       .query("leads")
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
+      .first();
+  },
+});
+
+export const getLeadByClerkUserId = query({
+  args: {
+    clerkUserId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("leads")
+      .withIndex("by_clerkUserId", (q) => q.eq("clerkUserId", args.clerkUserId))
       .first();
   },
 });

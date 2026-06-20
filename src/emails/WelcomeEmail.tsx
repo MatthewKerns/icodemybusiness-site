@@ -71,7 +71,7 @@ export function WelcomeEmail({ email, name }: WelcomeEmailProps) {
               </Text>
             </Section>
 
-            <Button style={ctaButton} href={`${siteUrl}/free-resources`}>
+            <Button style={ctaButton} href={`${siteUrl}/free-tools`}>
               Access Free Tools
             </Button>
 

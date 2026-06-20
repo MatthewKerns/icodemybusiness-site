@@ -29,7 +29,8 @@ export default defineSchema(
     })
       .index("by_email", ["email"])
       .index("by_source", ["source"])
-      .index("by_sessionId", ["sessionId"]),
+      .index("by_sessionId", ["sessionId"])
+      .index("by_clerkUserId", ["clerkUserId"]),
 
     // Page views table: tracks page visits with attribution
     pageViews: defineTable({
