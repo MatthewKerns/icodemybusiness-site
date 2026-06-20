@@ -1,39 +1,106 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
+import { AlertTriangle, Check, Download } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { FileText, BarChart3, ClipboardCheck } from "lucide-react";
+import {
+  FileText,
+  BarChart3,
+  ClipboardCheck,
+  Factory,
+  HardDrive,
+  CloudUpload,
+} from "lucide-react";
+
+export type ResourceCategory = "builders" | "founders";
+export type ResourceDelivery = "download" | "email" | "external";
 
 export interface FreeResource {
   icon: LucideIcon;
   toolName: string;
+  /** Short curiosity-inducing phrase shown under the name in larger type. */
+  tagline: string;
   description: string;
   href: string;
+  category: ResourceCategory;
+  /** How the user obtains it. Defaults to "email" (lead-gated). */
+  delivery?: ResourceDelivery;
+  /** Optional inline safety note (e.g. tools that can delete files). */
+  disclaimer?: string;
 }
 
-export const FREE_RESOURCES: FreeResource[] = [
+export const BUILDER_RESOURCES: FreeResource[] = [
   {
-    toolName: "EOS System Spreadsheet Skill",
+    toolName: "Disk Space Optimizer",
+    tagline: "Your Mac is hoarding gigabytes. This reclaims them — safely.",
+    description:
+      "A safety-gated loop that measures, then proposes cleanups across Docker, Downloads, and caches — archiving to Drive and deleting only what you approve. One real run freed 12 GB.",
+    icon: HardDrive,
+    href: "/downloads/disk-space-optimizer-skill.zip",
+    category: "builders",
+    delivery: "download",
+    disclaimer: "Can delete files — read the included disclaimer first.",
+  },
+  {
+    toolName: "Google Drive Archiver",
+    tagline: "Move it to the cloud before you delete it.",
+    description:
+      "Backs up Downloads, screenshots, and recordings to your own Google Drive — and removes the local copy only after the upload is verified. Your keys, your Drive.",
+    icon: CloudUpload,
+    href: "/downloads/google-drive-archiver-skill.zip",
+    category: "builders",
+    delivery: "download",
+    disclaimer: "Can delete files — read the included disclaimer first.",
+  },
+  {
+    toolName: "Feature Factory + Best Practices",
+    tagline: "Ship features like a ten-person engineering team.",
+    description:
+      "Six Claude Code orchestrator skills (arch, func, errors, observability, review, docs) plus a complete software-engineering reference — foundations to production readiness.",
+    icon: Factory,
+    href: "https://github.com/MatthewKerns/software-development-best-practices-guide",
+    category: "builders",
+    delivery: "external",
+  },
+];
+
+export const FOUNDER_RESOURCES: FreeResource[] = [
+  {
+    toolName: "EOS System Spreadsheet",
+    tagline: "Run your whole company on one operating system.",
     description:
       "Organize your business with the Entrepreneurial Operating System framework.",
     icon: FileText,
     href: "#eos-spreadsheet",
+    category: "founders",
+    delivery: "email",
   },
   {
-    toolName: "Habits Tracker Management Skill",
+    toolName: "Habits Tracker",
+    tagline: "Small daily habits, compounding into real growth.",
     description:
       "Build and track productive habits that compound into business growth.",
     icon: BarChart3,
     href: "#habits-tracker",
+    category: "founders",
+    delivery: "email",
   },
   {
-    toolName: "Client Delivery / Work Tracking Skill",
+    toolName: "Client Delivery Tracker",
+    tagline: "Never let a client deliverable slip through the cracks.",
     description:
       "Keep projects on track with structured delivery and progress tracking.",
     icon: ClipboardCheck,
     href: "#client-delivery",
+    category: "founders",
+    delivery: "email",
   },
+];
+
+/** Combined list, kept for backward-compatible consumers (e.g. EmailCapture). */
+export const FREE_RESOURCES: FreeResource[] = [
+  ...BUILDER_RESOURCES,
+  ...FOUNDER_RESOURCES,
 ];
 
 interface FreeResourceCardProps {
@@ -44,6 +111,12 @@ interface FreeResourceCardProps {
   ctaHref: string;
   onCtaClick?: () => void;
   downloaded?: boolean;
+  /** Curiosity phrase shown prominently under the name. */
+  tagline?: string;
+  /** Controls the CTA: direct download, external link, or email-gated (default). */
+  delivery?: ResourceDelivery;
+  /** Optional inline safety note. */
+  disclaimer?: string;
 }
 
 export function FreeResourceCard({
@@ -54,53 +127,90 @@ export function FreeResourceCard({
   ctaHref,
   onCtaClick,
   downloaded = false,
+  tagline,
+  delivery = "email",
+  disclaimer,
 }: FreeResourceCardProps) {
   return (
     <div
       className={cn(
-        "rounded-xl border border-border bg-bg-secondary p-4 transition-all hover:border-gold-dim hover:shadow-[0_0_20px_rgba(212,175,55,0.15)]"
+        "flex h-full flex-col rounded-xl border border-border bg-bg-secondary p-5 transition-all",
+        "hover:border-gold-dim hover:shadow-[0_0_24px_rgba(212,175,55,0.15)]"
       )}
     >
-      <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-bg-tertiary">
-          <Icon className="h-5 w-5 text-gold" />
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-bg-tertiary">
+          <Icon className="h-6 w-6 text-gold" aria-hidden="true" />
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h4 className="text-sm font-medium text-text-primary">
-              {toolName}
-            </h4>
-            <span
-              className="rounded bg-gold/10 px-1.5 py-0.5 text-xs font-medium text-gold"
-              aria-label="Free tool"
-            >
-              Free
-            </span>
-          </div>
-          <p className="mt-1 text-xs text-text-muted">{description}</p>
-        </div>
+        <span
+          className="rounded bg-gold/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-gold"
+          aria-label="Free tool"
+        >
+          Free
+        </span>
       </div>
 
-      {downloaded ? (
-        <div className="mt-3 flex items-center gap-1.5 text-sm text-success">
-          <Check className="h-4 w-4" aria-hidden="true" />
-          Sent to email
-        </div>
-      ) : onCtaClick ? (
-        <button
-          onClick={onCtaClick}
-          className="mt-3 inline-flex min-h-[44px] items-center text-sm font-medium text-blue transition-colors hover:text-blue-light"
-        >
-          {ctaLabel} →
-        </button>
-      ) : (
-        <a
-          href={ctaHref}
-          className="mt-3 inline-flex min-h-[44px] items-center text-sm font-medium text-blue transition-colors hover:text-blue-light"
-        >
-          {ctaLabel} &rarr;
-        </a>
+      {/* Skill name — larger letters */}
+      <h3 className="mt-4 text-xl font-bold leading-tight text-text-primary">
+        {toolName}
+      </h3>
+
+      {/* Curiosity-inducing phrase */}
+      {tagline && (
+        <p className="mt-1.5 text-sm font-medium text-gold-light">{tagline}</p>
       )}
+
+      <p className="mt-2 text-xs leading-relaxed text-text-muted">
+        {description}
+      </p>
+
+      {disclaimer && (
+        <p className="mt-3 flex items-start gap-1.5 text-[11px] leading-snug text-warning">
+          <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
+          <span>{disclaimer}</span>
+        </p>
+      )}
+
+      <div className="mt-auto pt-4">
+        {delivery === "download" ? (
+          <a
+            href={ctaHref}
+            download
+            className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-blue transition-colors hover:text-blue-light"
+          >
+            <Download className="h-4 w-4" aria-hidden="true" />
+            {ctaLabel}
+          </a>
+        ) : delivery === "external" ? (
+          <a
+            href={ctaHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-[44px] items-center text-sm font-semibold text-blue transition-colors hover:text-blue-light"
+          >
+            {ctaLabel} &rarr;
+          </a>
+        ) : downloaded ? (
+          <div className="flex items-center gap-1.5 text-sm text-success">
+            <Check className="h-4 w-4" aria-hidden="true" />
+            Sent to email
+          </div>
+        ) : onCtaClick ? (
+          <button
+            onClick={onCtaClick}
+            className="inline-flex min-h-[44px] items-center text-sm font-semibold text-blue transition-colors hover:text-blue-light"
+          >
+            {ctaLabel} →
+          </button>
+        ) : (
+          <a
+            href={ctaHref}
+            className="inline-flex min-h-[44px] items-center text-sm font-semibold text-blue transition-colors hover:text-blue-light"
+          >
+            {ctaLabel} &rarr;
+          </a>
+        )}
+      </div>
     </div>
   );
 }

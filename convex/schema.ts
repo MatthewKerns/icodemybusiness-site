@@ -123,6 +123,93 @@ export default defineSchema(
       .index("by_projectId_timestamp", ["projectId", "timestamp"])
       .index("by_timestamp", ["timestamp"]),
 
+    // HUBSPOT INTEGRATION POINT: sync conversation summary + lead data on completion
+    // Conversations table: stores Retell AI conversation records
+    conversations: defineTable({
+      retellCallId: v.string(),
+      leadId: v.optional(v.id("leads")),
+      visitorEmail: v.optional(v.string()),
+      visitorName: v.optional(v.string()),
+      visitorPhone: v.optional(v.string()),
+      source: v.optional(v.string()),
+      status: v.string(), // "active" | "completed" | "abandoned" | "error"
+      modality: v.string(), // "text" | "voice"
+      agentId: v.string(),
+      summary: v.optional(v.string()),
+      painPoints: v.optional(v.array(v.string())),
+      qualificationScore: v.optional(v.number()),
+      outcome: v.optional(v.string()), // "booked" | "roadmap_requested" | "free_tools" | "low_intent" | "abandoned" | "error"
+      roadmapRequested: v.boolean(),
+      roadmapStatus: v.optional(v.string()), // "pending" | "in_progress" | "sent"
+      bookingEmailSent: v.boolean(),
+      durationSeconds: v.optional(v.number()),
+      recordingUrl: v.optional(v.string()),
+      publicLogUrl: v.optional(v.string()),
+      startedAt: v.number(),
+      completedAt: v.optional(v.number()),
+    })
+      .index("by_retellCallId", ["retellCallId"])
+      .index("by_leadId", ["leadId"])
+      .index("by_status", ["status"])
+      .index("by_outcome", ["outcome"])
+      .index("by_roadmapStatus", ["roadmapStatus"]),
+
+    // Conversation messages table: stores individual messages from Retell conversations
+    conversationMessages: defineTable({
+      conversationId: v.id("conversations"),
+      role: v.string(), // "agent" | "visitor"
+      content: v.string(),
+      timestamp: v.number(),
+    })
+      .index("by_conversationId", ["conversationId"])
+      .index("by_conversationId_timestamp", ["conversationId", "timestamp"]),
+
+    // Native agent sessions (Top 3 Issues + future first-party agents)
+    agentSessions: defineTable({
+      agentKind: v.string(), // "top3-issues" for now
+      sessionId: v.string(), // client-generated, stable across anon visits
+      leadId: v.optional(v.id("leads")),
+      visitorEmail: v.optional(v.string()),
+      visitorName: v.optional(v.string()),
+      status: v.string(), // "active" | "completed" | "abandoned"
+      top3Issues: v.optional(
+        v.array(
+          v.object({
+            title: v.string(),
+            severity: v.string(), // "low" | "medium" | "high"
+            evidence: v.string(),
+          })
+        )
+      ),
+      fileIds: v.array(v.id("_storage")),
+      fileMeta: v.array(
+        v.object({
+          storageId: v.id("_storage"),
+          name: v.string(),
+          size: v.number(),
+          mime: v.string(),
+          extractedChars: v.number(),
+        })
+      ),
+      turnCount: v.number(),
+      summaryEmailSent: v.boolean(),
+      source: v.optional(v.string()),
+      startedAt: v.number(),
+      completedAt: v.optional(v.number()),
+    })
+      .index("by_sessionId", ["sessionId"])
+      .index("by_leadId", ["leadId"])
+      .index("by_status", ["status"]),
+
+    agentSessionMessages: defineTable({
+      sessionId: v.id("agentSessions"),
+      role: v.string(), // "user" | "assistant" | "system"
+      content: v.string(),
+      fileRefs: v.optional(v.array(v.id("_storage"))),
+      timestamp: v.number(),
+    })
+      .index("by_sessionId_timestamp", ["sessionId", "timestamp"]),
+
   },
   { schemaValidation: true }
 );

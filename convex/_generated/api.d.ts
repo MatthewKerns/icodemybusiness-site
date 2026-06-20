@@ -10,11 +10,17 @@
 
 import type * as activities from "../activities.js";
 import type * as admin from "../admin.js";
+import type * as agentSessions from "../agentSessions.js";
 import type * as auditLog from "../auditLog.js";
+import type * as conversationMessages from "../conversationMessages.js";
+import type * as conversations from "../conversations.js";
 import type * as deliverables from "../deliverables.js";
 import type * as email from "../email.js";
+import type * as emails from "../emails.js";
+import type * as http from "../http.js";
 import type * as leads from "../leads.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_constants from "../lib/constants.js";
 import type * as lib_dateFilter from "../lib/dateFilter.js";
 import type * as lib_leadScoring from "../lib/leadScoring.js";
 import type * as lib_rateLimits from "../lib/rateLimits.js";
@@ -34,11 +40,17 @@ import type {
 declare const fullApi: ApiFromModules<{
   activities: typeof activities;
   admin: typeof admin;
+  agentSessions: typeof agentSessions;
   auditLog: typeof auditLog;
+  conversationMessages: typeof conversationMessages;
+  conversations: typeof conversations;
   deliverables: typeof deliverables;
   email: typeof email;
+  emails: typeof emails;
+  http: typeof http;
   leads: typeof leads;
   "lib/auth": typeof lib_auth;
+  "lib/constants": typeof lib_constants;
   "lib/dateFilter": typeof lib_dateFilter;
   "lib/leadScoring": typeof lib_leadScoring;
   "lib/rateLimits": typeof lib_rateLimits;

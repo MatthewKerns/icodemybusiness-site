@@ -1,5 +1,6 @@
 import {
   LEAD_SCORE_REFERRAL,
+  LEAD_SCORE_RETELL_AGENT,
   LEAD_SCORE_YOUTUBE,
   LEAD_SCORE_DEFAULT,
 } from "./constants";
@@ -12,6 +13,8 @@ export function scoreLead(source?: string): number {
   switch (source) {
     case "referral":
       return LEAD_SCORE_REFERRAL;
+    case "retell-agent":
+      return LEAD_SCORE_RETELL_AGENT;
     case "youtube":
       return LEAD_SCORE_YOUTUBE;
     default:

@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { href: "/consulting", label: "Consulting" },
   { href: "/subscribe", label: "Subscriptions" },
   { href: "/free-tools", label: "Free Tools" },
+  { href: "/mango", label: "Mango" },
   { href: "/services", label: "Services" },
 ] as const;
 

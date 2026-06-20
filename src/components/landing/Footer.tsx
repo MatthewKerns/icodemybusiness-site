@@ -52,10 +52,10 @@ export function Footer() {
               Save time. Make money. Make a difference.
             </p>
             <a
-              href="mailto:hello@icodemybusiness.com"
+              href="mailto:matthew@icodemybusiness.com"
               className="mt-3 inline-block text-sm text-blue hover:underline"
             >
-              hello@icodemybusiness.com
+              matthew@icodemybusiness.com
             </a>
           </div>
 

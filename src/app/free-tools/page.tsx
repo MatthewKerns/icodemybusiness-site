@@ -8,9 +8,11 @@ import { useSessionId } from "@/hooks/useSessionId";
 import { useLeadAccess } from "@/hooks/useLeadAccess";
 import {
   FreeResourceCard,
-  FREE_RESOURCES,
+  BUILDER_RESOURCES,
+  FOUNDER_RESOURCES,
+  type FreeResource,
 } from "@/components/shared/FreeResourceCard";
-import { Check, Mail } from "lucide-react";
+import { Check, Mail, Wrench, Rocket, ShieldAlert } from "lucide-react";
 
 export default function FreeResourcesPage() {
   const { user, isSignedIn, isLoaded: clerkLoaded } = useUser();
@@ -175,19 +177,105 @@ export default function FreeResourcesPage() {
           </section>
         )}
 
-        {/* Resource Cards */}
-        <section className="mt-12" aria-live="polite">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {FREE_RESOURCES.map((resource) => (
+        {/* Builders */}
+        <section className="mt-16" aria-labelledby="builders-heading">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue/10">
+              <Wrench className="h-5 w-5 text-blue" aria-hidden="true" />
+            </div>
+            <div>
+              <h2
+                id="builders-heading"
+                className="text-h3 font-bold text-text-primary"
+              >
+                Builders
+              </h2>
+              <p className="text-sm text-text-muted">
+                Skills for the people shipping the software.
+              </p>
+            </div>
+          </div>
+
+          {/* Disclaimer — these tools can run real commands and delete files */}
+          <div className="mt-5 flex items-start gap-3 rounded-lg border border-warning/30 bg-warning/5 p-4">
+            <ShieldAlert
+              className="mt-0.5 h-5 w-5 shrink-0 text-warning"
+              aria-hidden="true"
+            />
+            <p className="text-xs leading-relaxed text-text-muted">
+              <span className="font-semibold text-text-primary">
+                Use at your own risk.
+              </span>{" "}
+              The Builder tools run real commands on your machine and can
+              permanently delete files and Docker resources. Each download
+              ships with a full disclaimer — always run a{" "}
+              <code className="rounded bg-bg-tertiary px-1 py-0.5 text-gold">
+                --dry-run
+              </code>{" "}
+              first and keep your own backups. Provided &ldquo;as is&rdquo;
+              without warranty; iCodeMyBusiness is not liable for any data loss.
+            </p>
+          </div>
+
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {BUILDER_RESOURCES.map((resource) => (
               <FreeResourceCard
                 key={resource.toolName}
                 icon={resource.icon}
                 toolName={resource.toolName}
+                tagline={resource.tagline}
                 description={resource.description}
-                downloaded={hasAccess}
-                ctaLabel={hasAccess ? "Check Email" : "Get Free"}
-                ctaHref={hasAccess ? resource.href : "#"}
-                onCtaClick={!isAuthenticated ? handleGetAccess : undefined}
+                delivery={resource.delivery}
+                disclaimer={resource.disclaimer}
+                ctaLabel={ctaLabelFor(resource)}
+                ctaHref={ctaHrefFor(resource)}
+                downloaded={resource.delivery === "email" ? hasAccess : false}
+                onCtaClick={
+                  resource.delivery === "email" && !isAuthenticated
+                    ? handleGetAccess
+                    : undefined
+                }
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Founders */}
+        <section className="mt-16" aria-labelledby="founders-heading">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10">
+              <Rocket className="h-5 w-5 text-gold" aria-hidden="true" />
+            </div>
+            <div>
+              <h2
+                id="founders-heading"
+                className="text-h3 font-bold text-text-primary"
+              >
+                Founders
+              </h2>
+              <p className="text-sm text-text-muted">
+                Skills for running and growing the business.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {FOUNDER_RESOURCES.map((resource) => (
+              <FreeResourceCard
+                key={resource.toolName}
+                icon={resource.icon}
+                toolName={resource.toolName}
+                tagline={resource.tagline}
+                description={resource.description}
+                delivery={resource.delivery}
+                ctaLabel={ctaLabelFor(resource)}
+                ctaHref={ctaHrefFor(resource)}
+                downloaded={resource.delivery === "email" ? hasAccess : false}
+                onCtaClick={
+                  resource.delivery === "email" && !isAuthenticated
+                    ? handleGetAccess
+                    : undefined
+                }
               />
             ))}
           </div>
@@ -195,4 +283,15 @@ export default function FreeResourcesPage() {
       </div>
     </main>
   );
+
+  function ctaLabelFor(resource: FreeResource): string {
+    if (resource.delivery === "download") return "Download";
+    if (resource.delivery === "external") return "View on GitHub";
+    return hasAccess ? "Check Email" : "Get Free";
+  }
+
+  function ctaHrefFor(resource: FreeResource): string {
+    if (resource.delivery === "email") return hasAccess ? resource.href : "#";
+    return resource.href;
+  }
 }

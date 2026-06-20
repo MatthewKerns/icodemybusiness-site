@@ -7,7 +7,7 @@ import { CommunityBanner } from "@/components/landing/CommunityBanner";
 import { ClipboardCheck, Users, Rocket } from "lucide-react";
 
 const CALENDLY_URL =
-  process.env.NEXT_PUBLIC_CALENDLY_URL ?? "https://calendly.com/icodemybusiness";
+  process.env.NEXT_PUBLIC_CALENDLY_URL ?? "https://calendly.com/12kernsmatthew/30min";
 
 const FAQ_ITEMS = [
   {
@@ -39,12 +39,6 @@ const FAQ_ITEMS = [
       "If you implement the system we build and don't see measurable improvement within 30 days — whether that's time saved, leads generated, or revenue increased — I'll do a follow-up session at no cost to make it right.",
     cta: { text: "Book risk-free", href: "#booking" },
   },
-  {
-    question: "Why is the price so low right now?",
-    answer:
-      "I'm building case studies and testimonials for the AI Launchpad program. Early clients get the full $200/hr-quality service at a fraction of the price in exchange for honest feedback and (with permission) a short testimonial.",
-    cta: { text: "Lock in the promo rate", href: "#booking" },
-  },
 ];
 
 const STEPS = [
@@ -54,7 +48,7 @@ const STEPS = [
     title: "You book, I prepare",
     description:
       "Once you book a slot, I spend 2-3 hours researching your business, industry, and current workflows. You show up to a call where I already understand your situation.",
-    detail: "Prep rate: $50/hr",
+    detail: "2-3 hours of prep research",
   },
   {
     icon: Users,
@@ -62,7 +56,7 @@ const STEPS = [
     title: "We meet",
     description:
       "A focused strategy session where we map your workflows, identify automation opportunities, and build a concrete system together — not theory, action items.",
-    detail: "Session rate: $75/hr",
+    detail: "Focused live strategy session",
   },
   {
     icon: Rocket,
@@ -91,7 +85,7 @@ export default function ConsultingPage() {
               How it works
             </h2>
             <p className="mt-2 text-center text-text-muted">
-              Transparent pricing. No surprises. No upsells.
+              A clear, focused process. No surprises. No upsells.
             </p>
 
             <div className="mt-10 grid gap-6 md:grid-cols-3">
@@ -122,26 +116,10 @@ export default function ConsultingPage() {
               ))}
             </div>
 
-            {/* Pricing summary */}
-            <div className="mt-10 rounded-xl border border-border bg-bg-secondary p-6 text-center">
-              <p className="text-text-muted">
-                Standard rate:{" "}
-                <span className="text-text-dim line-through">$200/hr</span>
-              </p>
-              <p className="mt-1 text-lg text-text-primary">
-                AI Launchpad promo:{" "}
-                <span className="font-semibold text-gold">$50/hr</span> prep +{" "}
-                <span className="font-semibold text-gold">$75/hr</span> call
-                <span className="ml-2 text-sm text-text-muted">
-                  — 75% off standard rate
-                </span>
-              </p>
-            </div>
-
             {/* Guarantee */}
             <div
               id="guarantee"
-              className="mt-6 rounded-xl border border-gold-dim bg-gold/5 p-6 text-center"
+              className="mt-10 rounded-xl border border-gold-dim bg-gold/5 p-6 text-center"
             >
               <h3 className="text-h3 font-bold text-gold">
                 The Measurable Progress Guarantee

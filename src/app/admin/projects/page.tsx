@@ -33,7 +33,8 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Plus, Pencil, Trash2, MessageSquare, Clock, ArrowRight } from "lucide-react";
 
 const PROJECT_STATUSES = [
   "planning",
@@ -80,6 +81,25 @@ const formatDate = (timestamp: number) => {
   });
 };
 
+const getScoreColor = (score: number | undefined) => {
+  if (!score) return "bg-gray-500/10 text-gray-500 border-gray-500/20";
+  if (score >= 4) return "bg-green-500/10 text-green-500 border-green-500/20";
+  if (score >= 3) return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
+  if (score >= 2) return "bg-orange-500/10 text-orange-500 border-orange-500/20";
+  return "bg-red-500/10 text-red-500 border-red-500/20";
+};
+
+const timeAgo = (timestamp: number) => {
+  const seconds = Math.floor((Date.now() - timestamp) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+};
+
 export default function AdminProjectsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -95,10 +115,20 @@ export default function AdminProjectsPage() {
     endDate: "",
   });
 
+  const [isConversationDialogOpen, setIsConversationDialogOpen] = useState(false);
+  const [selectedConversationId, setSelectedConversationId] = useState<Id<"conversations"> | null>(null);
+
   const projects = useQuery(api.projects.listProjects, {});
   const createProject = useMutation(api.projects.createProject);
   const updateProject = useMutation(api.projects.updateProject);
   const deleteProject = useMutation(api.projects.deleteProject);
+
+  const pendingRoadmaps = useQuery(api.conversations.listPendingRoadmaps, {});
+  const updateRoadmapStatus = useMutation(api.conversations.updateRoadmapStatus);
+  const selectedConversation = useQuery(
+    api.conversations.getConversation,
+    selectedConversationId ? { conversationId: selectedConversationId } : "skip"
+  );
 
   const selectedProject = projects?.find((p) => p._id === selectedProjectId);
 
@@ -113,6 +143,19 @@ export default function AdminProjectsPage() {
       endDate: "",
     });
     setIsCreateDialogOpen(true);
+  };
+
+  const handleViewConversation = (conversationId: Id<"conversations">) => {
+    setSelectedConversationId(conversationId);
+    setIsConversationDialogOpen(true);
+  };
+
+  const handleRoadmapStatus = async (conversationId: Id<"conversations">, status: string) => {
+    try {
+      await updateRoadmapStatus({ conversationId, status });
+    } catch (error) {
+      console.error("Failed to update roadmap status:", error);
+    }
   };
 
   const handleOpenEdit = (projectId: Id<"projects">) => {
@@ -201,6 +244,79 @@ export default function AdminProjectsPage() {
             New Project
           </Button>
         </div>
+
+        {/* Pending Roadmap Requests */}
+        {pendingRoadmaps && pendingRoadmaps.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-[#D4AF37]" />
+                Pending Roadmap Requests
+                <Badge className="ml-2 bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/20">
+                  {pendingRoadmaps.length}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {pendingRoadmaps.map((conversation) => (
+                  <div
+                    key={conversation._id}
+                    className="flex items-start justify-between gap-4 rounded-lg border border-border/50 bg-bg-secondary/50 p-4"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-text-primary">
+                          {conversation.visitorName || conversation.visitorEmail || "Unknown visitor"}
+                        </span>
+                        {conversation.visitorEmail && conversation.visitorName && (
+                          <span className="text-sm text-text-muted">
+                            ({conversation.visitorEmail})
+                          </span>
+                        )}
+                        <Badge className={cn("text-xs", getScoreColor(conversation.qualificationScore))}>
+                          Score: {conversation.qualificationScore ?? "N/A"}
+                        </Badge>
+                      </div>
+                      {conversation.summary && (
+                        <p className="text-sm text-text-muted line-clamp-2 mb-1">
+                          {conversation.summary}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-1 text-xs text-text-dim">
+                        <Clock className="h-3 w-3" />
+                        {timeAgo(conversation._creationTime)}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewConversation(conversation._id)}
+                      >
+                        View Conversation
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => void handleRoadmapStatus(conversation._id, "in_progress")}
+                      >
+                        Mark In Progress
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black"
+                        onClick={() => void handleRoadmapStatus(conversation._id, "sent")}
+                      >
+                        Mark Sent
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Projects List */}
         <Card>
@@ -541,6 +657,67 @@ export default function AdminProjectsPage() {
               </Button>
               <Button variant="destructive" onClick={() => void handleDelete()}>
                 Delete Project
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Conversation Transcript Dialog */}
+        <Dialog open={isConversationDialogOpen} onOpenChange={setIsConversationDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>
+                Conversation with {selectedConversation?.visitorName || selectedConversation?.visitorEmail || "Unknown"}
+              </DialogTitle>
+              <DialogDescription>
+                {selectedConversation?.modality === "voice" ? "Voice" : "Text"} conversation
+                {selectedConversation?.durationSeconds
+                  ? ` — ${Math.floor(selectedConversation.durationSeconds / 60)}m ${selectedConversation.durationSeconds % 60}s`
+                  : ""}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedConversation?.summary && (
+              <div className="rounded-lg bg-bg-secondary/50 p-3 text-sm text-text-muted">
+                <strong className="text-text-primary">Summary:</strong> {selectedConversation.summary}
+              </div>
+            )}
+            {selectedConversation?.painPoints && selectedConversation.painPoints.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {selectedConversation.painPoints.map((point, i) => (
+                  <Badge key={i} variant="outline" className="text-xs">
+                    {point}
+                  </Badge>
+                ))}
+              </div>
+            )}
+            <ScrollArea className="h-[400px] pr-4">
+              <div className="space-y-3">
+                {selectedConversation?.messages?.map((msg) => (
+                  <div
+                    key={msg._id}
+                    className={cn(
+                      "rounded-lg p-3 text-sm",
+                      msg.role === "agent"
+                        ? "bg-[#D4AF37]/10 text-text-primary mr-8"
+                        : "bg-bg-secondary text-text-primary ml-8"
+                    )}
+                  >
+                    <div className="mb-1 text-xs font-medium text-text-dim">
+                      {msg.role === "agent" ? "Alex (Agent)" : "Visitor"}
+                    </div>
+                    {msg.content}
+                  </div>
+                ))}
+                {selectedConversation?.messages?.length === 0 && (
+                  <div className="py-8 text-center text-text-muted">
+                    No transcript available for this conversation.
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsConversationDialogOpen(false)}>
+                Close
               </Button>
             </DialogFooter>
           </DialogContent>

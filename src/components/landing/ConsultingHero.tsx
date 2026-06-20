@@ -20,24 +20,6 @@ export function ConsultingHero() {
           system — not theory, not a pitch deck, a working plan.
         </p>
 
-        {/* Price anchor */}
-        <div className="mt-10 flex flex-col items-center gap-2">
-          <div className="flex items-center gap-3">
-            <span className="text-xl text-text-dim line-through">
-              $200/hr
-            </span>
-            <span className="rounded-full bg-gold/10 px-3 py-1 font-accent text-sm font-medium text-gold">
-              75% OFF
-            </span>
-          </div>
-          <p className="text-lg text-text-muted">
-            <span className="font-semibold text-text-primary">$50/hr</span>{" "}
-            prep +{" "}
-            <span className="font-semibold text-text-primary">$75/hr</span>{" "}
-            live call
-          </p>
-        </div>
-
         {/* CTA */}
         <a
           href="#booking"

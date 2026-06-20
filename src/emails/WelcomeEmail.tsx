@@ -66,6 +66,9 @@ export function WelcomeEmail({ email, name }: WelcomeEmailProps) {
               <Text style={resourceItem}>
                 <span style={goldBullet}>&#9670;</span> Client Delivery / Work Tracking Skill
               </Text>
+              <Text style={resourceItem}>
+                <span style={goldBullet}>&#9670;</span> Feature Factory Skills + Best Practices Guide
+              </Text>
             </Section>
 
             <Button style={ctaButton} href={`${siteUrl}/free-resources`}>

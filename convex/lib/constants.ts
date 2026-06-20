@@ -1,5 +1,6 @@
 // Lead scoring constants
 export const LEAD_SCORE_REFERRAL = 15;
+export const LEAD_SCORE_RETELL_AGENT = 12;
 export const LEAD_SCORE_YOUTUBE = 10;
 export const LEAD_SCORE_DEFAULT = 5;
 

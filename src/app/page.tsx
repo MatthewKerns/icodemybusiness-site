@@ -5,6 +5,18 @@ import { OfferGrid } from "@/components/landing/OfferGrid";
 import { SocialProofBar } from "@/components/landing/SocialProofBar";
 import { EmailCapture } from "@/components/shared/EmailCapture";
 import { CommunityBanner } from "@/components/landing/CommunityBanner";
+// eslint-disable-next-line no-restricted-imports -- voice agent is now live on the homepage (Epic 7 in progress)
+import { AgentSection } from "@/components/agent/AgentSection";
+import { AgentWorkflowsBlock } from "@/components/landing/AgentWorkflowsBlock";
+import dynamic from "next/dynamic";
+
+const Top3IssuesAgent = dynamic(
+  () =>
+    import("@/components/agent/top3issues/Top3IssuesAgent").then(
+      (m) => m.Top3IssuesAgent
+    ),
+  { ssr: false }
+);
 
 function HeroContent() {
   return (
@@ -67,6 +79,21 @@ export default function Home() {
 
           {/* Credibility metrics */}
           <SocialProofBar />
+
+          {/* Philosophy: modern software runs via agent workflows */}
+          <AgentWorkflowsBlock />
+
+          {/* Demo: Top 3 Issues live chat agent */}
+          <section className="py-12 lg:py-20">
+            <div className="mx-auto max-w-5xl">
+              <Top3IssuesAgent />
+            </div>
+          </section>
+
+          {/* AI Agent */}
+          <section className="py-12 lg:py-20">
+            <AgentSection />
+          </section>
 
           {/* Community */}
           <CommunityBanner />
