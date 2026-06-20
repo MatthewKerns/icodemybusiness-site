@@ -60,27 +60,27 @@ export function SplashScreen() {
           initial="hidden"
           animate="visible"
           variants={lineVariants}
-          className="text-display font-body font-extrabold text-gold"
+          className="text-display font-display font-semibold text-gold"
         >
-          SAVE TIME.
+          Save Time.
         </motion.h1>
         <motion.h1
           custom={1}
           initial="hidden"
           animate="visible"
           variants={lineVariants}
-          className="text-display font-body font-extrabold text-gold"
+          className="text-display font-display font-semibold text-gold"
         >
-          MAKE MONEY.
+          Make Money.
         </motion.h1>
         <motion.p
           custom={2}
           initial="hidden"
           animate="visible"
           variants={lineVariants}
-          className="text-display font-body italic text-gold"
+          className="text-display font-display italic text-gold"
         >
-          make a difference.
+          Make a Difference.
         </motion.p>
       </div>
 
