@@ -5,19 +5,19 @@ export function ConsultingHero() {
     <section className="py-12 md:py-20">
       <div className="mx-auto max-w-4xl text-center">
         <p className="font-accent text-sm uppercase tracking-widest text-gold">
-          The AI Launchpad
+          Free 30-Minute Consultation
         </p>
 
         <h1 className="mt-4 text-display font-bold text-text-primary">
-          Go from overwhelmed{" "}
-          <span className="text-gold">to automated</span>{" "}
-          in one session
+          Let&apos;s figure out where{" "}
+          <span className="text-gold">AI fits</span>{" "}
+          in your business
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg text-text-muted">
-          A focused, high-impact consulting session where I research your
-          business, map your workflows, and hand you a ready-to-execute AI
-          system — not theory, not a pitch deck, a working plan.
+          Book a free 30-minute call to talk through your business, your biggest
+          time-drains, and where AI can help most. You&apos;ll leave with an
+          honest read on what&apos;s worth automating — no pitch, no pressure.
         </p>
 
         {/* CTA */}
@@ -29,7 +29,7 @@ export function ConsultingHero() {
             "animate-pulse-glow"
           )}
         >
-          Book your AI Launchpad — 4 spots this month
+          Book your free 30-minute call
         </a>
       </div>
     </section>

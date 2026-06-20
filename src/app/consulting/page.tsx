@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ConsultingHero } from "@/components/landing/ConsultingHero";
 import { BonusStack } from "@/components/landing/BonusStack";
@@ -158,11 +159,20 @@ export default function ConsultingPage() {
         {/* Community */}
         <CommunityBanner />
 
-        {/* Scarcity indicator */}
+        {/* Pre-call prep note */}
         <section className="py-6 text-center">
-          <p className="font-accent text-sm text-text-muted">
-            <span className="font-semibold text-gold">3 of 4</span> consulting
-            slots remaining this month
+          <p className="mx-auto max-w-2xl text-sm leading-relaxed text-text-muted">
+            <span className="font-semibold text-gold">Want to make the call count?</span>{" "}
+            Tell me what&apos;s going on in your business — and upload any
+            relevant files — using the{" "}
+            <Link
+              href="/#top3"
+              className="text-gold underline-offset-4 hover:underline"
+            >
+              live agent on the home page
+            </Link>
+            . I&apos;ll review it before we meet so we can skip discovery and go
+            straight to solutions.
           </p>
         </section>
 
@@ -170,10 +180,10 @@ export default function ConsultingPage() {
         <section id="booking" className="py-12 md:py-20">
           <div className="mx-auto max-w-2xl">
             <h2 className="text-center text-h2 font-bold text-text-primary">
-              Ready to automate?
+              Book your free consultation
             </h2>
             <p className="mt-2 text-center text-text-muted">
-              Book your AI Launchpad session or join the waitlist below
+              Grab a free 30-minute slot below and tell me about your situation
             </p>
 
             <div className="mt-8">

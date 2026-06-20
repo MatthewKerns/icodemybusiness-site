@@ -84,7 +84,7 @@ export default function Home() {
           <AgentWorkflowsBlock />
 
           {/* Demo: Top 3 Issues live chat agent */}
-          <section className="py-12 lg:py-20">
+          <section id="top3" className="scroll-mt-24 py-12 lg:py-20">
             <div className="mx-auto max-w-5xl">
               <Top3IssuesAgent />
             </div>
