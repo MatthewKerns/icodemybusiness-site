@@ -46,7 +46,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
         }
 
         // Derive plan from the Stripe price ID
-        let plan = "pro"; // fallback
+        let plan = "personal"; // fallback
         if (subscriptionId) {
           const sub = await stripe.subscriptions.retrieve(subscriptionId);
           const priceId = sub.items.data[0]?.price?.id;

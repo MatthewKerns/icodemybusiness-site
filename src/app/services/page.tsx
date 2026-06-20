@@ -2,6 +2,10 @@ import { cn } from "@/lib/utils";
 import { CaseStudyFilter } from "@/components/landing/CaseStudyFilter";
 import { EmailCapture } from "@/components/shared/EmailCapture";
 
+// Placeholder case studies — hidden on the live site until real client
+// projects are ready to feature. Set to true to show them again.
+const SHOW_CASE_STUDIES = false;
+
 const CASE_STUDIES = [
   {
     slug: "eos-implementation-dashboard",
@@ -78,15 +82,17 @@ export default function OffersPage() {
               week — not theoretical improvements, measurable ones.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <a
-                href="#case-studies"
-                className={cn(
-                  "rounded-lg bg-gold px-6 py-3 font-medium text-black transition-shadow",
-                  "hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
-                )}
-              >
-                See my work
-              </a>
+              {SHOW_CASE_STUDIES && (
+                <a
+                  href="#case-studies"
+                  className={cn(
+                    "rounded-lg bg-gold px-6 py-3 font-medium text-black transition-shadow",
+                    "hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+                  )}
+                >
+                  See my work
+                </a>
+              )}
               <a
                 href="#how-i-work"
                 className="rounded-lg border border-border px-6 py-3 font-medium text-text-primary transition-colors hover:border-gold-dim hover:text-gold"
@@ -98,20 +104,22 @@ export default function OffersPage() {
         </section>
 
         {/* Case Studies */}
-        <section id="case-studies" className="py-12 md:py-20">
-          <div className="mx-auto max-w-6xl">
-            <h2 className="text-center text-h2 font-bold text-text-primary">
-              Case Studies
-            </h2>
-            <p className="mt-2 text-center text-text-muted">
-              Real projects. Real metrics. Real business impact.
-            </p>
+        {SHOW_CASE_STUDIES && (
+          <section id="case-studies" className="py-12 md:py-20">
+            <div className="mx-auto max-w-6xl">
+              <h2 className="text-center text-h2 font-bold text-text-primary">
+                Case Studies
+              </h2>
+              <p className="mt-2 text-center text-text-muted">
+                Real projects. Real metrics. Real business impact.
+              </p>
 
-            <div className="mt-10">
-              <CaseStudyFilter studies={CASE_STUDIES} />
+              <div className="mt-10">
+                <CaseStudyFilter studies={CASE_STUDIES} />
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* How I Work */}
         <section id="how-i-work" className="py-12 md:py-20">
@@ -120,21 +128,21 @@ export default function OffersPage() {
               How I work
             </h2>
             <p className="mt-2 text-center text-text-muted">
-              Transparent pricing. No fluff. You pay for output, not overhead.
+              Senior-quality work. No fluff. You pay for output, not overhead.
             </p>
 
             <div className="mt-10 space-y-6">
               <div className="rounded-xl border border-border bg-bg-secondary p-6">
                 <h3 className="text-h3 font-bold text-text-primary">
-                  The $50/hr dev model
+                  Senior engineering, without the agency price tag
                 </h3>
                 <p className="mt-3 leading-relaxed text-text-muted">
-                  Most agencies charge $150-300/hr and staff your project with
-                  junior devs. I work differently: you get a senior
-                  Amazon-trained engineer at $50/hr because I use AI to multiply
-                  my output. I write the architecture, the AI helps me build
-                  faster, and I review every line. You get senior-quality work at
-                  a fraction of the cost.
+                  Most agencies staff your project with junior devs and bill
+                  big-agency rates. I work differently: you get a senior,
+                  Amazon-trained engineer end to end. I write the architecture,
+                  use AI to build faster, and review every line myself — so you
+                  get senior-quality work without the agency overhead or the
+                  junior-dev guesswork.
                 </p>
               </div>
 

@@ -20,10 +20,9 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const body = await request.json();
   const { plan } = body as { plan?: string };
 
-  if (!plan || !["starter", "pro", "enterprise"].includes(plan)) {
-    throw new ValidationError(
-      "Invalid plan. Must be starter, pro, or enterprise."
-    );
+  // "business" (EOS) is coming soon — not yet purchasable.
+  if (!plan || !["personal", "contractor"].includes(plan)) {
+    throw new ValidationError("Invalid plan. Must be personal or contractor.");
   }
 
   let priceId: string;

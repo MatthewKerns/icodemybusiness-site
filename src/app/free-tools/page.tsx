@@ -9,10 +9,10 @@ import { useLeadAccess } from "@/hooks/useLeadAccess";
 import {
   FreeResourceCard,
   BUILDER_RESOURCES,
-  FOUNDER_RESOURCES,
+  PREMIUM_RESOURCES,
   type FreeResource,
 } from "@/components/shared/FreeResourceCard";
-import { Check, Mail, Wrench, Rocket, ShieldAlert } from "lucide-react";
+import { Check, Mail, Wrench, ShieldAlert, Sparkles } from "lucide-react";
 
 export default function FreeResourcesPage() {
   const { user, isSignedIn, isLoaded: clerkLoaded } = useUser();
@@ -104,8 +104,8 @@ export default function FreeResourcesPage() {
             Free AI tools that actually work.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
-            Claude Project Packs and skills you can use today. No credit card.
-            No catch.
+            Open dev skills and our GitHub best-practices repo — yours to use
+            today. No credit card. No catch.
           </p>
         </section>
 
@@ -177,21 +177,22 @@ export default function FreeResourcesPage() {
           </section>
         )}
 
-        {/* Builders */}
-        <section className="mt-16" aria-labelledby="builders-heading">
+        {/* Free tools — the GitHub best-practices repo + dev skills */}
+        <section className="mt-16" aria-labelledby="free-heading">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue/10">
               <Wrench className="h-5 w-5 text-blue" aria-hidden="true" />
             </div>
             <div>
               <h2
-                id="builders-heading"
+                id="free-heading"
                 className="text-h3 font-bold text-text-primary"
               >
-                Builders
+                Free tools
               </h2>
               <p className="text-sm text-text-muted">
-                Skills for the people shipping the software.
+                Open dev skills from our GitHub best-practices repo — free to
+                download or grab on GitHub.
               </p>
             </div>
           </div>
@@ -240,27 +241,28 @@ export default function FreeResourcesPage() {
           </div>
         </section>
 
-        {/* Founders */}
-        <section className="mt-16" aria-labelledby="founders-heading">
+        {/* Advanced — paid, continuously-supported workflows (see /subscribe) */}
+        <section className="mt-16" aria-labelledby="premium-heading">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10">
-              <Rocket className="h-5 w-5 text-gold" aria-hidden="true" />
+              <Sparkles className="h-5 w-5 text-gold" aria-hidden="true" />
             </div>
             <div>
               <h2
-                id="founders-heading"
+                id="premium-heading"
                 className="text-h3 font-bold text-text-primary"
               >
-                Founders
+                Advanced
               </h2>
               <p className="text-sm text-text-muted">
-                Skills for running and growing the business.
+                Heavily-supported workflows we improve constantly — for everyone,
+                builders, and founders.
               </p>
             </div>
           </div>
 
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {FOUNDER_RESOURCES.map((resource) => (
+            {PREMIUM_RESOURCES.map((resource) => (
               <FreeResourceCard
                 key={resource.toolName}
                 icon={resource.icon}
@@ -268,14 +270,11 @@ export default function FreeResourcesPage() {
                 tagline={resource.tagline}
                 description={resource.description}
                 delivery={resource.delivery}
+                price={resource.price}
+                audience={resource.audience}
+                comingSoon={resource.comingSoon}
                 ctaLabel={ctaLabelFor(resource)}
                 ctaHref={ctaHrefFor(resource)}
-                downloaded={resource.delivery === "email" ? hasAccess : false}
-                onCtaClick={
-                  resource.delivery === "email" && !isAuthenticated
-                    ? handleGetAccess
-                    : undefined
-                }
               />
             ))}
           </div>
@@ -287,6 +286,7 @@ export default function FreeResourcesPage() {
   function ctaLabelFor(resource: FreeResource): string {
     if (resource.delivery === "download") return "Download";
     if (resource.delivery === "external") return "View on GitHub";
+    if (resource.delivery === "paid") return "View plans";
     return hasAccess ? "Check Email" : "Get Free";
   }
 

@@ -1,9 +1,10 @@
 import "server-only";
 
+// "business" (EOS) is coming soon — no price ID until it launches.
 const PLAN_TO_PRICE: Record<string, string> = {
-  starter: process.env.STRIPE_PRICE_ID_STARTER ?? "",
-  pro: process.env.STRIPE_PRICE_ID_PRO ?? "",
-  enterprise: process.env.STRIPE_PRICE_ID_ENTERPRISE ?? "",
+  personal: process.env.STRIPE_PRICE_ID_PERSONAL ?? "",
+  contractor: process.env.STRIPE_PRICE_ID_CONTRACTOR ?? "",
+  business: process.env.STRIPE_PRICE_ID_BUSINESS ?? "",
 };
 
 const PRICE_TO_PLAN: Record<string, string> = Object.fromEntries(

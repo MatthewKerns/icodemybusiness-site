@@ -13,68 +13,77 @@ import { EmbeddedCheckoutDialog } from "@/components/subscribe/EmbeddedCheckoutD
 import { ConvexErrorBoundary } from "@/components/shared/ConvexErrorBoundary";
 import { CreditCard } from "lucide-react";
 
-const TIERS = [
+type Tier = {
+  name: string;
+  plan: string;
+  price: string;
+  description: string;
+  features: string[];
+  recommended?: boolean;
+  comingSoon?: boolean;
+};
+
+const TIERS: Tier[] = [
   {
-    name: "Starter",
-    plan: "starter",
-    price: "$19.99",
-    description: "Get started with AI workflows",
+    name: "Personal Time Planner",
+    plan: "personal",
+    price: "$24.99",
+    description: "For everyone — plan your day around what actually matters.",
     features: [
-      "3 Claude Project Packs monthly",
-      "Basic workflow templates",
-      "Community access",
-      "Email support",
+      "Goal-to-daily-plan workflow",
+      "Stay-on-track nudges",
+      "Continuously improved & supported",
+      "Connect as an MCP server",
     ],
   },
   {
-    name: "Pro",
-    plan: "pro",
-    price: "$34.99",
-    description: "Scale your AI-powered business",
+    name: "Side Gig / Contractor Time",
+    plan: "contractor",
+    price: "$24.99",
+    description:
+      "For builders & contractors — track billable work without the busywork.",
     recommended: true,
     features: [
-      "Everything in Starter",
-      "10 Claude Project Packs monthly",
-      "Advanced automation templates",
-      "Priority support",
-      "Monthly group coaching call",
+      "Time across clients & projects",
+      "Billable vs non-billable at a glance",
+      "Contractor delivery tracking",
+      "Continuously improved & supported",
     ],
   },
   {
-    name: "Enterprise",
-    plan: "enterprise",
+    name: "Business Management (EOS)",
+    plan: "business",
     price: "$49.99",
-    description: "Full-service AI transformation",
+    description: "For founders — run your whole company on one operating system.",
+    comingSoon: true,
     features: [
-      "Everything in Pro",
-      "Unlimited Claude Project Packs",
-      "Custom workflow builds",
-      "1-on-1 monthly strategy call",
-      "Early access to new tools",
+      "Scorecards, rocks & L10 agenda",
+      "The EOS framework, fully supported",
+      "Built on the personal + contractor tools",
     ],
   },
 ];
 
 const FAQ_ITEMS = [
   {
-    question: "What are Claude Project Packs?",
+    question: "What's the difference between the free and paid tools?",
     answer:
-      "Pre-built AI skill configurations for Claude that automate specific business tasks. Each pack includes prompts, workflows, and instructions you can load directly into Claude to handle things like content creation, client communication, data analysis, and more.",
+      "The free tools live in our GitHub best-practices repo — yours to use anytime. The paid tools are workflows I actively develop and improve all the time. That ongoing support is what makes them valuable: they keep getting better and stay reliable.",
   },
   {
-    question: "Can I switch plans?",
+    question: "Can I switch tools?",
     answer:
-      "Yes, upgrade or downgrade anytime. Changes take effect next billing cycle.",
+      "Yes, upgrade or switch anytime. Changes take effect the next billing cycle.",
   },
   {
-    question: "Is there a free trial?",
+    question: "When is Business Management (EOS) available?",
     answer:
-      "Enter your email to get 3 free Claude Project Packs immediately — no credit card required.",
+      "It's coming soon. Drop your email below to join the waitlist and get early access when it launches.",
   },
   {
-    question: "What's included in group coaching?",
+    question: "How do I use these?",
     answer:
-      "Monthly live sessions where I walk through new AI tools, answer questions, and share automation strategies.",
+      "Each tool connects to Claude as an MCP server — set up takes a couple of minutes. Once connected, the tool's workflow shows up as commands inside your AI client.",
   },
 ];
 
@@ -125,6 +134,18 @@ function PricingSectionCore({
             subscription?.status === "active" &&
             subscription?.plan === tier.plan;
 
+          if (tier.comingSoon) {
+            return (
+              <div key={tier.name} className="relative">
+                <PricingTier
+                  {...tier}
+                  ctaHref="#email-capture"
+                  ctaLabel="Join the waitlist"
+                />
+              </div>
+            );
+          }
+
           return (
             <div key={tier.name} className="relative">
               {isCurrentPlan && (
@@ -173,14 +194,23 @@ function PricingSection({ onTierClick }: { onTierClick: (plan: string) => void }
   // Fallback: Show pricing tiers without subscription status
   const fallback = (
     <div className="grid gap-8 md:grid-cols-3">
-      {TIERS.map((tier) => (
-        <PricingTier
-          key={tier.name}
-          {...tier}
-          ctaLabel="Get Started"
-          onCtaClick={() => onTierClick(tier.plan)}
-        />
-      ))}
+      {TIERS.map((tier) =>
+        tier.comingSoon ? (
+          <PricingTier
+            key={tier.name}
+            {...tier}
+            ctaHref="#email-capture"
+            ctaLabel="Join the waitlist"
+          />
+        ) : (
+          <PricingTier
+            key={tier.name}
+            {...tier}
+            ctaLabel="Get Started"
+            onCtaClick={() => onTierClick(tier.plan)}
+          />
+        )
+      )}
     </div>
   );
 
@@ -215,12 +245,12 @@ export default function SubscriptionsPage() {
       {/* Hero Section */}
       <section className="mx-auto max-w-7xl py-12 lg:py-20">
         <h1 className="text-h1 font-bold text-text-primary">
-          AI Workflows That Work While You Sleep
+          Tools I support, so they keep getting better
         </h1>
         <p className="mt-4 max-w-2xl text-text-muted">
-          Stop spending hours on repetitive tasks. Our Claude Project Packs give
-          you plug-and-play AI automations that handle the busywork — so you can
-          focus on growing your business.
+          Unlike the free tools on GitHub, these are workflows I develop and
+          improve constantly — heavily supported, always reliable. Pick the one
+          that fits how you work.
         </p>
       </section>
 
@@ -233,8 +263,8 @@ export default function SubscriptionsPage() {
       <section id="email-capture" className="mx-auto max-w-7xl py-12 lg:py-20">
         <EmailCapture
           source="subscribe"
-          headline="Get 3 free Claude Project Packs"
-          subtitle="Enter your email for immediate access. No credit card required."
+          headline="Join the Business Management (EOS) waitlist"
+          subtitle="Be first to get EOS when it launches — plus updates as the tools improve."
         />
       </section>
 

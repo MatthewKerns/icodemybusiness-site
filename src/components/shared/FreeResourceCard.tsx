@@ -5,15 +5,15 @@ import { AlertTriangle, Check, Download } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
   FileText,
-  BarChart3,
+  CalendarClock,
   ClipboardCheck,
   Factory,
   HardDrive,
   CloudUpload,
 } from "lucide-react";
 
-export type ResourceCategory = "builders" | "founders";
-export type ResourceDelivery = "download" | "email" | "external";
+export type ResourceCategory = "builders" | "founders" | "premium";
+export type ResourceDelivery = "download" | "email" | "external" | "paid";
 
 export interface FreeResource {
   icon: LucideIcon;
@@ -27,6 +27,12 @@ export interface FreeResource {
   delivery?: ResourceDelivery;
   /** Optional inline safety note (e.g. tools that can delete files). */
   disclaimer?: string;
+  /** Display price for paid tools, e.g. "$24.99/mo". */
+  price?: string;
+  /** Who the paid tool is for, e.g. "For everyone", "For builders". */
+  audience?: string;
+  /** Paid tool not yet available — shows a disabled "Coming soon" CTA. */
+  comingSoon?: boolean;
 }
 
 export const BUILDER_RESOURCES: FreeResource[] = [
@@ -56,7 +62,7 @@ export const BUILDER_RESOURCES: FreeResource[] = [
     toolName: "Feature Factory + Best Practices",
     tagline: "Ship features like a ten-person engineering team.",
     description:
-      "Six Claude Code orchestrator skills (arch, func, errors, observability, review, docs) plus a complete software-engineering reference — foundations to production readiness.",
+      "Six Claude Code orchestrator skills (arch, func, errors, observability, review, docs) plus a complete software-engineering reference — foundations to production readiness. Free on GitHub.",
     icon: Factory,
     href: "https://github.com/MatthewKerns/software-development-best-practices-guide",
     category: "builders",
@@ -64,44 +70,52 @@ export const BUILDER_RESOURCES: FreeResource[] = [
   },
 ];
 
-export const FOUNDER_RESOURCES: FreeResource[] = [
+/**
+ * Paid tools — the heavily-supported, continuously-improved workflows sold on
+ * /subscribe. Each targets a different audience. CTA routes to /subscribe.
+ */
+export const PREMIUM_RESOURCES: FreeResource[] = [
   {
-    toolName: "EOS System Spreadsheet",
+    toolName: "Personal Time Planner",
+    tagline: "Plan your day around what actually matters.",
+    description:
+      "A continuously-supported planning workflow that turns your goals into a realistic daily plan — and keeps you on it.",
+    icon: CalendarClock,
+    href: "/subscribe",
+    category: "premium",
+    delivery: "paid",
+    price: "$24.99/mo",
+    audience: "For everyone",
+  },
+  {
+    toolName: "Side Gig / Contractor Work Time",
+    tagline: "Track billable work without the busywork.",
+    description:
+      "Capture time across clients and projects, see what's billable, and keep contractor delivery on track — built for builders running side gigs.",
+    icon: ClipboardCheck,
+    href: "/subscribe",
+    category: "premium",
+    delivery: "paid",
+    price: "$24.99/mo",
+    audience: "For builders",
+  },
+  {
+    toolName: "Business Management (EOS)",
     tagline: "Run your whole company on one operating system.",
     description:
-      "Organize your business with the Entrepreneurial Operating System framework.",
+      "The Entrepreneurial Operating System as a supported workflow — scorecards, rocks, and L10s in one place. For founders running the business.",
     icon: FileText,
-    href: "#eos-spreadsheet",
-    category: "founders",
-    delivery: "email",
-  },
-  {
-    toolName: "Habits Tracker",
-    tagline: "Small daily habits, compounding into real growth.",
-    description:
-      "Build and track productive habits that compound into business growth.",
-    icon: BarChart3,
-    href: "#habits-tracker",
-    category: "founders",
-    delivery: "email",
-  },
-  {
-    toolName: "Client Delivery Tracker",
-    tagline: "Never let a client deliverable slip through the cracks.",
-    description:
-      "Keep projects on track with structured delivery and progress tracking.",
-    icon: ClipboardCheck,
-    href: "#client-delivery",
-    category: "founders",
-    delivery: "email",
+    href: "/subscribe",
+    category: "premium",
+    delivery: "paid",
+    price: "$49.99/mo",
+    audience: "For founders",
+    comingSoon: true,
   },
 ];
 
 /** Combined list, kept for backward-compatible consumers (e.g. EmailCapture). */
-export const FREE_RESOURCES: FreeResource[] = [
-  ...BUILDER_RESOURCES,
-  ...FOUNDER_RESOURCES,
-];
+export const FREE_RESOURCES: FreeResource[] = [...BUILDER_RESOURCES];
 
 interface FreeResourceCardProps {
   icon: LucideIcon;
@@ -117,6 +131,12 @@ interface FreeResourceCardProps {
   delivery?: ResourceDelivery;
   /** Optional inline safety note. */
   disclaimer?: string;
+  /** Display price for paid tools, e.g. "$24.99/mo". */
+  price?: string;
+  /** Who the paid tool is for, e.g. "For everyone". */
+  audience?: string;
+  /** Paid tool not yet available — shows a disabled "Coming soon" CTA. */
+  comingSoon?: boolean;
 }
 
 export function FreeResourceCard({
@@ -130,6 +150,9 @@ export function FreeResourceCard({
   tagline,
   delivery = "email",
   disclaimer,
+  price,
+  audience,
+  comingSoon = false,
 }: FreeResourceCardProps) {
   return (
     <div
@@ -143,15 +166,32 @@ export function FreeResourceCard({
           <Icon className="h-6 w-6 text-gold" aria-hidden="true" />
         </div>
         <span
-          className="rounded bg-gold/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-gold"
-          aria-label="Free tool"
+          className={cn(
+            "rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-wide",
+            delivery === "paid"
+              ? "bg-blue/10 text-blue"
+              : "bg-gold/10 text-gold"
+          )}
+          aria-label={delivery === "paid" ? "Paid tool" : "Free tool"}
         >
-          Free
+          {delivery === "paid" ? (price ?? "Paid") : "Free"}
         </span>
       </div>
 
+      {/* Audience (paid tools) */}
+      {audience && (
+        <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-text-dim">
+          {audience}
+        </p>
+      )}
+
       {/* Skill name — larger letters */}
-      <h3 className="mt-4 text-xl font-bold leading-tight text-text-primary">
+      <h3
+        className={cn(
+          "text-xl font-bold leading-tight text-text-primary",
+          audience ? "mt-1" : "mt-4"
+        )}
+      >
         {toolName}
       </h3>
 
@@ -172,7 +212,20 @@ export function FreeResourceCard({
       )}
 
       <div className="mt-auto pt-4">
-        {delivery === "download" ? (
+        {delivery === "paid" ? (
+          comingSoon ? (
+            <span className="inline-flex min-h-[44px] items-center text-sm font-semibold text-text-dim">
+              Coming soon
+            </span>
+          ) : (
+            <a
+              href={ctaHref}
+              className="inline-flex min-h-[44px] items-center text-sm font-semibold text-gold transition-colors hover:text-gold-light"
+            >
+              {ctaLabel} &rarr;
+            </a>
+          )
+        ) : delivery === "download" ? (
           <a
             href={ctaHref}
             download

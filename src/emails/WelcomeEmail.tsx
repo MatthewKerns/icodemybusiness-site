@@ -58,13 +58,10 @@ export function WelcomeEmail({ email, name }: WelcomeEmailProps) {
             <Section style={resourcesSection}>
               <Text style={resourcesHeading}>Your Free Resources</Text>
               <Text style={resourceItem}>
-                <span style={goldBullet}>&#9670;</span> EOS System Spreadsheet Skill
+                <span style={goldBullet}>&#9670;</span> Disk Space Optimizer Skill
               </Text>
               <Text style={resourceItem}>
-                <span style={goldBullet}>&#9670;</span> Habits Tracker Management Skill
-              </Text>
-              <Text style={resourceItem}>
-                <span style={goldBullet}>&#9670;</span> Client Delivery / Work Tracking Skill
+                <span style={goldBullet}>&#9670;</span> Google Drive Archiver Skill
               </Text>
               <Text style={resourceItem}>
                 <span style={goldBullet}>&#9670;</span> Feature Factory Skills + Best Practices Guide
