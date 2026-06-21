@@ -192,9 +192,14 @@ export function LocalMcpInstall() {
                 key={tool.name}
                 className="rounded-xl border border-border bg-bg-secondary p-5"
               >
-                <code className="font-accent text-sm font-semibold text-gold-light">
-                  {tool.name}
-                </code>
+                <div className="flex items-center justify-between gap-2">
+                  <code className="font-accent text-sm font-semibold text-gold-light">
+                    {tool.name}
+                  </code>
+                  <span className="rounded bg-gold/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gold">
+                    Free
+                  </span>
+                </div>
                 <p className="mt-1.5 text-sm leading-relaxed text-text-muted">
                   {tool.blurb}
                 </p>
