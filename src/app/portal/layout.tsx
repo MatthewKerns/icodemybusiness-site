@@ -7,12 +7,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignOutButton } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
-import { Home, FolderKanban, FileText, Activity, LogOut } from "lucide-react";
+import { Home, FolderKanban, FileText, Activity, Gift, LogOut } from "lucide-react";
 
 const PORTAL_LINKS = [
   { href: "/portal", label: "Dashboard", icon: Home },
   { href: "/portal/projects", label: "Projects", icon: FolderKanban },
   { href: "/portal/deliverables", label: "Deliverables", icon: FileText },
+  { href: "/portal/resources", label: "Resources", icon: Gift },
   { href: "/portal/activity", label: "Activity", icon: Activity },
 ] as const;
 
@@ -25,12 +26,14 @@ export default function PortalLayout({
   const router = useRouter();
   const pathname = usePathname();
 
-  // Redirect to sign-in if not authenticated
+  // Redirect to sign-in if not authenticated, preserving the intended
+  // destination (e.g. the welcome email links straight to
+  // /portal/resources) so the user lands there after signing in.
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      router.push("/sign-in?redirect_url=/portal");
+      router.push(`/sign-in?redirect_url=${encodeURIComponent(pathname)}`);
     }
-  }, [isLoaded, isSignedIn, router]);
+  }, [isLoaded, isSignedIn, router, pathname]);
 
   // Show loading state while checking auth
   if (!isLoaded || !isSignedIn) {

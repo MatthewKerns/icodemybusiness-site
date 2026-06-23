@@ -11,6 +11,7 @@
 import type * as activities from "../activities.js";
 import type * as admin from "../admin.js";
 import type * as agentSessions from "../agentSessions.js";
+import type * as applications from "../applications.js";
 import type * as auditLog from "../auditLog.js";
 import type * as conversationMessages from "../conversationMessages.js";
 import type * as conversations from "../conversations.js";
@@ -18,6 +19,7 @@ import type * as deliverables from "../deliverables.js";
 import type * as email from "../email.js";
 import type * as emails from "../emails.js";
 import type * as http from "../http.js";
+import type * as intakeProcessor from "../intakeProcessor.js";
 import type * as leads from "../leads.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_constants from "../lib/constants.js";
@@ -30,6 +32,7 @@ import type * as pageViews from "../pageViews.js";
 import type * as projects from "../projects.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as users from "../users.js";
+import type * as visitorEvents from "../visitorEvents.js";
 
 import type {
   ApiFromModules,
@@ -41,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   activities: typeof activities;
   admin: typeof admin;
   agentSessions: typeof agentSessions;
+  applications: typeof applications;
   auditLog: typeof auditLog;
   conversationMessages: typeof conversationMessages;
   conversations: typeof conversations;
@@ -48,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   email: typeof email;
   emails: typeof emails;
   http: typeof http;
+  intakeProcessor: typeof intakeProcessor;
   leads: typeof leads;
   "lib/auth": typeof lib_auth;
   "lib/constants": typeof lib_constants;
@@ -60,6 +65,7 @@ declare const fullApi: ApiFromModules<{
   projects: typeof projects;
   subscriptions: typeof subscriptions;
   users: typeof users;
+  visitorEvents: typeof visitorEvents;
 }>;
 
 /**

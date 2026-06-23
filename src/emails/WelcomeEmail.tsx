@@ -19,6 +19,13 @@ interface WelcomeEmailProps {
 
 export function WelcomeEmail({ email, name }: WelcomeEmailProps) {
   const siteUrl = "https://icodemybusiness.com";
+  // The free tools are delivered from the gated client portal. The apex
+  // (icodemybusiness.com) still serves the old static placeholder, so the CTA
+  // must point at the host actually running the app — the Hostinger VPS —
+  // until the apex cutover. Override via NEXT_PUBLIC_APP_URL after cutover.
+  const appUrl =
+    process.env.NEXT_PUBLIC_APP_URL ??
+    "https://icodemybusiness.srv1757482.hstgr.cloud";
   const greeting = name ? `Hey ${name},` : "Hey there,";
 
   return (
@@ -68,7 +75,7 @@ export function WelcomeEmail({ email, name }: WelcomeEmailProps) {
               </Text>
             </Section>
 
-            <Button style={ctaButton} href={`${siteUrl}/free-tools`}>
+            <Button style={ctaButton} href={`${appUrl}/portal/resources`}>
               Access Free Tools
             </Button>
 

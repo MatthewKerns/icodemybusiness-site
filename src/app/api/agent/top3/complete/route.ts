@@ -11,6 +11,11 @@ import {
   InternalError,
   ApiError,
 } from "@/lib/api-error-handler";
+import {
+  captureServerEvent,
+  flushServerAnalytics,
+} from "@/lib/posthog-server";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -78,6 +83,18 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     top3Issues: issues,
     leadId,
   });
+
+  captureServerEvent({
+    distinctId: body.email,
+    event: ANALYTICS_EVENTS.TOP3_COMPLETED,
+    properties: { issueCount: issues.length },
+  });
+  captureServerEvent({
+    distinctId: body.email,
+    event: ANALYTICS_EVENTS.LEAD_CAPTURED,
+    properties: { source: "top3-agent" },
+  });
+  await flushServerAnalytics();
 
   return NextResponse.json({ ok: true, leadId });
 });

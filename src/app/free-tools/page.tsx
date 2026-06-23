@@ -6,13 +6,16 @@ import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useSessionId } from "@/hooks/useSessionId";
 import { useLeadAccess } from "@/hooks/useLeadAccess";
+import { analytics } from "@/lib/analytics";
 import {
   FreeResourceCard,
   BUILDER_RESOURCES,
+  FOUNDER_RESOURCES,
   PREMIUM_RESOURCES,
   type FreeResource,
 } from "@/components/shared/FreeResourceCard";
-import { Check, Mail, Wrench, ShieldAlert, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { Check, Mail, Wrench, ShieldAlert, Sparkles, Rocket, Plug, ArrowRight } from "lucide-react";
 
 export default function FreeResourcesPage() {
   const { user, isSignedIn, isLoaded: clerkLoaded } = useUser();
@@ -42,6 +45,9 @@ export default function FreeResourcesPage() {
       .then(() => {
         if (emailSentRef.current) return;
         emailSentRef.current = true;
+
+        analytics.leadCaptured("free-tools");
+        analytics.freeToolAccessed();
 
         return fetch("/api/email/welcome", {
           method: "POST",
@@ -107,6 +113,51 @@ export default function FreeResourcesPage() {
             Open dev skills and our GitHub best-practices repo — yours to use
             today. No credit card. No catch.
           </p>
+        </section>
+
+        {/* Connect in Claude — add the tools as Claude connectors */}
+        <section className="mt-12" aria-labelledby="connect-heading">
+          <div className="rounded-xl border border-gold-dim bg-gold/5 p-6 md:p-8">
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/10">
+                <Plug className="h-5 w-5 text-gold" aria-hidden="true" />
+              </div>
+              <div>
+                <h2
+                  id="connect-heading"
+                  className="text-h3 font-bold text-text-primary"
+                >
+                  Use them right inside Claude
+                </h2>
+                <p className="mt-1 text-sm text-text-muted">
+                  Add our tools to Claude as connectors — they show up in any
+                  chat. Most tools are free, no account to start.
+                </p>
+              </div>
+            </div>
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <Link
+                href="/connect/mango"
+                className="flex h-11 items-center justify-center gap-2 rounded-lg bg-gold px-5 text-sm font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+              >
+                Add Mango
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+              <Link
+                href="/connect/builder-tools"
+                className="flex h-11 items-center justify-center gap-2 rounded-lg border border-border px-5 text-sm font-medium text-text-primary transition-colors hover:border-gold-dim hover:text-gold"
+              >
+                Install Software Builder Tools
+              </Link>
+              <Link
+                href="/connect"
+                className="flex h-11 items-center justify-center gap-2 rounded-lg px-2 text-sm font-medium text-text-muted transition-colors hover:text-gold"
+              >
+                See all connectors
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
         </section>
 
         {/* Sign-in CTA for unauthenticated users */}
@@ -236,6 +287,43 @@ export default function FreeResourcesPage() {
                     ? handleGetAccess
                     : undefined
                 }
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Founder tools — free, founder-facing workflows kept in this repo */}
+        <section className="mt-16" aria-labelledby="founder-heading">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10">
+              <Rocket className="h-5 w-5 text-gold" aria-hidden="true" />
+            </div>
+            <div>
+              <h2
+                id="founder-heading"
+                className="text-h3 font-bold text-text-primary"
+              >
+                Founder tools
+              </h2>
+              <p className="text-sm text-text-muted">
+                Free workflows for running the business — yours to download and
+                drop into Claude Code.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {FOUNDER_RESOURCES.map((resource) => (
+              <FreeResourceCard
+                key={resource.toolName}
+                icon={resource.icon}
+                toolName={resource.toolName}
+                tagline={resource.tagline}
+                description={resource.description}
+                delivery={resource.delivery}
+                disclaimer={resource.disclaimer}
+                ctaLabel={ctaLabelFor(resource)}
+                ctaHref={ctaHrefFor(resource)}
               />
             ))}
           </div>

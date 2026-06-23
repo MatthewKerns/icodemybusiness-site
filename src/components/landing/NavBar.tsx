@@ -9,6 +9,8 @@ import { api } from "../../../convex/_generated/api";
 import { cn } from "@/lib/utils";
 import { CreditCard, LogOut, Menu, X } from "lucide-react";
 import { ConvexErrorBoundary } from "../shared/ConvexErrorBoundary";
+import { useTrackEvent } from "@/hooks/useTrackEvent";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -96,6 +98,7 @@ function BillingButton(props: {
 export function NavBar() {
   const pathname = usePathname();
   const { isSignedIn } = useUser();
+  const track = useTrackEvent();
   const isHome = pathname === "/";
   const [visible, setVisible] = useState(!isHome);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -209,6 +212,9 @@ export function NavBar() {
           <div className="hidden items-center gap-4 md:flex">
             <Link
               href="/consulting#booking"
+              onClick={() =>
+                track(ANALYTICS_EVENTS.BOOK_CALL_CLICKED, { placement: "nav-desktop" })
+              }
               className="rounded-lg bg-gold px-5 py-2.5 text-sm font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
             >
               Book a Call
@@ -285,7 +291,10 @@ export function NavBar() {
           <div className="flex flex-col gap-3 p-4">
             <Link
               href="/consulting#booking"
-              onClick={closeMobile}
+              onClick={() => {
+                track(ANALYTICS_EVENTS.BOOK_CALL_CLICKED, { placement: "nav-mobile" });
+                closeMobile();
+              }}
               className="flex h-12 items-center justify-center rounded-lg bg-gold text-base font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
             >
               Book a Call

@@ -25,6 +25,12 @@ const OFFERS = [
     description: "Custom development, automation, and AI integrations.",
     href: "/services",
   },
+  {
+    icon: "\u{1F6D2}",
+    title: "Custom E-Commerce Tools",
+    description: "Apply for a bespoke AI automation set built for your store.",
+    href: "/custom-tools",
+  },
 ] as const;
 
 export function OfferGrid() {

@@ -11,6 +11,8 @@ import { FAQAccordion } from "@/components/landing/FAQAccordion";
 import { CommunityBanner } from "@/components/landing/CommunityBanner";
 import { EmbeddedCheckoutDialog } from "@/components/subscribe/EmbeddedCheckoutDialog";
 import { ConvexErrorBoundary } from "@/components/shared/ConvexErrorBoundary";
+import { useTrackEvent } from "@/hooks/useTrackEvent";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import { CreditCard } from "lucide-react";
 
 type Tier = {
@@ -224,17 +226,23 @@ function PricingSection({ onTierClick }: { onTierClick: (plan: string) => void }
 export default function SubscriptionsPage() {
   const router = useRouter();
   const { isSignedIn } = useUser();
+  const track = useTrackEvent();
   const [checkoutPlan, setCheckoutPlan] = useState<string | null>(null);
 
   const handleTierClick = useCallback(
     (plan: string) => {
+      track(
+        ANALYTICS_EVENTS.TIER_SELECTED,
+        { plan, signedIn: !!isSignedIn },
+        "decision"
+      );
       if (!isSignedIn) {
         router.push("/sign-in?redirect_url=/subscribe");
         return;
       }
       setCheckoutPlan(plan);
     },
-    [isSignedIn, router]
+    [isSignedIn, router, track]
   );
 
   return (

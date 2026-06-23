@@ -9,6 +9,11 @@ import {
   ValidationError,
   InternalError,
 } from "@/lib/api-error-handler";
+import {
+  captureServerEvent,
+  flushServerAnalytics,
+} from "@/lib/posthog-server";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 export const dynamic = "force-dynamic";
 
@@ -74,6 +79,12 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
           stripeEventId: event.id,
           severity: "info",
         });
+
+        captureServerEvent({
+          distinctId: userId,
+          event: ANALYTICS_EVENTS.CHECKOUT_COMPLETED,
+          properties: { plan },
+        });
         break;
       }
 
@@ -134,6 +145,12 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
             stripeEventId: event.id,
             severity: "warn",
           });
+
+          captureServerEvent({
+            distinctId: subscription.metadata.userId,
+            event: ANALYTICS_EVENTS.SUBSCRIPTION_CANCELED,
+            properties: { subscriptionId: subscription.id },
+          });
         }
         break;
       }
@@ -145,6 +162,9 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   } catch (err) {
     throw new InternalError("Webhook handler failed");
   }
+
+  // Ensure analytics are sent before the response ends.
+  await flushServerAnalytics();
 
   return NextResponse.json({ received: true }, { status: 200 });
 });

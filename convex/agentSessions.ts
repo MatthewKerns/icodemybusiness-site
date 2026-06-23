@@ -1,5 +1,11 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import {
+  mutation,
+  query,
+  internalMutation,
+  internalQuery,
+} from "./_generated/server";
+import { internal } from "./_generated/api";
 import { requireRole } from "./lib/auth";
 
 const MAX_FILES_PER_SESSION = 5;
@@ -202,6 +208,77 @@ export const getForServer = query({
       )
       .take(200);
     return { session, messages };
+  },
+});
+
+// --- E-commerce intake agent ---
+
+// Persist the structured intake profile the chat agent extracts each turn.
+export const updateIntakeProfile = mutation({
+  args: {
+    sessionId: v.string(),
+    intakeProfile: v.any(),
+    ready: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
+      .first();
+    if (!session) return;
+    await ctx.db.patch(session._id, {
+      intakeProfile: args.intakeProfile,
+      intakeReady: args.ready ?? session.intakeReady,
+    });
+  },
+});
+
+// Start the background "pre-draft" once context is rich enough — runs while the
+// user is still chatting, without blocking their input. Idempotent.
+export const kickoffPreDraft = mutation({
+  args: { sessionId: v.string() },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
+      .first();
+    if (!session || session.preDraftStarted || !session.intakeReady) return;
+    await ctx.db.patch(session._id, { preDraftStarted: true });
+    await ctx.scheduler.runAfter(0, internal.intakeProcessor.preDraft, {
+      sessionId: args.sessionId,
+    });
+  },
+});
+
+// Internal: read a session for the background processor (action runtime).
+export const internalGetSession = internalQuery({
+  args: { sessionId: v.string() },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
+      .first();
+    if (!session) return null;
+    const messages = await ctx.db
+      .query("agentSessionMessages")
+      .withIndex("by_sessionId_timestamp", (q) =>
+        q.eq("sessionId", session._id)
+      )
+      .take(200);
+    return { session, messages };
+  },
+});
+
+// Internal: store the background pre-draft analysis on the session.
+export const internalStorePreDraft = internalMutation({
+  args: { sessionId: v.string(), preDraft: v.string() },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
+      .first();
+    if (!session) return;
+    await ctx.db.patch(session._id, { preDraft: args.preDraft });
   },
 });
 

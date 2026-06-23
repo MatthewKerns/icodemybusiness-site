@@ -3,6 +3,8 @@
 import { cn } from "@/lib/utils";
 import { AlertTriangle, Check, Download } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useTrackEvent } from "@/hooks/useTrackEvent";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import {
   FileText,
   CalendarClock,
@@ -10,6 +12,8 @@ import {
   Factory,
   HardDrive,
   CloudUpload,
+  Target,
+  Compass,
 } from "lucide-react";
 
 export type ResourceCategory = "builders" | "founders" | "premium";
@@ -23,6 +27,8 @@ export interface FreeResource {
   description: string;
   href: string;
   category: ResourceCategory;
+  /** Public GitHub folder for the tool, linked from the gated portal page. */
+  repoUrl?: string;
   /** How the user obtains it. Defaults to "email" (lead-gated). */
   delivery?: ResourceDelivery;
   /** Optional inline safety note (e.g. tools that can delete files). */
@@ -43,6 +49,8 @@ export const BUILDER_RESOURCES: FreeResource[] = [
       "A safety-gated loop that measures, then proposes cleanups across Docker, Downloads, and caches — archiving to Drive and deleting only what you approve. One real run freed 12 GB.",
     icon: HardDrive,
     href: "/downloads/disk-space-optimizer-skill.zip",
+    repoUrl:
+      "https://github.com/MatthewKerns/software-development-best-practices-guide/tree/main/skills/disk-space-optimizer",
     category: "builders",
     delivery: "download",
     disclaimer: "Can delete files — read the included disclaimer first.",
@@ -54,6 +62,8 @@ export const BUILDER_RESOURCES: FreeResource[] = [
       "Backs up Downloads, screenshots, and recordings to your own Google Drive — and removes the local copy only after the upload is verified. Your keys, your Drive.",
     icon: CloudUpload,
     href: "/downloads/google-drive-archiver-skill.zip",
+    repoUrl:
+      "https://github.com/MatthewKerns/software-development-best-practices-guide/tree/main/skills/google-drive-archiver",
     category: "builders",
     delivery: "download",
     disclaimer: "Can delete files — read the included disclaimer first.",
@@ -65,8 +75,43 @@ export const BUILDER_RESOURCES: FreeResource[] = [
       "Six Claude Code orchestrator skills (arch, func, errors, observability, review, docs) plus a complete software-engineering reference — foundations to production readiness. Free on GitHub.",
     icon: Factory,
     href: "https://github.com/MatthewKerns/software-development-best-practices-guide",
+    repoUrl:
+      "https://github.com/MatthewKerns/software-development-best-practices-guide/tree/main/skills/feature-factory",
     category: "builders",
     delivery: "external",
+  },
+];
+
+/**
+ * Founder tools — free, founder-facing workflows kept in this repo (packaged in
+ * `skill-packages/` → `public/downloads/`), delivered as direct downloads. Their
+ * "special place" is the Founder tools section on the free-tools / portal pages.
+ */
+export const FOUNDER_RESOURCES: FreeResource[] = [
+  {
+    toolName: "Quarterly Planner (EOS)",
+    tagline: "Plan your next 90 days the way you run on EOS.",
+    description:
+      "A founder's quarterly planning session. Reads context from your Google Drive, Apple Notes, and Claude history (read-only), then walks the EOS pulse — review last quarter, set 3–7 Rocks, build a weekly Scorecard, and output a 90-day plan + Level 10 agenda.",
+    icon: Target,
+    href: "/downloads/quarterly-planner-skill.zip",
+    category: "founders",
+    delivery: "download",
+    disclaimer:
+      "Reads your Drive / Notes / Claude history (read-only) — see the included disclaimer.",
+  },
+  {
+    toolName: "E-Commerce Brand Business Automation Audit",
+    tagline:
+      "Find the one constraint holding your brand back — and the ranked plan to fix it.",
+    description:
+      "A four-stage strategic audit for an e-commerce or Amazon FBA brand — yours or a client's. Five Claude skills run as one pipeline: structured discovery → Theory-of-Constraints diagnosis → a ranked, reasoned opportunity matrix with a Kill List → a time-phased roadmap. Turns a brand's messy reality into a short list of what to actually do next, everything else deferred.",
+    icon: Compass,
+    href: "/downloads/ecommerce-brand-automation-audit-skill.zip",
+    category: "founders",
+    delivery: "download",
+    disclaimer:
+      "Strategic guidance, not financial or legal advice — see the included disclaimer.",
   },
 ];
 
@@ -154,6 +199,7 @@ export function FreeResourceCard({
   audience,
   comingSoon = false,
 }: FreeResourceCardProps) {
+  const track = useTrackEvent();
   return (
     <div
       className={cn(
@@ -229,6 +275,13 @@ export function FreeResourceCard({
           <a
             href={ctaHref}
             download
+            onClick={() =>
+              track(ANALYTICS_EVENTS.TOOL_DOWNLOADED, {
+                tool: toolName,
+                delivery,
+                href: ctaHref,
+              })
+            }
             className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-blue transition-colors hover:text-blue-light"
           >
             <Download className="h-4 w-4" aria-hidden="true" />
@@ -239,6 +292,13 @@ export function FreeResourceCard({
             href={ctaHref}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() =>
+              track(ANALYTICS_EVENTS.TOOL_DOWNLOADED, {
+                tool: toolName,
+                delivery,
+                href: ctaHref,
+              })
+            }
             className="inline-flex min-h-[44px] items-center text-sm font-semibold text-blue transition-colors hover:text-blue-light"
           >
             {ctaLabel} &rarr;

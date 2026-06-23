@@ -32,6 +32,29 @@ export default defineSchema(
       .index("by_sessionId", ["sessionId"])
       .index("by_clerkUserId", ["clerkUserId"]),
 
+    // APPEND-ONLY
+    // Visitor events: durable system-of-record log of clicks and decisions made
+    // on the marketing site (CTA clicks, plan/tier/path selection, copies,
+    // downloads). Dual-written alongside PostHog so an admin can review the full
+    // visitor journey even when PostHog is unavailable. Keyed by the anonymous
+    // client session id (and Clerk user id once known) so events can be stitched
+    // to a lead / agent session for the same visitor.
+    visitorEvents: defineTable({
+      name: v.string(), // semantic event name from the analytics taxonomy
+      category: v.string(), // "click" | "decision" | "form" | "system"
+      sessionId: v.optional(v.string()), // anonymous client session (icmb_session_id)
+      clerkUserId: v.optional(v.string()),
+      page: v.optional(v.string()), // pathname where the event fired
+      props: v.optional(v.any()), // event-specific details (plan, tool, label, ...)
+      source: v.optional(v.string()), // attribution source
+      variant: v.optional(v.string()), // attribution variant
+      timestamp: v.number(),
+    })
+      .index("by_sessionId", ["sessionId"])
+      .index("by_name", ["name"])
+      .index("by_clerkUserId", ["clerkUserId"])
+      .index("by_timestamp", ["timestamp"]),
+
     // Page views table: tracks page visits with attribution
     pageViews: defineTable({
       userId: v.optional(v.string()),
@@ -165,9 +188,9 @@ export default defineSchema(
       .index("by_conversationId", ["conversationId"])
       .index("by_conversationId_timestamp", ["conversationId", "timestamp"]),
 
-    // Native agent sessions (Top 3 Issues + future first-party agents)
+    // Native agent sessions (Top 3 Issues, e-commerce intake, future agents)
     agentSessions: defineTable({
-      agentKind: v.string(), // "top3-issues" for now
+      agentKind: v.string(), // "top3-issues" | "ecommerce-intake"
       sessionId: v.string(), // client-generated, stable across anon visits
       leadId: v.optional(v.id("leads")),
       visitorEmail: v.optional(v.string()),
@@ -182,6 +205,12 @@ export default defineSchema(
           })
         )
       ),
+      // E-commerce intake agent: structured context extracted from the chat,
+      // and a background "pre-draft" analysis started mid-conversation.
+      intakeProfile: v.optional(v.any()),
+      intakeReady: v.optional(v.boolean()),
+      preDraft: v.optional(v.string()),
+      preDraftStarted: v.optional(v.boolean()),
       fileIds: v.array(v.id("_storage")),
       fileMeta: v.array(
         v.object({
@@ -211,6 +240,32 @@ export default defineSchema(
     })
       .index("by_sessionId_timestamp", ["sessionId", "timestamp"]),
 
+    // "Custom E-Commerce Tools Set" applications. A free intake-chat session is
+    // turned into an application when the user creates an account and submits.
+    // Background processing drafts free value (emailed to the user) and an
+    // internal next-steps proposal (admin-only, never sent to the user).
+    applications: defineTable({
+      email: v.string(),
+      name: v.optional(v.string()),
+      sessionId: v.optional(v.string()), // links to agentSessions.sessionId
+      leadId: v.optional(v.id("leads")),
+      clerkUserId: v.optional(v.string()),
+      source: v.optional(v.string()), // "ecommerce-tools-application"
+      intakeProfile: v.optional(v.any()), // snapshot of extracted context at submit
+      status: v.string(), // "new" | "processing" | "processed" | "proposed" | "closed"
+      // Free value generated in the background and emailed to the user.
+      freeValue: v.optional(v.string()),
+      followupEmailSent: v.boolean(),
+      // INTERNAL — admin only, never returned by user-facing queries.
+      internalProposal: v.optional(v.string()),
+      internalProposalAt: v.optional(v.number()),
+      processingError: v.optional(v.string()),
+      createdAt: v.number(),
+    })
+      .index("by_email", ["email"])
+      .index("by_clerkUserId", ["clerkUserId"])
+      .index("by_sessionId", ["sessionId"])
+      .index("by_status", ["status"]),
   },
   { schemaValidation: true }
 );

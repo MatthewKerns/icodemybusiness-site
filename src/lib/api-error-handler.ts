@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
+import { captureServerError } from "@/lib/posthog-server";
 
 /**
  * Standard error response shape for API routes.
@@ -146,6 +147,8 @@ export function errorResponse(
   error: unknown,
   context?: Record<string, unknown>
 ): NextResponse<ErrorResponse> {
+  const route = typeof context?.route === "string" ? context.route : undefined;
+
   // Handle ApiError instances
   if (error instanceof ApiError) {
     // Log to Sentry with appropriate severity
@@ -160,6 +163,18 @@ export function errorResponse(
         status_code: error.statusCode.toString(),
       },
     });
+
+    // Surface server-side failures on the PostHog ops dashboard. 4xx are
+    // expected client errors (validation/auth/rate-limit) — keep them out of
+    // the operational error metric so it stays meaningful.
+    if (error.statusCode >= 500) {
+      captureServerError({
+        route,
+        code: error.code,
+        statusCode: error.statusCode,
+        message: error.message,
+      });
+    }
 
     const response: ErrorResponse = {
       error: error.message,
@@ -179,6 +194,12 @@ export function errorResponse(
       },
     });
 
+    captureServerError({
+      route,
+      statusCode: 500,
+      message: error.message || "An unexpected error occurred",
+    });
+
     return NextResponse.json(
       { error: error.message || "An unexpected error occurred" },
       { status: 500 }
@@ -196,6 +217,8 @@ export function errorResponse(
       },
     },
   });
+
+  captureServerError({ route, statusCode: 500, message });
 
   return NextResponse.json({ error: message }, { status: 500 });
 }
@@ -262,7 +285,9 @@ export function withErrorHandler<T extends unknown[] = []>(
     try {
       return await handler(request, ...args);
     } catch (error) {
-      return errorResponse(error, context);
+      // Auto-tag the route so PostHog/Sentry can break errors down by endpoint.
+      const route = context?.route ?? request.nextUrl?.pathname;
+      return errorResponse(error, { ...context, route });
     }
   };
 }

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Copy, Check } from "lucide-react";
+import { useTrackEvent } from "@/hooks/useTrackEvent";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 interface CopyRowProps {
   /** Uppercase label above the value. */
@@ -16,8 +18,10 @@ interface CopyRowProps {
 /** A read-only code value with a copy-to-clipboard button. */
 export function CopyRow({ label, value, multiline = false }: CopyRowProps) {
   const [copied, setCopied] = useState(false);
+  const track = useTrackEvent();
 
   const handleCopy = async () => {
+    track(ANALYTICS_EVENTS.COPY_CLICKED, { label });
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);

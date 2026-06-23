@@ -1,4 +1,4 @@
-import { HeroAuroraBackground } from "./HeroAuroraBackground";
+import { HeroConstellationBackground } from "./HeroConstellationBackground";
 
 interface ImmersiveHeroProps {
   children: React.ReactNode;
@@ -7,7 +7,7 @@ interface ImmersiveHeroProps {
 export function ImmersiveHero({ children }: ImmersiveHeroProps) {
   return (
     <div className="relative flex items-center justify-center py-20 lg:py-32">
-      <HeroAuroraBackground />
+      <HeroConstellationBackground />
       <div className="relative z-10 text-center">{children}</div>
     </div>
   );

@@ -3,7 +3,6 @@ import { ImmersiveHero } from "@/components/landing/ImmersiveHero";
 import { StoryBlock } from "@/components/landing/StoryBlock";
 import { OfferGrid } from "@/components/landing/OfferGrid";
 import { SocialProofBar } from "@/components/landing/SocialProofBar";
-import { EmailCapture } from "@/components/shared/EmailCapture";
 import { CommunityBanner } from "@/components/landing/CommunityBanner";
 // eslint-disable-next-line no-restricted-imports -- voice agent is now live on the homepage (Epic 7 in progress)
 import { AgentSection } from "@/components/agent/AgentSection";
@@ -21,10 +20,10 @@ const Top3IssuesAgent = dynamic(
 function HeroContent() {
   return (
     <>
-      <h2 className="text-h1 font-semibold text-text-primary">
+      <h2 className="text-display font-semibold text-text-primary">
         Premium Consulting &amp; AI Automation
       </h2>
-      <p className="mt-4 max-w-2xl text-text-muted">
+      <p className="mt-4 max-w-2xl mx-auto text-text-muted">
         Helping business owners save time and make money with AI-powered
         tools, consulting, and automation systems.
       </p>
@@ -97,18 +96,6 @@ export default function Home() {
 
           {/* Community */}
           <CommunityBanner />
-
-          {/* Email capture */}
-          <section className="py-12 lg:py-20">
-            <div className="mx-auto max-w-2xl">
-              <EmailCapture
-                variant="full"
-                source="homepage"
-                headline="Get free AI tools instantly"
-                subtitle="Enter your email for immediate access. No credit card. No catch."
-              />
-            </div>
-          </section>
         </div>
       </main>
     </>

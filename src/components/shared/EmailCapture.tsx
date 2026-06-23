@@ -9,6 +9,7 @@ import { api } from "../../../convex/_generated/api";
 import { cn } from "@/lib/utils";
 import { parseConvexError } from "@/lib/errors";
 import { useSessionId } from "@/hooks/useSessionId";
+import { analytics } from "@/lib/analytics";
 import { Check, Loader2 } from "lucide-react";
 import { FreeResourceCard, FREE_RESOURCES } from "./FreeResourceCard";
 import {
@@ -83,6 +84,7 @@ export function EmailCaptureComponent({
           sessionId: sessionId ?? undefined,
         });
 
+        analytics.leadCaptured(source ?? "email-capture", { form_variant: variant });
         setStatus("success");
         setShowGlow(true);
         setTimeout(() => setShowGlow(false), 1500);
@@ -93,7 +95,7 @@ export function EmailCaptureComponent({
         submittingRef.current = false;
       }
     },
-    [source, sessionId, createLead, status]
+    [source, variant, sessionId, createLead, status]
   );
 
   if (status === "success") {

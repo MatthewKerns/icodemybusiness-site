@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Mic, MicOff, Loader2 } from "lucide-react";
+import { analytics } from "@/lib/analytics";
 
 type VoiceStatus = "idle" | "connecting" | "active" | "ended" | "error";
 type AgentTalkingState = "listening" | "speaking";
@@ -45,6 +46,7 @@ export default function RetellVoiceWidget() {
       retellClient.on("call_started", () => {
         setStatus("active");
         setAgentState("listening");
+        analytics.voiceCallStarted();
       });
 
       retellClient.on("call_ended", () => {

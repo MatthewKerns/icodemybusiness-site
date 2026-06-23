@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { Suspense, useEffect, type ReactNode } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
-import { initPostHog } from "@/lib/posthog";
 
 function PostHogPageView() {
   const pathname = usePathname();
@@ -43,17 +42,17 @@ function PostHogIdentify() {
 }
 
 export function PostHogProvider({ children }: { children: ReactNode }) {
-  useEffect(() => {
-    initPostHog();
-  }, []);
-
   if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) {
     return <>{children}</>;
   }
 
   return (
     <PHProvider client={posthog}>
-      <PostHogPageView />
+      {/* useSearchParams requires a Suspense boundary so the whole tree
+          doesn't de-opt to client-side rendering at build time. */}
+      <Suspense fallback={null}>
+        <PostHogPageView />
+      </Suspense>
       <PostHogIdentify />
       {children}
     </PHProvider>

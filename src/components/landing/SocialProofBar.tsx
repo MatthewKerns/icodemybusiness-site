@@ -8,7 +8,7 @@ interface Metric {
 }
 
 const METRICS: Metric[] = [
-  { value: "15+", label: "Years Experience" },
+  { value: "8+", label: "Years Professional Software Development Experience" },
   { value: "Premium", label: "Consulting" },
   { value: "3", label: "Free Tools" },
 ];

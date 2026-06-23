@@ -8,6 +8,8 @@ import {
   ValidationError,
   InternalError,
 } from "@/lib/api-error-handler";
+import { captureServerEvent } from "@/lib/posthog-server";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +45,12 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     customerEmail: email,
     userId,
     returnUrl,
+  });
+
+  captureServerEvent({
+    distinctId: userId,
+    event: ANALYTICS_EVENTS.CHECKOUT_STARTED,
+    properties: { plan },
   });
 
   return NextResponse.json({ clientSecret: session.client_secret });

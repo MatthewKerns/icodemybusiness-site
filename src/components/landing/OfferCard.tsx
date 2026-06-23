@@ -1,5 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useTrackEvent } from "@/hooks/useTrackEvent";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 interface OfferCardProps {
   icon: string;
@@ -9,9 +13,13 @@ interface OfferCardProps {
 }
 
 export function OfferCard({ icon, title, description, href }: OfferCardProps) {
+  const track = useTrackEvent();
   return (
     <Link
       href={href}
+      onClick={() =>
+        track(ANALYTICS_EVENTS.PATH_CHOSEN, { title, href }, "decision")
+      }
       className={cn(
         "group flex flex-col rounded-xl border border-border bg-bg-secondary p-5 transition-all",
         "hover:border-gold-dim hover:shadow-[0_0_20px_rgba(212,175,55,0.15)]",

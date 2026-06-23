@@ -72,7 +72,86 @@ async function sendEmail(
   }
 }
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+// Minimal markdown → HTML for emailed deliverables (headings, bullets, bold).
+function mdToHtml(md: string): string {
+  const lines = escapeHtml(md).split("\n");
+  const out: string[] = [];
+  let inList = false;
+  const closeList = () => {
+    if (inList) {
+      out.push("</ul>");
+      inList = false;
+    }
+  };
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    const bold = (s: string) =>
+      s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    if (/^#{1,3}\s+/.test(line)) {
+      closeList();
+      out.push(
+        `<p style="${emailStyles.label}">${bold(line.replace(/^#{1,3}\s+/, ""))}</p>`
+      );
+    } else if (/^[-*]\s+/.test(line)) {
+      if (!inList) {
+        out.push('<ul style="margin:0 0 16px;padding-left:20px;">');
+        inList = true;
+      }
+      out.push(
+        `<li style="${emailStyles.listItem}">${bold(line.replace(/^[-*]\s+/, ""))}</li>`
+      );
+    } else if (line.trim() === "") {
+      closeList();
+    } else {
+      closeList();
+      out.push(`<p style="${emailStyles.paragraph}">${bold(line)}</p>`);
+    }
+  }
+  closeList();
+  return out.join("\n");
+}
+
 // HUBSPOT INTEGRATION POINT: after sending booking email, sync deal stage to "discovery_call_scheduled" in HubSpot
+
+// Follow-up email for "Custom E-Commerce Tools Set" applications — delivers the
+// free-value deliverable drafted in the background (see intakeProcessor.ts).
+export const sendEcommerceFollowupEmail = internalAction({
+  args: {
+    email: v.string(),
+    name: v.optional(v.string()),
+    freeValue: v.string(),
+  },
+  handler: async (_ctx, args) => {
+    const greeting = args.name ? `Hi ${args.name},` : "Hi there,";
+    const bodyContent = `
+  <div style="padding:24px 0;">
+    <p style="${emailStyles.heading}">${greeting}</p>
+    <p style="${emailStyles.paragraph}">
+      Thanks for telling us about your store. Here&rsquo;s a head start &mdash;
+      your top automation opportunities, on us:
+    </p>
+    <hr style="${emailStyles.hr}">
+    ${mdToHtml(args.freeValue)}
+    <hr style="${emailStyles.hr}">
+    <p style="${emailStyles.paragraph}">
+      We&rsquo;re putting together a tailored set of AI tools for your store and
+      will follow up with next steps. Just reply to this email anytime &mdash; a
+      real human reads every message.
+    </p>
+  </div>`;
+    const subject =
+      "Your e-commerce automation opportunities — from iCodeMyBusiness";
+    const html = wrapHtml(subject, bodyContent);
+    await sendEmail(args.email, subject, html);
+  },
+});
 
 export const sendCalendlyBookingEmail = internalAction({
   args: {

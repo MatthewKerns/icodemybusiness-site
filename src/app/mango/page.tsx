@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { EmailCapture } from "@/components/shared/EmailCapture";
 import { FAQAccordion } from "@/components/landing/FAQAccordion";
 import { CommunityBanner } from "@/components/landing/CommunityBanner";
+import { MangoPlanCta } from "@/components/mango/MangoPlanCta";
 import {
   Plug,
   Languages,
@@ -174,7 +175,7 @@ export default function MangoPage() {
 
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <a
-                href="#waitlist"
+                href="https://mango.icodemybusiness.com"
                 className="flex h-12 w-full items-center justify-center rounded-lg bg-gold px-6 font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] sm:w-auto"
               >
                 Get early access
@@ -362,17 +363,12 @@ export default function MangoPage() {
                     ))}
                   </ul>
 
-                  <a
+                  <MangoPlanCta
+                    plan={plan.name}
+                    label={plan.cta}
                     href="#waitlist"
-                    className={cn(
-                      "mt-6 flex h-12 items-center justify-center rounded-lg px-6 font-medium transition-shadow",
-                      plan.highlighted
-                        ? "bg-gold text-black hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
-                        : "border border-border text-text-primary transition-colors hover:border-gold-dim hover:text-gold"
-                    )}
-                  >
-                    {plan.cta}
-                  </a>
+                    highlighted={plan.highlighted}
+                  />
                 </div>
               ))}
             </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { analytics } from "@/lib/analytics";
 
 interface CalendlyEmbedProps {
   url: string;
@@ -65,6 +66,22 @@ export function CalendlyEmbedComponent({ url, email, name }: CalendlyEmbedProps)
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
+  }, []);
+
+  // Capture the booking conversion. Calendly posts a message to the parent
+  // window when a meeting is scheduled inside the iframe.
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      if (
+        typeof e.origin === "string" &&
+        e.origin.includes("calendly.com") &&
+        e.data?.event === "calendly.event_scheduled"
+      ) {
+        analytics.consultationBooked();
+      }
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
   }, []);
 
   const handleIframeLoad = useCallback(() => {
