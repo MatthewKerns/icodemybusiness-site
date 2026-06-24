@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plug, Sparkles, Wrench, Palette, ArrowRight, ExternalLink } from "lucide-react";
+import { Plug, Sparkles, Wrench, Boxes, Palette, ArrowRight, ExternalLink } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Claude Connectors — free tools inside Claude | iCodeMyBusiness",
   description:
-    "Add our tools to Claude as connectors. Step-by-step setup for the Mango Claude Connector, the Software Builder Tools MCP, and the IDEA Brand Coach — most tools free, no account to start.",
+    "Add our tools to Claude as connectors. Step-by-step setup for the Mango Claude Connector, the Software Builder Tools MCP, Inventory Hero, and the IDEA Brand Coach — most tools free, no account to start.",
   openGraph: {
     title: "Claude Connectors — free tools inside Claude",
     description:
-      "Add Mango, the Software Builder Tools MCP, and the IDEA Brand Coach to Claude. Most tools free, no account to start.",
+      "Add Mango, the Software Builder Tools MCP, Inventory Hero, and the IDEA Brand Coach to Claude. Most tools free, no account to start.",
     type: "website",
   },
 };
@@ -34,6 +34,16 @@ const CONNECTORS = [
     href: "/connect/builder-tools",
     cta: "Install the MCP",
     external: false,
+  },
+  {
+    icon: Boxes,
+    name: "Inventory Hero",
+    audience: "For Amazon sellers",
+    blurb:
+      "Run your Amazon FBA business from any Claude chat — restock planning, sales velocity, and profitability, grounded in your live inventory, suppliers, and purchase orders.",
+    href: "https://www.inventoryhero.ai",
+    cta: "Set up Inventory Hero",
+    external: true,
   },
   {
     icon: Palette,
@@ -72,7 +82,7 @@ export default function ConnectHubPage() {
         </section>
 
         <section className="pb-20">
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {CONNECTORS.map((c) => (
               <Link
                 key={c.name}
