@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { convexTest } from "convex-test";
 import { api } from "./_generated/api";

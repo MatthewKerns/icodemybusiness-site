@@ -266,6 +266,152 @@ export default defineSchema(
       .index("by_clerkUserId", ["clerkUserId"])
       .index("by_sessionId", ["sessionId"])
       .index("by_status", ["status"]),
+
+    // ======================================================================
+    // Owner objectives dashboard (/admin/objectives)
+    //
+    // Single-operator tables, all gated by requireOwner(). Convex is the source
+    // of truth for the plan; Mango is synced into mangoSnapshots for context and
+    // is never authoritative for anything here.
+    // ======================================================================
+
+    // Operator preferences. One row, key = "owner".
+    ownerSettings: defineTable({
+      key: v.string(),
+      // A local CEILING on unpaid/investment hours per week. Deliberately not
+      // sourced from Mango's weekly_min_hours, which is a commitment FLOOR (and
+      // is 0.0 on every unpaid tile anyway).
+      overheadWeeklyBudgetHours: v.number(),
+      // Mango focus-project key for iCMB overhead, e.g. "icmb-overhead".
+      mangoOverheadKey: v.optional(v.string()),
+      updatedAt: v.number(),
+    }).index("by_key", ["key"]),
+
+    // Objectives ("rocks") for a planning period.
+    objectives: defineTable({
+      title: v.string(),
+      notes: v.optional(v.string()),
+      period: v.string(), // "week" | "month" | "quarter"
+      periodKey: v.string(), // "2026-W35" | "2026-08" | "2026-Q3"
+      status: v.string(), // "active" | "blocked" | "done" | "dropped"
+      // Relative time emphasis. Active objectives in a period sum to 100.
+      weightPct: v.number(),
+      order: v.number(), // fractional sort key among siblings in the period
+      archivedAt: v.optional(v.number()),
+      // Optional link to a Mango focus-project objective, for confirm-first
+      // write-back. Both must be set for the push button to appear.
+      mangoKey: v.optional(v.string()),
+      mangoObjectiveId: v.optional(v.string()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+      .index("by_period_periodKey", ["period", "periodKey"])
+      .index("by_status", ["status"])
+      .index("by_mangoKey", ["mangoKey"]),
+
+    // To-dos: a tree under one objective. Parent pointer + materialized ancestor
+    // path, because Convex has no recursive queries. `path` makes the cycle
+    // check on re-parent O(1) and subtree selection a pure predicate; depth is
+    // derived from path.length so it cannot desync.
+    objectiveTodos: defineTable({
+      objectiveId: v.id("objectives"), // denormalized owner, always set
+      parentId: v.optional(v.id("objectiveTodos")),
+      // Ancestor ids, root-first, EXCLUDING self.
+      path: v.array(v.id("objectiveTodos")),
+      title: v.string(),
+      notes: v.optional(v.string()),
+      status: v.string(), // "todo" | "doing" | "blocked" | "done"
+      estimateMinutes: v.optional(v.number()),
+      order: v.number(), // fractional sort key among siblings
+      todayDate: v.optional(v.string()), // "YYYY-MM-DD" when on the focus list
+      deferUntil: v.optional(v.string()), // "YYYY-MM-DD"
+      // Soft delete. archivedAt is stamped on every node of the subtree;
+      // archiveRootId marks the node the operator actually archived, so a nested
+      // archive can be restored without resurrecting an outer one.
+      archivedAt: v.optional(v.number()),
+      archiveRootId: v.optional(v.id("objectiveTodos")),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+      .index("by_objectiveId", ["objectiveId"])
+      .index("by_objectiveId_parentId", ["objectiveId", "parentId"])
+      .index("by_todayDate", ["todayDate"])
+      .index("by_archiveRootId", ["archiveRootId"]),
+
+    // One applied op batch, with enough of a delta to revert it. Stores only the
+    // CHANGED FIELDS of touched docs plus the ids of created docs — not a full
+    // copy of the plan.
+    objectiveOpBatches: defineTable({
+      label: v.string(),
+      source: v.string(), // "manual" | "ai" | "revert"
+      requestId: v.optional(v.id("reorgRequests")),
+      ops: v.any(), // the ReorgOp[] that were applied
+      createdObjectives: v.array(v.id("objectives")),
+      createdTodos: v.array(v.id("objectiveTodos")),
+      // [{ id, set: {...}, clear: ["field", ...] }] — only the changed fields.
+      // Removals are a name list because Convex drops `undefined` on write, so
+      // "this field was absent" cannot be encoded as a value.
+      beforeObjectives: v.any(),
+      beforeTodos: v.any(),
+      docCount: v.number(),
+      revertedAt: v.optional(v.number()),
+      revertedByBatchId: v.optional(v.id("objectiveOpBatches")),
+      createdAt: v.number(),
+    })
+      .index("by_createdAt", ["createdAt"])
+      .index("by_requestId", ["requestId"]),
+
+    // Every reorganization request the operator typed, for pattern mining.
+    // `unmapped` — what the AI could NOT express with the available ops — is the
+    // signal for which reorganization tooling is worth actually building.
+    reorgRequests: defineTable({
+      rawText: v.string(),
+      status: v.string(), // "pending"|"proposed"|"applied"|"rejected"|"reverted"|"failed"
+      edited: v.boolean(), // operator changed the proposal before applying
+      proposedOps: v.optional(v.any()),
+      appliedOps: v.optional(v.any()),
+      rejectedOps: v.optional(v.any()), // [{ op, reason }] refused by validateOps
+      rationale: v.optional(v.string()),
+      unmapped: v.array(
+        v.object({
+          intentKey: v.string(), // kebab-case slug from the taxonomy
+          description: v.string(),
+          why: v.string(),
+        })
+      ),
+      batchId: v.optional(v.id("objectiveOpBatches")),
+      model: v.optional(v.string()),
+      latencyMs: v.optional(v.number()),
+      error: v.optional(v.string()),
+      createdAt: v.number(),
+      resolvedAt: v.optional(v.number()),
+    })
+      .index("by_status", ["status"])
+      .index("by_createdAt", ["createdAt"]),
+
+    // Latest Mango snapshot per kind (upsert — one row per kind, no history).
+    // Mango is the system of record for time; a local history would be an
+    // unbounded second copy to reconcile.
+    mangoSnapshots: defineTable({
+      kind: v.string(),
+      payload: v.optional(v.any()),
+      ok: v.boolean(),
+      error: v.optional(v.string()),
+      fetchedAt: v.number(), // last ATTEMPT
+      okAt: v.optional(v.number()), // last SUCCESS — drives "last synced"
+    }).index("by_kind", ["kind"]),
+
+    // APPEND-ONLY — no update or delete mutations permitted
+    // Confirm-first writes pushed out to Mango, for auditability.
+    mangoWrites: defineTable({
+      tool: v.string(),
+      args: v.any(),
+      ok: v.boolean(),
+      response: v.optional(v.any()),
+      error: v.optional(v.string()),
+      objectiveId: v.optional(v.id("objectives")),
+      createdAt: v.number(),
+    }).index("by_createdAt", ["createdAt"]),
   },
   { schemaValidation: true }
 );
