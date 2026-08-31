@@ -46,6 +46,8 @@ export const ANALYTICS_EVENTS = {
   TOOL_DOWNLOADED: "tool_downloaded",
   /** The "Book a Call" CTA was clicked (intent, precedes consultation_booked). */
   BOOK_CALL_CLICKED: "book_call_clicked",
+  /** The "Join the Academy" CTA was clicked (intent, precedes lead_captured). */
+  ACADEMY_JOIN_CLICKED: "academy_join_clicked",
   /** The e-commerce intake agent was submitted into an application. */
   ECOMMERCE_INTAKE_COMPLETED: "ecommerce_intake_completed",
 

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Plug, Sparkles, Wrench, Boxes, Palette, ArrowRight, ExternalLink } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Claude Connectors — free tools inside Claude | iCodeMyBusiness",
+  title: "Claude Connectors",
   description:
     "Add our tools to Claude as connectors. Step-by-step setup for the Mango Claude Connector, the Software Builder Tools MCP, Inventory Hero, and the IDEA Brand Coach — most tools free, no account to start.",
   openGraph: {

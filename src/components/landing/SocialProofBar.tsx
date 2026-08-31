@@ -8,9 +8,9 @@ interface Metric {
 }
 
 const METRICS: Metric[] = [
-  { value: "8+", label: "Years Professional Software Development Experience" },
-  { value: "Premium", label: "Consulting" },
-  { value: "3", label: "Free Tools" },
+  { value: "8+", label: "Years Building Software Professionally" },
+  { value: "4", label: "Production Platforms Built & Shipped" },
+  { value: "Free", label: "Builder Tools To Start With Today" },
 ];
 
 export function SocialProofBar() {

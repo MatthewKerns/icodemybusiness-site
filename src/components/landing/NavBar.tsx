@@ -14,6 +14,7 @@ import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
+  { href: "/academy", label: "Academy" },
   { href: "/consulting", label: "Consulting" },
   { href: "/subscribe", label: "Subscriptions" },
   { href: "/free-tools", label: "Free Tools" },
@@ -211,13 +212,13 @@ export function NavBar() {
           {/* Desktop CTA + Sign Out */}
           <div className="hidden items-center gap-4 md:flex">
             <Link
-              href="/consulting#booking"
+              href="/academy#join"
               onClick={() =>
-                track(ANALYTICS_EVENTS.BOOK_CALL_CLICKED, { placement: "nav-desktop" })
+                track(ANALYTICS_EVENTS.ACADEMY_JOIN_CLICKED, { placement: "nav-desktop" })
               }
               className="rounded-lg bg-gold px-5 py-2.5 text-sm font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
             >
-              Book a Call
+              Join the Academy
             </Link>
             <BillingButton variant="desktop" />
             {isSignedIn && (
@@ -290,14 +291,14 @@ export function NavBar() {
 
           <div className="flex flex-col gap-3 p-4">
             <Link
-              href="/consulting#booking"
+              href="/academy#join"
               onClick={() => {
-                track(ANALYTICS_EVENTS.BOOK_CALL_CLICKED, { placement: "nav-mobile" });
+                track(ANALYTICS_EVENTS.ACADEMY_JOIN_CLICKED, { placement: "nav-mobile" });
                 closeMobile();
               }}
               className="flex h-12 items-center justify-center rounded-lg bg-gold text-base font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
             >
-              Book a Call
+              Join the Academy
             </Link>
             <BillingButton variant="mobile" onMobileBillingClick={closeMobile} />
             {isSignedIn && (

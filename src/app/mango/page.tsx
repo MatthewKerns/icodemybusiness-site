@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Mango MCP — Client context tools for dev contractors | iCodeMyBusiness",
+  title: "Mango MCP",
   description:
     "Free MCP tools that help dev contractors speak their client's language: client-tuned decision briefs, deliverable summaries without jargon, and a status agent your client can query any time — that only shows what you approve.",
   openGraph: {

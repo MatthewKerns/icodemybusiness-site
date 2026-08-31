@@ -2,6 +2,7 @@ import Link from "next/link";
 
 const FOOTER_LINKS = [
   { href: "/", label: "Home" },
+  { href: "/academy", label: "Academy" },
   { href: "/consulting", label: "Consulting" },
   { href: "/subscribe", label: "Subscriptions" },
   { href: "/free-tools", label: "Free Tools" },

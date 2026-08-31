@@ -26,14 +26,18 @@ const ebGaramond = EB_Garamond({
   display: "swap",
 });
 
+const SITE_DESCRIPTION =
+  "A developer academy for founders who build their own software. Learn to ship the tools your business runs on — professionally.";
+
 export const metadata: Metadata = {
-  title: "iCodeMyBusiness",
-  description:
-    "Save time. Make money. AI-powered consulting and automation tools for business owners.",
+  title: {
+    default: "iCodeMyBusiness — Learn to Build Your Own Software",
+    template: "%s | iCodeMyBusiness",
+  },
+  description: SITE_DESCRIPTION,
   openGraph: {
-    title: "iCodeMyBusiness",
-    description:
-      "Save time. Make money. AI-powered consulting and automation tools for business owners.",
+    title: "iCodeMyBusiness — Learn to Build Your Own Software",
+    description: SITE_DESCRIPTION,
     type: "website",
   },
 };
