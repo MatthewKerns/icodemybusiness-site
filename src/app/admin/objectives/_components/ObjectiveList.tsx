@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Archive } from "lucide-react";
+import { Plus, Archive, Link2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ interface ObjectiveListProps {
   onApply: (ops: ReorgOp[], label: string) => Promise<void>;
   onCreate: (title: string) => Promise<void>;
   onArchive: (objectiveId: string) => Promise<void>;
+  onLinkMango: (objectiveId: string) => void;
   busy: boolean;
 }
 
@@ -40,6 +41,7 @@ export function ObjectiveList({
   onApply,
   onCreate,
   onArchive,
+  onLinkMango,
   busy,
 }: ObjectiveListProps) {
   const [title, setTitle] = useState("");
@@ -164,6 +166,25 @@ export function ObjectiveList({
                       ))}
                     </SelectContent>
                   </Select>
+                  <button
+                    type="button"
+                    title={
+                      objective.mangoKey
+                        ? `Linked to Mango (${objective.mangoKey})`
+                        : `Link "${objective.title}" to Mango`
+                    }
+                    aria-label={`Link "${objective.title}" to Mango`}
+                    disabled={busy}
+                    onClick={() => onLinkMango(objective.id)}
+                    className={cn(
+                      "rounded p-1.5 transition-colors hover:bg-bg-tertiary disabled:opacity-30",
+                      objective.mangoKey
+                        ? "text-gold hover:text-gold"
+                        : "text-text-dim hover:text-text-primary",
+                    )}
+                  >
+                    <Link2 className="h-3.5 w-3.5" />
+                  </button>
                   <button
                     type="button"
                     title={`Archive "${objective.title}"`}

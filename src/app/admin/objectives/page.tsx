@@ -13,6 +13,7 @@ import { ObjectiveList } from "./_components/ObjectiveList";
 import { ReorgBox, type ReorgRequestDoc } from "./_components/ReorgBox";
 import { MangoStatus, type MangoSnapshots } from "./_components/MangoStatus";
 import { OverheadPanel } from "./_components/OverheadPanel";
+import { MangoLinkDialog } from "./_components/MangoLinkDialog";
 import { TodoTree } from "./_components/TodoTree";
 import { TodayPanel } from "./_components/TodayPanel";
 import { isoWeekKey, todayKey, type Plan, type ReorgOp } from "./_components/plan";
@@ -37,12 +38,15 @@ export default function AdminObjectivesPage() {
   const submitRequest = useMutation(api.objectivesIntake.submitRequest);
   const resolveRequest = useMutation(api.objectivesIntake.resolveRequest);
   const setOwnerSettings = useMutation(api.objectives.setOwnerSettings);
+  const updateObjective = useMutation(api.objectives.updateObjective);
   const syncMango = useAction(api.mango.syncNow);
+  const pushObjectiveStatus = useAction(api.mango.pushObjectiveStatus);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<Id<"reorgRequests"> | null>(null);
+  const [linkingId, setLinkingId] = useState<string | null>(null);
 
   // The proposal arrives asynchronously (a scheduled action calls the model),
   // so the page subscribes to the row rather than awaiting a response.
@@ -215,6 +219,51 @@ export default function AdminObjectivesPage() {
     [setOwnerSettings],
   );
 
+  const linking = plan?.objectives.find((o) => o.id === linkingId) ?? null;
+
+  const runSaveMangoLink = useCallback(
+    async (mangoKey: string, mangoObjectiveId: string) => {
+      if (!linkingId) return;
+      setBusy(true);
+      setError(null);
+      try {
+        await updateObjective({
+          objectiveId: linkingId as Id<"objectives">,
+          mangoKey,
+          mangoObjectiveId,
+        });
+      } catch (e) {
+        setError(errorMessage(e));
+      } finally {
+        setBusy(false);
+      }
+    },
+    [linkingId, updateObjective],
+  );
+
+  const runPushToMango = useCallback(
+    async (status: string) => {
+      if (!linking?.mangoKey || !linking.mangoObjectiveId) return;
+      setBusy(true);
+      setError(null);
+      try {
+        const result = await pushObjectiveStatus({
+          objectiveId: linking.id as Id<"objectives">,
+          mangoKey: linking.mangoKey,
+          mangoObjectiveId: linking.mangoObjectiveId,
+          status,
+        });
+        if (result.ok) setLinkingId(null);
+        else setError(result.error ?? "Mango rejected the update");
+      } catch (e) {
+        setError(errorMessage(e));
+      } finally {
+        setBusy(false);
+      }
+    },
+    [linking, pushObjectiveStatus],
+  );
+
   return (
     <main id="main-content" className="px-4 py-8 md:px-6 lg:px-12">
       <div className="mx-auto max-w-7xl">
@@ -278,6 +327,7 @@ export default function AdminObjectivesPage() {
                 onApply={runOps}
                 onCreate={runCreateObjective}
                 onArchive={runArchiveObjective}
+                onLinkMango={setLinkingId}
                 busy={busy}
               />
             </section>
@@ -380,6 +430,15 @@ export default function AdminObjectivesPage() {
             </aside>
           </div>
         )}
+
+        <MangoLinkDialog
+          objective={linking}
+          open={linkingId !== null}
+          busy={busy}
+          onOpenChange={(open) => setLinkingId(open ? linkingId : null)}
+          onSave={runSaveMangoLink}
+          onPush={runPushToMango}
+        />
       </div>
     </main>
   );
