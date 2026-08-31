@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { ConvexError } from "convex/values";
 import { Undo2, RotateCcw, AlertTriangle } from "lucide-react";
 import { api } from "../../../../convex/_generated/api";
@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ObjectiveList } from "./_components/ObjectiveList";
 import { ReorgBox, type ReorgRequestDoc } from "./_components/ReorgBox";
+import { MangoStatus, type MangoSnapshots } from "./_components/MangoStatus";
+import { OverheadPanel } from "./_components/OverheadPanel";
 import { TodoTree } from "./_components/TodoTree";
 import { TodayPanel } from "./_components/TodayPanel";
 import { isoWeekKey, todayKey, type Plan, type ReorgOp } from "./_components/plan";
@@ -25,6 +27,8 @@ export default function AdminObjectivesPage() {
   const plan = useQuery(api.objectives.getPlan, {}) as Plan | undefined;
   const batches = useQuery(api.objectives.listBatches, { limit: 5 });
   const archivedRoots = useQuery(api.objectives.listArchivedRoots, {});
+  const settings = useQuery(api.objectives.getOwnerSettings, {});
+  const snapshots = useQuery(api.mango.getSnapshots, {}) as MangoSnapshots | undefined;
 
   const applyOps = useMutation(api.objectives.applyOps);
   const createObjective = useMutation(api.objectives.createObjective);
@@ -32,6 +36,8 @@ export default function AdminObjectivesPage() {
   const revertBatch = useMutation(api.objectives.revertBatch);
   const submitRequest = useMutation(api.objectivesIntake.submitRequest);
   const resolveRequest = useMutation(api.objectivesIntake.resolveRequest);
+  const setOwnerSettings = useMutation(api.objectives.setOwnerSettings);
+  const syncMango = useAction(api.mango.syncNow);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -182,6 +188,33 @@ export default function AdminObjectivesPage() {
     }
   }, [requestId, resolveRequest]);
 
+  const runSyncMango = useCallback(async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await syncMango({});
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }, [syncMango]);
+
+  const runSetBudget = useCallback(
+    async (overheadWeeklyBudgetHours: number) => {
+      setBusy(true);
+      setError(null);
+      try {
+        await setOwnerSettings({ overheadWeeklyBudgetHours });
+      } catch (e) {
+        setError(errorMessage(e));
+      } finally {
+        setBusy(false);
+      }
+    },
+    [setOwnerSettings],
+  );
+
   return (
     <main id="main-content" className="px-4 py-8 md:px-6 lg:px-12">
       <div className="mx-auto max-w-7xl">
@@ -193,7 +226,8 @@ export default function AdminObjectivesPage() {
               in check.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <MangoStatus snapshots={snapshots} busy={busy} onSync={() => void runSyncMango()} />
             {lastBatch && (
               <Button
                 variant="outline"
@@ -291,6 +325,13 @@ export default function AdminObjectivesPage() {
                 onApply={runOps}
                 onSelectObjective={setSelectedId}
                 busy={busy}
+              />
+
+              <OverheadPanel
+                snapshots={snapshots}
+                budgetHours={settings?.overheadWeeklyBudgetHours ?? 10}
+                busy={busy}
+                onSetBudget={runSetBudget}
               />
 
               {archivedRoots && archivedRoots.length > 0 && (
