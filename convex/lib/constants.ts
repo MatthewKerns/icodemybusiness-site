@@ -14,3 +14,11 @@ export const HOUR = 60 * 60 * 1000;
 // abusive floods. Excess events are silently dropped, never errored.
 export const EVENT_CAPTURE_RATE = 120;
 export const EVENT_CAPTURE_CAPACITY = 60;
+
+/**
+ * AI reorganization intake. Each request costs a model call, so the bucket is
+ * small and refills slowly — generous for a single operator thinking out loud,
+ * tight enough that a stuck retry loop cannot run up a bill.
+ */
+export const REORG_INTAKE_RATE = 20;
+export const REORG_INTAKE_CAPACITY = 5;

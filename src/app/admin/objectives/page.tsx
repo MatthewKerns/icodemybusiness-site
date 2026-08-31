@@ -10,9 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ObjectiveList } from "./_components/ObjectiveList";
+import { ReorgBox, type ReorgRequestDoc } from "./_components/ReorgBox";
 import { TodoTree } from "./_components/TodoTree";
 import { TodayPanel } from "./_components/TodayPanel";
-import { isoWeekKey, type Plan, type ReorgOp } from "./_components/plan";
+import { isoWeekKey, todayKey, type Plan, type ReorgOp } from "./_components/plan";
 
 function errorMessage(error: unknown): string {
   if (error instanceof ConvexError) return String(error.data);
@@ -29,10 +30,20 @@ export default function AdminObjectivesPage() {
   const createObjective = useMutation(api.objectives.createObjective);
   const archiveObjective = useMutation(api.objectives.archiveObjective);
   const revertBatch = useMutation(api.objectives.revertBatch);
+  const submitRequest = useMutation(api.objectivesIntake.submitRequest);
+  const resolveRequest = useMutation(api.objectivesIntake.resolveRequest);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [requestId, setRequestId] = useState<Id<"reorgRequests"> | null>(null);
+
+  // The proposal arrives asynchronously (a scheduled action calls the model),
+  // so the page subscribes to the row rather than awaiting a response.
+  const request = useQuery(
+    api.objectivesIntake.getRequest,
+    requestId ? { requestId } : "skip",
+  ) as ReorgRequestDoc | null | undefined;
 
   const selected = useMemo(() => {
     if (!plan) return null;
@@ -111,6 +122,65 @@ export default function AdminObjectivesPage() {
       setBusy(false);
     }
   }, [lastBatch, revertBatch]);
+
+  const runSubmitRequest = useCallback(
+    async (rawText: string) => {
+      setBusy(true);
+      setError(null);
+      try {
+        const id = await submitRequest({ rawText, today: todayKey() });
+        setRequestId(id);
+      } catch (e) {
+        setError(errorMessage(e));
+      } finally {
+        setBusy(false);
+      }
+    },
+    [submitRequest],
+  );
+
+  const runApplyProposal = useCallback(
+    async (ops: ReorgOp[], edited: boolean) => {
+      if (!requestId) return;
+      setBusy(true);
+      setError(null);
+      try {
+        const { batchId } = await applyOps({
+          ops,
+          label: "AI re-plan",
+          source: "ai",
+          requestId,
+        });
+        await resolveRequest({
+          requestId,
+          status: edited ? "edited_applied" : "applied",
+          appliedOps: ops,
+          edited,
+          batchId,
+        });
+        setRequestId(null);
+      } catch (e) {
+        // The proposal stays on screen so it can be edited and retried.
+        setError(errorMessage(e));
+      } finally {
+        setBusy(false);
+      }
+    },
+    [applyOps, requestId, resolveRequest],
+  );
+
+  const runRejectProposal = useCallback(async () => {
+    if (!requestId) return;
+    setBusy(true);
+    try {
+      await resolveRequest({ requestId, status: "rejected" });
+      setRequestId(null);
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }, [requestId, resolveRequest]);
 
   return (
     <main id="main-content" className="px-4 py-8 md:px-6 lg:px-12">
@@ -206,6 +276,16 @@ export default function AdminObjectivesPage() {
             </section>
 
             <aside className="space-y-4">
+              <ReorgBox
+                plan={plan}
+                request={request}
+                busy={busy}
+                onSubmit={runSubmitRequest}
+                onApply={runApplyProposal}
+                onReject={runRejectProposal}
+                onDismiss={() => setRequestId(null)}
+              />
+
               <TodayPanel
                 plan={plan}
                 onApply={runOps}
