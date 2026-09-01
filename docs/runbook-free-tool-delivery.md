@@ -27,8 +27,11 @@ chmod 600). See `.env.example`.
 |-----|---------|--------------------|
 | `RESEND_API_KEY` | Resend auth | Route throws 503 `SERVICE_UNAVAILABLE`; **no email sent** |
 | `RESEND_FROM_EMAIL` | From address (default `hello@icodemybusiness.com`) | Falls back to default |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` | Auth (route requires session) | Signup/auth broken → 401 on send |
-| `NEXT_PUBLIC_CONVEX_URL` | Lead create/lookup | Lead never created → effect/email never fire |
+| `NEXT_PUBLIC_CONVEX_URL` | Lead create/lookup | Lead never created → welcome-email send has no matching lead, 400 |
+
+`/api/email/welcome` no longer requires a Clerk session — the free-tools
+capture is email-only. It's gated on a matching `leads` row instead (see
+`docs/free-tool-delivery.md`).
 
 **Resend domain:** `icodemybusiness.com` must be a **verified domain** in the
 Resend account (SPF/DKIM). If unverified, Resend returns an error and the route
@@ -45,74 +48,58 @@ node -e 'const https=require("https");
 const h="icodemybusiness.srv1757482.hstgr.cloud";
 ["/free-tools","/downloads/disk-space-optimizer-skill.zip"].forEach(p=>
  https.get({host:h,path:p},r=>console.log(r.statusCode,p)));
-const req=https.request({host:h,path:"/api/email/welcome",method:"POST"},r=>console.log(r.statusCode,"POST /api/email/welcome"));req.end();'
+const req=https.request({host:h,path:"/api/email/welcome",method:"POST",
+ headers:{"Content-Type":"application/json"}},r=>console.log(r.statusCode,"POST /api/email/welcome"));
+req.end(JSON.stringify({email:"no-such-lead@example.com"}));'
 ```
-Expected: `/free-tools` → 200 (public marketing), download → 200,
-`POST /api/email/welcome` → **401** (correctly auth-gated). The welcome-email
-CTA points to the **gated** `/portal/free-resources` (the app host —
-`NEXT_PUBLIC_APP_URL`); unauthenticated, it redirects to `/sign-in`, so don't
-expect a bare 200 there.
+Expected: `/free-tools` → 200 (fully public, no auth), download → 200,
+`POST /api/email/welcome` with an email that was never captured → **400**
+(no matching `leads` row — correctly rejected, not an open relay). The
+welcome-email CTA points straight at the public `/free-tools` page.
 
 ### Full flow (manual, end-to-end)
-1. Open `/free-tools` in a fresh browser/incognito → click **Get Free Access**.
-2. Complete Clerk sign-up with a **real inbox you control**.
-3. On redirect back to `/free-tools`, the page should show **"Setting up your
-   access…"** then **"Check your email!"** (this is the lead-create + email
-   trigger).
+1. Open `/free-tools` in a fresh browser/incognito.
+2. Enter a **real inbox you control** into the email-capture form and submit —
+   no account or sign-in required.
+3. The form should show its success state ("Check your email — we've sent
+   your download links.").
 4. Confirm the welcome email arrives (check spam). The **"Access Free Tools"**
-   button must land on `/portal/free-resources` (signed in → the gated delivery
-   page; signed out → sign-in, then back to it).
-5. On `/portal/free-resources`, confirm each free tool's **"View on GitHub"**
-   link opens the right repo folder (`skills/disk-space-optimizer`,
-   `skills/google-drive-archiver`, `skills/feature-factory`).
+   button should land on the public `/free-tools` page — no sign-in prompt.
+5. On `/free-tools`, confirm each tool card's CTA works directly: **Download**
+   for the two Builder skills, **View on GitHub** for Feature Factory.
 
 ## Failure modes
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| Page stuck on "Setting up your access…" | Lead never created — Convex unreachable or `createLead` error | Check `NEXT_PUBLIC_CONVEX_URL`; Convex logs |
+| EmailCapture form stuck on loading | Convex unreachable or `createLead` error | Check `NEXT_PUBLIC_CONVEX_URL`; Convex logs |
 | No email received | `RESEND_API_KEY` unset (503), or Resend domain unverified (500), or in spam | Check route response / Resend dashboard → Logs & Domains |
-| Email CTA 404s or lands on the static placeholder | `appUrl` points at the apex (still placeholder) instead of the app host | CTA must be `${appUrl}/portal/free-resources`; set `NEXT_PUBLIC_APP_URL` to the app host in `WelcomeEmail.tsx` |
-| Email CTA lands on portal dashboard, not free tools | `redirect_url` not preserved through sign-in | `portal/layout.tsx` must redirect with `redirect_url=${pathname}` |
+| Email CTA 404s or lands on the static placeholder | `appUrl` points at the apex (still placeholder) instead of the app host | CTA must be `${appUrl}/free-tools`; set `NEXT_PUBLIC_APP_URL` to the app host in `WelcomeEmail.tsx` |
 | "View on GitHub" 404s | The two skills not yet pushed to the public repo | Push `skills/disk-space-optimizer` + `skills/google-drive-archiver` to `software-development-best-practices-guide` |
-| `POST /api/email/welcome` returns 401 in browser | Not signed in / Clerk session missing | Expected when unauthenticated; sign in first |
-| "Get Started" on /subscribe errors | `STRIPE_PRICE_ID_PERSONAL`/`_CONTRACTOR` not set | Create the Stripe prices + set env vars (see "Paid tools" below) |
+| `POST /api/email/welcome` returns 400 "No matching lead" | The email never went through `createLead` first (direct API call, or a typo) | Expected for an unknown email — capture it via the form first |
 
 Resend send results are logged (`data?.id` on success, `error.message` on
 failure) — check the container logs / Resend dashboard to confirm delivery.
 
-## Free vs paid catalog
+## Free tools catalog
 
-- **Free** = the GitHub best-practices repo set, shown in the "Free tools"
-  section on `/free-tools`: Disk Space Optimizer + Google Drive Archiver
-  (downloads) and Feature Factory + Best Practices (GitHub link). The welcome
-  email lists exactly these. Fully working today.
-- **Paid** = three continuously-supported workflow tools on `/subscribe`
-  (`src/app/subscribe/page.tsx`), each for a different audience:
-  - `personal` — **Personal Time Planner** — $24.99/mo — for everyone
-  - `contractor` — **Side Gig / Contractor Work Time** — $24.99/mo — for builders
-  - `business` — **Business Management (EOS)** — $49.99/mo — for founders —
-    **coming soon** (waitlist via the email-capture section; no checkout)
+**Free** = the GitHub best-practices repo set, shown in the "Free tools"
+section on `/free-tools`: Disk Space Optimizer + Google Drive Archiver
+(downloads) and Feature Factory + Best Practices (GitHub link). The welcome
+email lists exactly these. Fully working today, no auth or checkout involved.
 
-## ⚠️ Paid tools — blocked on Stripe config + assets
+## ⚠️ Self-serve pricing — retired, not just unconfigured
 
-To make the paid checkout functional:
-1. In the **Stripe dashboard**, create a product + recurring monthly price for
-   each tool ($24.99 personal, $24.99 contractor; $49.99 business when ready).
-2. Set the price IDs in `/opt/icodemybusiness-site/.env.build` (see `.env.example`):
-   `STRIPE_PRICE_ID_PERSONAL`, `STRIPE_PRICE_ID_CONTRACTOR`,
-   `STRIPE_PRICE_ID_BUSINESS`. These map to the plan keys in
-   `src/lib/stripe-plans.ts`; the checkout route accepts `personal`/`contractor`
-   (not `business`, which is coming soon), and the Stripe webhook maps the price
-   back to the plan via `planFromPriceId`.
-3. Redeploy. "Get Started" then opens the embedded checkout for that tool.
-4. Provide the actual tool deliverables (the planner / time-tracker / EOS
-   workflows) — these are MCP-server workflows, delivered/connected after
-   purchase. Gate any downloadable asset behind
-   `api.subscriptions.getActiveSubscription` before revealing it.
-
-Until step 2 is done, the personal/contractor "Get Started" buttons return a
-"Plan not configured" error. Business Management stays a waitlist until launch.
+The old three-tier `/subscribe` product ($24.99 personal, $24.99 contractor,
+$49.99 business) is **retired**, not merely blocked on config: `/subscribe`
+now redirects to `/consulting` and the priced cards no longer render anywhere
+public. Paid interest is sold on a free, no-pricing booked call instead — see
+`src/app/consulting/page.tsx`. The Stripe checkout stack (API routes,
+`EmbeddedCheckoutDialog`, `PricingTier`, webhook, `src/lib/stripe-plans.ts`)
+stays in the repo dormant — untouched, unlinked — in case self-serve
+checkout is relaunched later. If it is, the old setup steps (create Stripe
+prices, set `STRIPE_PRICE_ID_*`, re-link the CTAs) still apply; see git
+history on this file for the prior version of those instructions.
 
 ## Deploy
 
