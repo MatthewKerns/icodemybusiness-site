@@ -5,6 +5,8 @@ import {
   EVENT_CAPTURE_RATE,
   HOUR,
   MINUTE,
+  REORG_INTAKE_CAPACITY,
+  REORG_INTAKE_RATE,
 } from "./constants";
 
 export const { checkRateLimit, rateLimit, resetRateLimit } = defineRateLimits({
@@ -18,5 +20,11 @@ export const { checkRateLimit, rateLimit, resetRateLimit } = defineRateLimits({
     rate: EVENT_CAPTURE_RATE,
     period: MINUTE,
     capacity: EVENT_CAPTURE_CAPACITY,
+  },
+  reorgIntake: {
+    kind: "token bucket",
+    rate: REORG_INTAKE_RATE,
+    period: HOUR,
+    capacity: REORG_INTAKE_CAPACITY,
   },
 });

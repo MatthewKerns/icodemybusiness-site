@@ -3,7 +3,23 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isWebhookRateLimited } from "@/lib/webhook-rate-limit";
 import { applyAttribution } from "@/lib/attribution-middleware";
-import { isAdmin } from "@/lib/auth";
+import { isOwnerEmail, isOwnerUserId } from "@/lib/owner";
+import { isOwnerByApiLookup } from "@/lib/owner-lookup";
+
+/**
+ * A browser navigation gets an HTML page; an API/fetch caller keeps the JSON 403.
+ * /forbidden deliberately lives OUTSIDE /admin so this redirect cannot loop.
+ */
+function forbid(request: NextRequest) {
+  const accept = request.headers.get("accept") ?? "";
+  if (accept.includes("text/html")) {
+    return NextResponse.redirect(new URL("/forbidden", request.url));
+  }
+  return NextResponse.json(
+    { error: "Forbidden - Admin access required" },
+    { status: 403 }
+  );
+}
 
 export default clerkMiddleware(async (auth, request: NextRequest) => {
   if (request.nextUrl.pathname.startsWith("/api/webhooks/")) {
@@ -16,9 +32,9 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
     }
   }
 
-  // Protect /admin/* routes
+  // Protect /admin/* — the operator's own surfaces.
   if (request.nextUrl.pathname.startsWith("/admin")) {
-    const { userId } = await auth();
+    const { userId, sessionClaims } = await auth();
 
     // If not signed in, redirect to sign-in
     if (!userId) {
@@ -27,13 +43,17 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
       return NextResponse.redirect(signInUrl);
     }
 
-    // Check if user is admin
-    const userIsAdmin = await isAdmin(userId);
-    if (!userIsAdmin) {
-      return NextResponse.json(
-        { error: "Forbidden - Admin access required" },
-        { status: 403 }
-      );
+    const claimEmail = (sessionClaims as { email?: string } | null)?.email;
+
+    // Ordered cheapest-and-most-reliable first. The Clerk API lookup runs only
+    // when the session token carries no email claim.
+    const allowed =
+      isOwnerUserId(userId) ||
+      isOwnerEmail(claimEmail) ||
+      (claimEmail === undefined && (await isOwnerByApiLookup(userId)));
+
+    if (!allowed) {
+      return forbid(request);
     }
   }
 

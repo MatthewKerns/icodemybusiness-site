@@ -1,51 +1,13 @@
 import { v } from "convex/values";
 import { internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { callClaude } from "./lib/anthropic";
 
 // Background drafting runs in Convex actions (so it continues after the user
-// leaves the chat). Uses the Anthropic REST API via fetch — no SDK / "use node"
-// needed. Requires ANTHROPIC_API_KEY in the Convex deployment env.
+// leaves the chat). The Anthropic call itself lives in lib/anthropic.ts, shared
+// with the objectives reorganization agent. The model stays pinned here so
+// extracting the helper did not change this agent's behaviour.
 const MODEL = "claude-opus-4-7";
-const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
-
-async function callClaude(
-  system: string,
-  userText: string,
-  maxTokens: number
-): Promise<string | null> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    console.error("ANTHROPIC_API_KEY not set in Convex env — skipping drafting");
-    return null;
-  }
-  const res = await fetch(ANTHROPIC_URL, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: maxTokens,
-      system,
-      messages: [{ role: "user", content: userText }],
-    }),
-  });
-  if (!res.ok) {
-    console.error(`Anthropic error ${res.status}: ${await res.text()}`);
-    return null;
-  }
-  const data = (await res.json()) as {
-    content?: Array<{ type: string; text?: string }>;
-  };
-  return (
-    data.content
-      ?.filter((b) => b.type === "text")
-      .map((b) => b.text ?? "")
-      .join("") ?? null
-  );
-}
 
 function contextString(intakeProfile: unknown, messages: { role: string; content: string }[]): string {
   const profile = intakeProfile
@@ -114,7 +76,8 @@ export const preDraft = internalAction({
     const text = await callClaude(
       PREDRAFT_SYSTEM,
       contextString(ctxData.session.intakeProfile, ctxData.messages),
-      800
+      800,
+      MODEL,
     );
     if (text) {
       await ctx.runMutation(internal.agentSessions.internalStorePreDraft, {
@@ -142,7 +105,7 @@ export const processApplication = internalAction({
     let userInput = contextString(app.intakeProfile, []);
     if (pre) userInput += `\n\n---\nPreliminary analysis (from mid-chat):\n${pre}`;
 
-    const out = await callClaude(PROCESS_SYSTEM, userInput, 2500);
+    const out = await callClaude(PROCESS_SYSTEM, userInput, 2500, MODEL);
     const parsed = out ? parseTwoFields(out) : null;
 
     // Resilient fallback so the user-facing flow works even if drafting fails

@@ -7,7 +7,7 @@ import { api } from "../../convex/_generated/api";
 
 export function useEnsureUser() {
   const { user: clerkUser, isSignedIn } = useUser();
-  const createUser = useMutation(api.users.createUser);
+  const ensureCurrentUser = useMutation(api.users.ensureCurrentUser);
 
   const clerkUserId = clerkUser?.id;
   const convexUser = useQuery(
@@ -20,14 +20,12 @@ export function useEnsureUser() {
     // convexUser is undefined while loading, null means not found
     if (convexUser !== undefined) return;
 
-    const adminId = process.env.NEXT_PUBLIC_ADMIN_CLERK_USER_ID;
-    createUser({
-      clerkUserId: clerkUser.id,
-      email: clerkUser.primaryEmailAddress?.emailAddress ?? "",
+    // The Clerk user id, email and role are all derived server-side from the
+    // verified identity — deliberately not passed from the browser.
+    ensureCurrentUser({
       name: clerkUser.fullName ?? undefined,
-      role: adminId && clerkUser.id === adminId ? "admin" : undefined,
     }).catch(console.error);
-  }, [isSignedIn, clerkUser, convexUser, createUser]);
+  }, [isSignedIn, clerkUser, convexUser, ensureCurrentUser]);
 
   return convexUser;
 }
