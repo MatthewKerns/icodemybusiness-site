@@ -68,26 +68,15 @@ export const createLead = mutation({
   },
 });
 
-export const getLeadBySessionId = query({
+/** Used to gate the unauthenticated welcome-email send to emails that actually went through createLead. */
+export const getLeadByEmail = query({
   args: {
-    sessionId: v.string(),
+    email: v.string(),
   },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("leads")
-      .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
-      .first();
-  },
-});
-
-export const getLeadByClerkUserId = query({
-  args: {
-    clerkUserId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("leads")
-      .withIndex("by_clerkUserId", (q) => q.eq("clerkUserId", args.clerkUserId))
+      .withIndex("by_email", (q) => q.eq("email", args.email))
       .first();
   },
 });

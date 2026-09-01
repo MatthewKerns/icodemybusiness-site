@@ -5,7 +5,6 @@ import {
   FreeResourceCard,
   BUILDER_RESOURCES,
   FOUNDER_RESOURCES,
-  PREMIUM_RESOURCES,
 } from "@/components/shared/FreeResourceCard";
 import { Wrench, ShieldAlert, Rocket, Sparkles, ArrowRight } from "lucide-react";
 
@@ -24,8 +23,8 @@ export default function PortalResourcesPage() {
         <header>
           <h1 className="text-h2 font-bold text-text-primary">Resources</h1>
           <p className="mt-1 text-sm text-text-muted">
-            Free tools, founder workflows, advanced subscriptions, and custom
-            builds — everything available to you in one place.
+            Free tools, founder workflows, and custom builds — everything
+            available to you in one place.
           </p>
         </header>
 
@@ -155,45 +154,6 @@ export default function PortalResourcesPage() {
                 delivery={resource.delivery}
                 disclaimer={resource.disclaimer}
                 ctaLabel="Download"
-                ctaHref={resource.href}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Advanced — paid, continuously-supported workflows (see /subscribe) */}
-        <section className="mt-12" aria-labelledby="premium-heading">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold/10">
-              <Sparkles className="h-5 w-5 text-gold" aria-hidden="true" />
-            </div>
-            <div>
-              <h2
-                id="premium-heading"
-                className="text-h3 font-bold text-text-primary"
-              >
-                Advanced
-              </h2>
-              <p className="text-sm text-text-muted">
-                Heavily-supported workflows we improve constantly — for everyone,
-                builders, and founders.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {PREMIUM_RESOURCES.map((resource) => (
-              <FreeResourceCard
-                key={resource.toolName}
-                icon={resource.icon}
-                toolName={resource.toolName}
-                tagline={resource.tagline}
-                description={resource.description}
-                delivery={resource.delivery}
-                price={resource.price}
-                audience={resource.audience}
-                comingSoon={resource.comingSoon}
-                ctaLabel="View plans"
                 ctaHref={resource.href}
               />
             ))}

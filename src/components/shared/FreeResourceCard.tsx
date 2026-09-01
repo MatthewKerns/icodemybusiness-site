@@ -74,7 +74,7 @@ export const BUILDER_RESOURCES: FreeResource[] = [
     description:
       "Six Claude Code orchestrator skills (arch, func, errors, observability, review, docs) plus a complete software-engineering reference — foundations to production readiness. Free on GitHub.",
     icon: Factory,
-    href: "https://github.com/MatthewKerns/software-development-best-practices-guide",
+    href: "https://github.com/MatthewKerns/software-development-best-practices-guide/tree/main/skills/feature-factory",
     repoUrl:
       "https://github.com/MatthewKerns/software-development-best-practices-guide/tree/main/skills/feature-factory",
     category: "builders",

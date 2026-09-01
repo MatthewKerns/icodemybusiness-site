@@ -39,6 +39,8 @@ interface EmailCaptureProps {
   subtitle?: string;
   buttonLabel?: string;
   successMessage?: string;
+  /** Called with the captured email right after the lead is created. */
+  onSuccess?: (email: string) => void;
 }
 
 /**
@@ -52,6 +54,7 @@ export function EmailCaptureComponent({
   subtitle = "Enter your email for immediate access. No credit card. No catch.",
   buttonLabel = "Get Free Access",
   successMessage = "You\u2019re in! Explore your free tools below.",
+  onSuccess,
 }: EmailCaptureProps) {
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
   const [showGlow, setShowGlow] = useState(false);
@@ -88,6 +91,7 @@ export function EmailCaptureComponent({
         setStatus("success");
         setShowGlow(true);
         setTimeout(() => setShowGlow(false), 1500);
+        onSuccess?.(values.email);
       } catch (err: unknown) {
         setServerError(parseConvexError(err));
         setStatus("idle");
@@ -95,7 +99,7 @@ export function EmailCaptureComponent({
         submittingRef.current = false;
       }
     },
-    [source, variant, sessionId, createLead, status]
+    [source, variant, sessionId, createLead, status, onSuccess]
   );
 
   if (status === "success") {

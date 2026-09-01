@@ -8,10 +8,10 @@ const OFFERS = [
     href: "/consulting",
   },
   {
-    icon: "\u26A1",
-    title: "Workflow Platform",
-    description: "Subscribe to guided AI workflows and Claude skills.",
-    href: "/subscribe",
+    icon: "\u{1F393}",
+    title: "The Academy",
+    description: "Learn to build the software your business runs on.",
+    href: "/academy",
   },
   {
     icon: "\u{1F381}",

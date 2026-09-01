@@ -1,102 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useUser } from "@clerk/nextjs";
-import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { useSessionId } from "@/hooks/useSessionId";
-import { useLeadAccess } from "@/hooks/useLeadAccess";
-import { analytics } from "@/lib/analytics";
+import { useState } from "react";
 import {
   FreeResourceCard,
   BUILDER_RESOURCES,
   FOUNDER_RESOURCES,
-  PREMIUM_RESOURCES,
   type FreeResource,
 } from "@/components/shared/FreeResourceCard";
+import { EmailCapture } from "@/components/shared/EmailCapture";
 import Link from "next/link";
-import { Check, Mail, Wrench, ShieldAlert, Sparkles, Rocket, Plug, ArrowRight } from "lucide-react";
+import { Wrench, ShieldAlert, Rocket, Plug, ArrowRight } from "lucide-react";
 
 export default function FreeResourcesPage() {
-  const { user, isSignedIn, isLoaded: clerkLoaded } = useUser();
-  const { status: leadStatus } = useLeadAccess();
-  const sessionId = useSessionId();
-  const createLead = useMutation(api.leads.createLead);
-  const processingRef = useRef(false);
-  const emailSentRef = useRef(false);
-
-  // After sign-in, auto-create lead + send welcome email (runs once)
-  useEffect(() => {
-    if (!isSignedIn || !user) return;
-    if (leadStatus !== "no-access") return;
-    if (processingRef.current || emailSentRef.current) return;
-
-    processingRef.current = true;
-    const email = user.primaryEmailAddress?.emailAddress ?? "";
-    const name = user.fullName ?? undefined;
-
-    createLead({
-      email,
-      name,
-      source: "free-tools",
-      sessionId: sessionId ?? undefined,
-      clerkUserId: user.id,
-    })
-      .then(() => {
-        if (emailSentRef.current) return;
-        emailSentRef.current = true;
-
-        analytics.leadCaptured("free-tools");
-        analytics.freeToolAccessed();
-
-        return fetch("/api/email/welcome", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, name }),
-        });
-      })
-      .catch(() => {
-        // Lead may already exist or email failed — non-critical
-      })
-      .finally(() => {
-        processingRef.current = false;
-      });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSignedIn, leadStatus]);
-
-  const handleGetAccess = () => {
-    if (isSignedIn) return; // already signed in, lead creation handled by effect
-    // Redirect to Clerk sign-in, then back to this page
-    window.location.href = `/sign-in?redirect_url=${encodeURIComponent("/free-tools")}`;
-  };
-
-  // Loading state
-  if (!clerkLoaded || leadStatus === "loading") {
-    return (
-      <main
-        id="main-content"
-        className="min-h-screen bg-bg-primary px-4 py-12 md:px-6 lg:px-12"
-      >
-        <div className="mx-auto max-w-5xl py-12 lg:py-20">
-          <section className="text-center">
-            <div className="mx-auto h-10 w-3/4 animate-pulse rounded-lg bg-bg-tertiary" />
-            <div className="mx-auto mt-4 h-6 w-1/2 animate-pulse rounded-lg bg-bg-tertiary" />
-          </section>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-48 animate-pulse rounded-xl border border-border bg-bg-secondary"
-              />
-            ))}
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  const hasAccess = leadStatus === "has-access";
-  const isAuthenticated = !!isSignedIn;
+  const [hasAccess, setHasAccess] = useState(false);
 
   return (
     <main
@@ -160,73 +76,24 @@ export default function FreeResourcesPage() {
           </div>
         </section>
 
-        {/* Sign-in CTA for unauthenticated users */}
-        {!isAuthenticated && (
-          <section className="mt-12" aria-live="polite">
-            <div className="rounded-xl border border-border bg-bg-secondary p-6">
-              <div className="mb-4">
-                <h3 className="text-h3 font-bold text-text-primary">
-                  Sign in to get instant access to all free tools.
-                </h3>
-                <p className="mt-1 text-sm text-text-muted">
-                  We&apos;ll send you the download links right away.
-                </p>
-              </div>
-              <button
-                onClick={handleGetAccess}
-                className="h-12 shrink-0 rounded-lg bg-gold px-6 font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
-              >
-                Get Free Access
-              </button>
-            </div>
-          </section>
-        )}
-
-        {/* Check your email confirmation */}
-        {isAuthenticated && hasAccess && (
-          <section className="mt-12" aria-live="polite">
-            <div className="rounded-xl border border-border bg-bg-secondary p-6">
-              <div className="flex items-center gap-3" role="status">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/20">
-                  <Check className="h-5 w-5 text-success" />
-                </div>
-                <div>
-                  <p className="font-medium text-text-primary">
-                    Check your email!
-                  </p>
-                  <p className="text-sm text-text-muted">
-                    We&apos;ve sent download links for all free tools to{" "}
-                    <span className="font-medium text-text-primary">
-                      {user?.primaryEmailAddress?.emailAddress}
-                    </span>
-                    . Check your spam folder if you don&apos;t see it.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Authenticated but lead still being created */}
-        {isAuthenticated && !hasAccess && (
-          <section className="mt-12" aria-live="polite">
-            <div className="rounded-xl border border-border bg-bg-secondary p-6">
-              <div className="flex items-center gap-3" role="status">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/20">
-                  <Mail className="h-5 w-5 text-gold" />
-                </div>
-                <div>
-                  <p className="font-medium text-text-primary">
-                    Setting up your access...
-                  </p>
-                  <p className="text-sm text-text-muted">
-                    We&apos;re preparing your free tools and sending them to your email.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
+        {/* Email capture — puts the visitor on the list, emails the download links */}
+        <section id="get-access" className="mt-12 scroll-mt-24">
+          <EmailCapture
+            source="free-tools"
+            headline="Get the download links by email"
+            subtitle="Enter your email and we'll send every free tool straight to your inbox — no account required."
+            buttonLabel="Send Me the Tools"
+            successMessage="Check your email — we've sent your download links."
+            onSuccess={(email) => {
+              setHasAccess(true);
+              void fetch("/api/email/welcome", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+              });
+            }}
+          />
+        </section>
 
         {/* Free tools — the GitHub best-practices repo + dev skills */}
         <section className="mt-16" aria-labelledby="free-heading">
@@ -282,11 +149,6 @@ export default function FreeResourcesPage() {
                 ctaLabel={ctaLabelFor(resource)}
                 ctaHref={ctaHrefFor(resource)}
                 downloaded={resource.delivery === "email" ? hasAccess : false}
-                onCtaClick={
-                  resource.delivery === "email" && !isAuthenticated
-                    ? handleGetAccess
-                    : undefined
-                }
               />
             ))}
           </div>
@@ -328,45 +190,6 @@ export default function FreeResourcesPage() {
             ))}
           </div>
         </section>
-
-        {/* Advanced — paid, continuously-supported workflows (see /subscribe) */}
-        <section className="mt-16" aria-labelledby="premium-heading">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10">
-              <Sparkles className="h-5 w-5 text-gold" aria-hidden="true" />
-            </div>
-            <div>
-              <h2
-                id="premium-heading"
-                className="text-h3 font-bold text-text-primary"
-              >
-                Advanced
-              </h2>
-              <p className="text-sm text-text-muted">
-                Heavily-supported workflows we improve constantly — for everyone,
-                builders, and founders.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {PREMIUM_RESOURCES.map((resource) => (
-              <FreeResourceCard
-                key={resource.toolName}
-                icon={resource.icon}
-                toolName={resource.toolName}
-                tagline={resource.tagline}
-                description={resource.description}
-                delivery={resource.delivery}
-                price={resource.price}
-                audience={resource.audience}
-                comingSoon={resource.comingSoon}
-                ctaLabel={ctaLabelFor(resource)}
-                ctaHref={ctaHrefFor(resource)}
-              />
-            ))}
-          </div>
-        </section>
       </div>
     </main>
   );
@@ -379,7 +202,7 @@ export default function FreeResourcesPage() {
   }
 
   function ctaHrefFor(resource: FreeResource): string {
-    if (resource.delivery === "email") return hasAccess ? resource.href : "#";
+    if (resource.delivery === "email") return hasAccess ? resource.href : "#get-access";
     return resource.href;
   }
 }
