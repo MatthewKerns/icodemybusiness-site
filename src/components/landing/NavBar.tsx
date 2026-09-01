@@ -14,8 +14,9 @@ import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
+  { href: "/academy", label: "Academy" },
+  { href: "/book", label: "Free Intro Call" },
   { href: "/consulting", label: "Consulting" },
-  { href: "/subscribe", label: "Subscriptions" },
   { href: "/free-tools", label: "Free Tools" },
   { href: "/connect", label: "Connect" },
   { href: "/mango", label: "Mango" },
@@ -211,7 +212,7 @@ export function NavBar() {
           {/* Desktop CTA + Sign Out */}
           <div className="hidden items-center gap-4 md:flex">
             <Link
-              href="/consulting#booking"
+href="/consulting#booking"
               onClick={() =>
                 track(ANALYTICS_EVENTS.BOOK_CALL_CLICKED, { placement: "nav-desktop" })
               }
@@ -290,7 +291,7 @@ export function NavBar() {
 
           <div className="flex flex-col gap-3 p-4">
             <Link
-              href="/consulting#booking"
+href="/consulting#booking"
               onClick={() => {
                 track(ANALYTICS_EVENTS.BOOK_CALL_CLICKED, { placement: "nav-mobile" });
                 closeMobile();
