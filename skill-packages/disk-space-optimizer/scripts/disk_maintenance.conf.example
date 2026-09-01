@@ -1,0 +1,41 @@
+# Disk Space Optimizer — configuration (example)
+#
+# Copy to:  ~/.config/disk-optimizer/disk_maintenance.conf
+#   mkdir -p ~/.config/disk-optimizer
+#   cp disk_maintenance.conf.example ~/.config/disk-optimizer/disk_maintenance.conf
+#
+# Every value here can also be set as an environment variable. This file is
+# sourced by both disk_maintenance_safe.sh and disk_maintenance_downloads_safe.sh.
+
+# ── Google Drive archiver skill location ─────────────────────────────────────
+# Must contain .venv/ and scripts/ (install the google-drive-archiver skill).
+GOOGLE_DRIVE_ARCHIVER_DIR="$HOME/.claude/skills/google-drive-archiver"
+
+# ── Screenshot archive ───────────────────────────────────────────────────────
+# Local folder that holds screenshots / screen recordings to archive.
+ARCHIVE_LOCAL="$HOME/Desktop/ScreenShot Archive"
+# REQUIRED for --screenshots-only: the Google Drive folder ID to upload into.
+# Create a folder in your Drive, open it, copy the ID from the URL:
+#   https://drive.google.com/drive/folders/<THIS_IS_THE_ID>
+ARCHIVE_DRIVE_ID=""
+
+# ── Where to hunt for stale node_modules ─────────────────────────────────────
+WORKSPACE_ROOT="$HOME"
+
+# ── Thresholds ───────────────────────────────────────────────────────────────
+DISK_USAGE_THRESHOLD=85     # only run live cleanup when disk is fuller than this %
+NODE_MODULES_AGE=60         # node_modules untouched for N days are candidates
+CACHE_AGE=30                # ~/Library/Caches files older than N days
+DOWNLOADS_AGE=365           # Downloads older than N days (default 1 year = conservative)
+CONFIRM_NODE_MODULES=10     # prompt if more than N node_modules dirs would be deleted
+CONFIRM_DOWNLOADS=50        # prompt threshold for Downloads deletion
+
+# ── Never-touch lists ────────────────────────────────────────────────────────
+# Filenames to never archive or delete from the screenshot archive.
+EXCLUDE_FILES=( ".DS_Store" )
+# node_modules paths to NEVER delete (glob match against full path).
+# Add your active projects here so a sweep can't nuke a live app's deps.
+PROTECTED_GLOBS=(
+  # "*/my-active-app/*"
+  # "*/another-live-project/*"
+)

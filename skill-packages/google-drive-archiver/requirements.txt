@@ -1,0 +1,6 @@
+# Google Drive Archiver — Python dependencies
+# Install into a virtualenv:  python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+google-api-python-client>=2.180
+google-auth>=2.40
+google-auth-oauthlib>=1.2
+google-auth-httplib2>=0.2

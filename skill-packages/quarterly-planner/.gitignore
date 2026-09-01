@@ -1,0 +1,25 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# OAuth credentials and tokens — NEVER COMMIT OR SHARE THESE
+credentials/*.json
+tokens/
+*token*.json
+
+# Working output written by the skill at run time
+.quarterly-planner/
+quarterly-plan-*.md
+
+# Python
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.pytest_cache/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log

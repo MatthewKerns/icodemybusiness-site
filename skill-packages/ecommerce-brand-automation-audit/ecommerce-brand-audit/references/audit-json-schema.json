@@ -1,0 +1,132 @@
+{
+  "_README": "CANONICAL audit.json for the ecommerce-brand-audit skill set. This is the single source of truth an audit reads from and writes to across all four stages. It merges the documented/richest schema (plotter lineage) with native source-traceability (maples lineage): every metric is a {value, source, confidence} object, so you structurally cannot record a number without recording where it came from. Replace all example values. For any metric the owner did not state, set value=null and add the field to unknowns[]. NEVER fabricate or extrapolate a number — see the honesty discipline in the orchestrator SKILL.md. A metric with confidence:'guess' is an owner's estimate (acceptable, flagged), not a fabricated figure.",
+
+  "schema_version": "1.0-ecom",
+  "client_id": "example-store",
+  "subject": "own_brand | external_brand",
+  "created_date": "YYYY-MM-DD",
+  "last_updated": "YYYY-MM-DD",
+  "audit_status": "discovery | in_progress | completed | delivered",
+  "data_completeness": "full | partial | minimal",
+  "pace_mode": "quick_pass | deep_dive | mixed",
+
+  "_metric_shape_note": "Every numeric/factual field below uses this shape: { \"value\": <number|string|null>, \"source\": \"<verbatim owner quote or document ref>\", \"confidence\": \"stated | guess | derived | unknown\" }. value:null + confidence:'unknown' means it's an open gap (mirror it in unknowns[]).",
+
+  "audit_brief": {
+    "company_name": "Example Store",
+    "category": "e.g. TCG accessories / supplements / apparel",
+    "business_model": "DTC | Marketplace (Amazon/Walmart) | DTC+Marketplace | Subscription",
+    "obg": {
+      "stated_goal": "DISCOVERED from owner, never assumed — e.g. 'profitability in 12mo', 'free up owner time', 'grow to $X', 'launch line', 'exit'",
+      "source": "<owner quote stating the goal>",
+      "confidence": "stated | unknown"
+    },
+    "ecommerce_profile": {
+      "primary_platform": { "value": "Amazon FBA | Shopify | multi", "source": "", "confidence": "unknown" },
+      "sales_channels": { "value": ["Amazon", "DTC site", "TikTok Shop", "wholesale"], "source": "", "confidence": "unknown" },
+      "monthly_revenue": { "value": null, "source": "", "confidence": "unknown" },
+      "revenue_peak_vs_now": { "value": null, "source": "", "confidence": "unknown" },
+      "cm1_pct": { "value": null, "source": "", "confidence": "unknown" },
+      "cm2_pct": { "value": null, "source": "", "confidence": "unknown" },
+      "cm3_pct": { "value": null, "source": "", "confidence": "unknown" },
+      "sku_count": { "value": null, "source": "", "confidence": "unknown" },
+      "aov": { "value": null, "source": "", "confidence": "unknown" },
+      "conversion_rate": { "value": null, "source": "", "confidence": "unknown" },
+      "ctr": { "value": null, "source": "", "confidence": "unknown" },
+      "ad_spend": { "value": null, "source": "", "confidence": "unknown" },
+      "acos_tacos": { "value": null, "source": "", "confidence": "unknown" },
+      "cac": { "value": null, "source": "", "confidence": "unknown" },
+      "ltv": { "value": null, "source": "", "confidence": "unknown" },
+      "repeat_purchase_rate": { "value": null, "source": "", "confidence": "unknown" },
+      "return_rate": { "value": null, "source": "", "confidence": "unknown" },
+      "review_rating": { "value": null, "source": "", "confidence": "unknown" },
+      "landed_cost_per_unit": { "value": null, "source": "", "confidence": "unknown" },
+      "supplier_lead_time": { "value": null, "source": "", "confidence": "unknown" },
+      "moq": { "value": null, "source": "", "confidence": "unknown" },
+      "fulfillment_model": { "value": "FBA | 3PL | self | hybrid", "source": "", "confidence": "unknown" },
+      "owned_audience": { "value": "email list size / social following / none", "source": "", "confidence": "unknown" }
+    },
+    "avatars": [
+      { "name": "primary", "description": "", "pain_outside_product": "the psychological/situational pain that exists regardless of the product", "split_pct": { "value": null, "source": "", "confidence": "unknown" } }
+    ],
+    "products": [
+      { "parent": "", "variations": null, "price_points": [], "in_stock": null, "differentiation": "", "drives_revenue": "is this a hero SKU?" }
+    ],
+    "competitors": [
+      { "name": "", "size": "global/regional", "retail_presence": "", "brand_strength_note": "", "white_space_they_leave": "" }
+    ],
+    "time_allocation": {
+      "_note": "The most diagnostic input. Where the owner's hours actually go. Tracked export preferred; owner estimate acceptable if flagged confidence:'guess'.",
+      "is_solo": { "value": null, "source": "", "confidence": "unknown" },
+      "hours_per_week_on_brand": { "value": null, "source": "", "confidence": "unknown" },
+      "what_falls_apart_when_focus_shifts": { "value": "", "source": "", "confidence": "unknown" },
+      "by_activity": []
+    },
+    "constraints_stated": { "budget": { "value": null, "source": "", "confidence": "unknown" }, "cash_runway": { "value": null, "source": "", "confidence": "unknown" }, "technical": [], "organizational": [] }
+  },
+
+  "current_state_maps": [
+    {
+      "name": "e.g. Weekly listing + PPC management, or Order-to-fulfillment",
+      "funnel_stage": "Traffic | Discovery/PDP | Cart/Checkout | Fulfillment | Post-purchase/Support | Retention | Reviews/UGC | Analytics",
+      "owner_roles": [],
+      "frequency": { "value": null, "source": "", "confidence": "unknown" },
+      "steps": [ { "step": 1, "name": "", "who": "", "tool": "", "duration": { "value": null, "source": "", "confidence": "unknown" } } ],
+      "pain_points": [ { "description": "", "impact": "high|medium|low", "time_cost": { "value": null, "source": "", "confidence": "unknown" }, "revenue_impact": { "value": null, "source": "", "confidence": "unknown" } } ]
+    }
+  ],
+
+  "constraint_map": {
+    "scores": [
+      { "constraint": "Capital/CCC | Inventory | Channel | Brand&Audience | Operational/TaskVolume | Capability | Market | Regulatory", "severity": "low|medium|high|critical", "trajectory": "improving|stable|worsening", "leverage": "low|medium|high", "binding": false, "note": "", "provisional": false }
+    ],
+    "binding_constraint": { "name": "", "reasoning": "", "co_binding_with": null },
+    "compound_constraints": [ { "interaction": "e.g. Cash x Lead Time = stockout trap", "why": "" } ],
+    "five_core_pillars": { "new_product_dev": null, "launching": null, "sku_optimization": null, "amazon_ppc": null, "audience_utilization": null, "lowest_flagged": "", "reconciled_with_binding": "" },
+    "attack_sequence": [ { "order": 1, "constraint": "", "unlocks_next": "" } ],
+    "not_yet": [ { "item": "", "why_deferred": "" } ]
+  },
+
+  "opportunity_matrix": [
+    {
+      "id": "opp_001",
+      "name": "",
+      "funnel_stage": "",
+      "category": "Cart Recovery | AI Support/WISMO | Reviews&UGC | Inventory/Restock | Merchandising/PDP | Ad Reporting | Product Copy | Returns | Retention/Winback | Listing Optimization | Brand/Creative | Pricing Test",
+      "description": "what, how, expected result",
+      "addresses_binding_constraint": false,
+      "impact": "high|medium|low",
+      "effort": "high|medium|low",
+      "obg_fit": "high|medium|low",
+      "four_l": { "low_human": null, "low_capital": null, "low_complexity": null, "low_tech": null },
+      "platform_risk": "defensible | at_risk | trap",
+      "roi": { "value": "TBD until baseline provided", "inputs_used": [], "confidence": "unknown" },
+      "priority": "P0|P1|P2|P3|Kill",
+      "reasoning": ""
+    }
+  ],
+
+  "kill_list": [ { "item": "", "reason": "one line" } ],
+
+  "roadmap": {
+    "capacity_model": { "real_hours_per_week": { "value": null, "source": "", "confidence": "unknown" }, "ramp": "", "ramp_contingent_on": "" },
+    "tracks": [ { "name": "", "constraint_addressed": "", "weekly_hours": null, "checklist": [], "track_kill_list": [] } ],
+    "phases": {
+      "quick_wins_30d": { "opportunity_ids": [], "success_criteria": [] },
+      "scale_90d": { "opportunity_ids": [], "success_criteria": [] },
+      "strategic_180d": { "opportunity_ids": [], "success_criteria": [] }
+    },
+    "criteria": { "must_haves": [], "stretch": [], "failure_offramps": [] },
+    "governance": { "mechanism": "time-tracking + weekly review + witness | written agreement + comp structure", "comp_structure": "if any: tie to CM$ above a locked baseline, capped, baseline locked", "review_cadence": "" }
+  },
+
+  "unknowns": [ "Every field with confidence:'unknown' — drives follow-up discovery. Never silently fill these." ],
+  "notes": [],
+  "_metadata": {
+    "anti_hallucination_compliant": true,
+    "data_sources": ["transcript path / Fathom recording id / uploaded docs / MCP reads"],
+    "assumptions_made": [ { "assumption": "", "needs_validation": true } ],
+    "pace_mode_used": "quick_pass | deep_dive | mixed",
+    "stage_completed": "intake | constraint_map | prioritization | roadmap"
+  }
+}

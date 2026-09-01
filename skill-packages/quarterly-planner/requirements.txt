@@ -1,0 +1,6 @@
+# Google Drive read-only context capture (gather_drive.py). Apple Notes and
+# Claude history capture need no Python deps. Install into a venv:
+#   python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+google-api-python-client>=2.0.0
+google-auth-httplib2>=0.1.0
+google-auth-oauthlib>=1.0.0
