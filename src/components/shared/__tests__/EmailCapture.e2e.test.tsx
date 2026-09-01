@@ -18,6 +18,18 @@ vi.mock("@/hooks/useSessionId", () => ({
   useSessionId: () => "test-session-id",
 }));
 
+// The success state renders FreeResourceCard, which tracks events via
+// useTrackEvent -> useAuth() + usePathname(). Neither provider exists in this
+// test render, so stub them; otherwise the card throws and the surrounding
+// FormErrorBoundary swallows the success UI under test.
+vi.mock("@clerk/nextjs", () => ({
+  useAuth: () => ({ userId: null, isLoaded: true, isSignedIn: false }),
+}));
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/",
+}));
+
 describe("EmailCapture E2E Validation", () => {
   beforeEach(() => {
     mockCreateLead.mockReset();
