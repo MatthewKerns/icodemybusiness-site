@@ -42,3 +42,13 @@ issue"); "verified" meant a person's word.
 the deploy script's own gates stay.
 
 **Enforcement.** Gates run on the VPS (`offload-run`) inside the deploy script; `pre-push` locally.
+
+## 2026-09-02 — a queue-row commit reverted another session's copy on main (4ec89d5 → fixed 1b5ef61)
+
+**What happened.** The deploy session's local `main` was behind `origin/main` (the offer session had pushed `dafc551` from its worktree). A push of one `DEPLOY_QUEUE.md` commit was rejected as non-fast-forward. The recovery — cherry-pick in a temp worktree — failed on a bad flag, the shell chain continued, and `git update-ref refs/heads/main origin/main` moved the branch pointer under the shared tree. That left every file changed upstream staged with its *old* content. The next `git commit -m …` (no pathspec) took the whole index and reverted `06b95e4`'s headline, subhead and gate wording in two files. The gates were green (copy is not under test), so the push went through. Caught within five minutes by inspecting the commit stat; staging never served it.
+
+**Same cause as two earlier incidents today** (offer session's observation): the autostash `pull --rebase` that wiped `node_modules`, the stale shared offload tree that broke the pre-push gate, and this staged index all come from the shared checkout being load-bearing. Three mechanisms, one cause; the worktree rule and the clean-export deploy/gate address it, and this hook covers the last exposure — a commit from the shared checkout with a non-empty index.
+
+**Why it got through.** No rule or hook distinguished "commit the file I staged" from "commit everything staged". Moving a branch pointer with a dirty shared tree is never safe and was not on the Never list.
+
+**Fixes.** (1) `AGENTS.md` Never Do: no `commit -a`, no commit without `-- <paths>`, no `reset --hard` / `update-ref` on a branch in the shared checkout; when behind origin, commit in a temp worktree. (2) `.claude/hooks/shared-checkout-guard.sh` blocks those shapes (override `SHARED_CHECKOUT_APPROVED`). (3) This entry. Sessions that were already on their own worktree were unaffected — the durable fix is still every session on its own worktree (`AGENTS.md` Always Do).

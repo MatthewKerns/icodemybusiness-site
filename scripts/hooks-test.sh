@@ -21,5 +21,17 @@ run 2 "edit adds ts-ignore"     '{"tool_name":"Edit","tool_input":{"file_path":"
 run 2 "write empties test"      '{"tool_name":"Write","tool_input":{"file_path":"src/a.test.ts","content":""}}'
 run 2 "tsconfig excludes tests" '{"tool_name":"Edit","tool_input":{"file_path":"convex/tsconfig.json","old_string":"\"exclude\": [\"./_generated\"]","new_string":"\"exclude\": [\"./_generated\", \"./**/*.test.ts\"]"}}'
 run 0 "unrelated edit"          '{"tool_name":"Edit","tool_input":{"file_path":"src/app/page.tsx","old_string":"a","new_string":"b"}}'
+HOOK="$(cd "$(dirname "$0")/.." && pwd)/.claude/hooks/shared-checkout-guard.sh"
+run 2 "commit -a"                '{"tool_name":"Bash","tool_input":{"command":"git commit -am \"x\""}}'
+run 2 "commit without pathspec"  '{"tool_name":"Bash","tool_input":{"command":"git add docs/a.md && git commit -q -m \"x\""}}'
+run 0 "commit with pathspec"     '{"tool_name":"Bash","tool_input":{"command":"git commit -q -m \"x\" -- docs/a.md"}}'
+run 0 "commit --amend"           '{"tool_name":"Bash","tool_input":{"command":"git commit --amend --no-edit"}}'
+run 2 "update-ref main"          '{"tool_name":"Bash","tool_input":{"command":"git update-ref refs/heads/main origin/main"}}'
+run 2 "reset --hard"             '{"tool_name":"Bash","tool_input":{"command":"git reset --hard origin/main"}}'
+run 2 "checkout -- ."            '{"tool_name":"Bash","tool_input":{"command":"git checkout -- ."}}'
+run 0 "checkout one file"        '{"tool_name":"Bash","tool_input":{"command":"git checkout dafc551 -- src/a.ts"}}'
+run 0 "git -C worktree commit paths" '{"tool_name":"Bash","tool_input":{"command":"git -C /tmp/wt commit -m \"x\" -- a.md"}}'
+run 0 "override with reason"     '{"tool_name":"Bash","tool_input":{"command":"SHARED_CHECKOUT_APPROVED=\"clean worktree, Matthew ok\" git commit -am x"}}'
+run 0 "prose mentioning commit -a" '{"tool_name":"Bash","tool_input":{"command":"echo \"never git commit -a here\""}}'
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" = 0 ]
