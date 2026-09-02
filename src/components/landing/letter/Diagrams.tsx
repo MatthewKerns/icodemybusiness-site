@@ -79,7 +79,7 @@ function Figure({
 export function WeekDiagram() {
   const MAX_HOURS = 60;
   const GROWTH_STARTS = 48;
-  const X0 = 92;
+  const X0 = 104;
   const X1 = 624;
   const perHour = (X1 - X0) / MAX_HOURS;
 
@@ -97,7 +97,7 @@ export function WeekDiagram() {
     { name: "Week 4", total: 56 },
   ];
 
-  const rowY = (i: number) => 62 + i * 46;
+  const rowY = (i: number) => 74 + i * 46;
   const BAR_H = 26;
   const monthTotal = WEEKS.reduce((n, w) => n + w.total, 0);
   const growthTotal = WEEKS.reduce((n, w) => n + (w.total - GROWTH_STARTS), 0);
@@ -112,8 +112,8 @@ export function WeekDiagram() {
       ]}
     >
       <svg
-        viewBox="0 0 660 276"
-        className="h-auto w-full min-w-[430px]"
+        viewBox="0 0 660 300"
+        className="mx-auto h-auto w-full max-w-[560px]"
         role="img"
         aria-labelledby="week-t week-d"
       >
@@ -122,17 +122,19 @@ export function WeekDiagram() {
           {`Four stacked bars, one per week, each 50 to 60 hours long. In every week the first 48 hours go to repeating the same work, chasing information and fixing broken handoffs. Only the hours after 48 go to growing the business: ${WEEKS.map((w) => `${w.name} ${w.total - GROWTH_STARTS}`).join(", ")}. Across the month that is ${growthTotal} hours out of ${monthTotal}.`}
         </desc>
 
-        <text x="30" y="28" fill={TEXT} fontSize="16" fontWeight="600">
+        <text x="30" y="28" fill={TEXT} fontSize="24" fontWeight="600">
           Your typical week might look like this
         </text>
 
         {/* The threshold is the argument, so it is drawn before the bars and
             labelled above them rather than tucked into the axis. */}
         <line
-          x1={growthX} y1="44" x2={growthX} y2={rowY(3) + BAR_H + 10}
+          x1={growthX} y1="68" x2={growthX} y2={rowY(3) + BAR_H + 10}
           stroke={GOLD} strokeWidth="1" strokeDasharray="3 3" opacity="0.7"
         />
-        <text x={growthX - 8} y="40" fill={GOLD} fontSize="11" fontWeight="600" textAnchor="end">
+        {/* Sits just above the first bar. At the top of the chart it collided
+            with the title once the type was scaled up for phones. */}
+        <text x={growthX - 8} y="64" fill={GOLD} fontSize="17" fontWeight="600" textAnchor="end">
           growth starts here
         </text>
 
@@ -142,7 +144,7 @@ export function WeekDiagram() {
           let x = X0;
           return (
             <g key={week.name}>
-              <text x="30" y={y + 17} fill={MUTED} fontSize="12">
+              <text x="30" y={y + 17} fill={MUTED} fontSize="19">
                 {week.name}
               </text>
               {SINKS.map((sink) => {
@@ -163,7 +165,7 @@ export function WeekDiagram() {
               />
               <text
                 x={growthX + growth * perHour + 8} y={y + 17}
-                fill={GOLD} fontSize="11.5" fontWeight="600"
+                fill={GOLD} fontSize="18" fontWeight="600"
               >
                 {growth}h
               </text>
@@ -182,7 +184,7 @@ export function WeekDiagram() {
             />
             <text
               x={X0 + h * perHour} y={rowY(3) + BAR_H + 30}
-              fill={DIM} fontSize="11" textAnchor="middle"
+              fill={DIM} fontSize="17" textAnchor="middle"
             >
               {h}h
             </text>
