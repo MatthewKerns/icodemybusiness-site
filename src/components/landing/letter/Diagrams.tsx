@@ -448,21 +448,42 @@ export function PathsDiagram() {
                 {path.plot.shortTimeline}
               </text>
 
+              {/* Leader line: without it the left-hand label and the curve that
+                  lands at its height read as unrelated. */}
+              <line
+                x1="176" y1={y} x2={endX} y2={y}
+                stroke={LINE} strokeWidth="1" strokeDasharray="1 4"
+              />
+
               {/* Every track leaves the same origin. */}
               <path
                 d={`M ${X0} 250 C ${X0 + 40} 250, ${X0 + 20} ${y}, ${endX} ${y}`}
                 fill="none"
                 stroke={stroke}
-                strokeWidth={path.highlight ? 2.5 : 1.5}
-                opacity={path.highlight ? 1 : 0.75}
+                strokeWidth={path.highlight ? 3 : 1.5}
+                opacity={path.highlight ? 1 : 0.7}
                 markerEnd={ongoing ? "url(#pathArrow)" : undefined}
               />
-              {!ongoing && (
-                <circle cx={endX} cy={y} r="3.5" fill={stroke} />
-              )}
+              {!ongoing && <circle cx={endX} cy={y} r="4" fill={stroke} />}
               {ongoing && (
-                <text x={X1 - 6} y={y - 10} fill={GOLD_DIM} fontSize="10.5" textAnchor="end">
+                <text
+                  x={X1 - 10} y={y - 12}
+                  fill={GOLD_DIM} fontSize="10.5" textAnchor="end"
+                >
                   ongoing
+                </text>
+              )}
+
+              {/* The free diagnosis is genuinely the shortest track — one call —
+                  so on a true week scale it is a stub. That brevity is the
+                  selling point, but unannotated it reads as the least important
+                  thing on the chart, which is the opposite of the intent. */}
+              {path.highlight && (
+                <text
+                  x={endX + 12} y={y + 4}
+                  fill={GOLD} fontSize="11.5" fontWeight="600"
+                >
+                  start here — it&#8217;s free
                 </text>
               )}
             </g>
