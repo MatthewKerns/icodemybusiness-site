@@ -21,11 +21,10 @@ export function WelcomeEmail({ email, name }: WelcomeEmailProps) {
   // /free-tools is public — every tool card links straight to its download,
   // no account required. The apex (icodemybusiness.com) still serves the old
   // static placeholder, so the CTA must point at the host actually running
-  // the app — the Hostinger VPS — until the apex cutover. Override via
-  // NEXT_PUBLIC_APP_URL after cutover.
+  // the app — staging.icodemybusiness.com — until the apex cutover. Override
+  // via NEXT_PUBLIC_APP_URL (set to https://icodemybusiness.com after cutover).
   const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL ??
-    "https://icodemybusiness.srv1757482.hstgr.cloud";
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://staging.icodemybusiness.com";
   const greeting = name ? `Hey ${name},` : "Hey there,";
 
   return (
