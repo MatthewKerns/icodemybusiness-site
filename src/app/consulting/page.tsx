@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ConsultingHero } from "@/components/landing/ConsultingHero";
@@ -6,6 +7,18 @@ import { FAQAccordion } from "@/components/landing/FAQAccordion";
 import { CalendlyEmbed } from "@/components/shared/CalendlyEmbed";
 import { CommunityBanner } from "@/components/landing/CommunityBanner";
 import { ClipboardCheck, Users, Rocket } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "AI Consulting | iCodeMyBusiness",
+  description:
+    "Work out where AI actually fits in your business, and what it would take to build it. Starts with a free intro call.",
+  openGraph: {
+    title: "AI Consulting | iCodeMyBusiness",
+    description:
+      "Work out where AI actually fits in your business, and what it would take to build it. Starts with a free intro call.",
+    type: "website",
+  },
+};
 
 const CALENDLY_URL =
   // `new-meeting` was deactivated on Calendly (2026-09-02); the only live

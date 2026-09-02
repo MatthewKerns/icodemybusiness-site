@@ -1,6 +1,19 @@
+import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
 import { CaseStudyFilter } from "@/components/landing/CaseStudyFilter";
 import { EmailCapture } from "@/components/shared/EmailCapture";
+
+export const metadata: Metadata = {
+  title: "AI Development Services | iCodeMyBusiness",
+  description:
+    "Full-stack development meets practical AI. Custom business tools, built and handed over so your team can run them.",
+  openGraph: {
+    title: "AI Development Services | iCodeMyBusiness",
+    description:
+      "Full-stack development meets practical AI. Custom business tools, built and handed over so your team can run them.",
+    type: "website",
+  },
+};
 
 // Placeholder case studies — hidden on the live site until real client
 // projects are ready to feature. Set to true to show them again.
