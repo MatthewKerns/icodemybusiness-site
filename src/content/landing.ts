@@ -33,9 +33,9 @@ export const VSL: {
   src: null,
   kind: "youtube",
   posterEyebrow: "A short message from Matthew",
-  headline: "Most businesses don't need more software.",
+  headline: "Most businesses don't need more software. They need the right three things fixed.",
   subhead:
-    "I'm Matthew Kerns. I build the systems that take the manual and repetitive work off your plate. We start by thoroughly assessing your current situation.",
+    "I'm Matthew Kerns. I build the systems that take the manual, repetitive, forgettable work off a business owner's plate — and I start by finding out what's actually costing you, not by selling you a package.",
 };
 
 /** The problem beat — named, specific, recognisable. */
