@@ -90,7 +90,7 @@ export function SplashScreen() {
         animate="visible"
         variants={lineVariants}
         onClick={scrollToContent}
-        aria-label="Enter site"
+        aria-label="Start Now"
         className="mt-12 text-lg font-medium text-blue focus-visible:ring-2 focus-visible:ring-blue-light"
       >
         <motion.span
@@ -109,7 +109,7 @@ export function SplashScreen() {
           }
           className="inline-block"
         >
-          Enter site
+          Start Now
         </motion.span>
       </motion.button>
     </div>
