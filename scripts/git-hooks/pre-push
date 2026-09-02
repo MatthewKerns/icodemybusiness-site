@@ -8,9 +8,9 @@
 # WARN or CRIT — the point is that the gate runs, not where. A gate that could not run
 # is not a passed gate: any failure to run refuses the push.
 set -euo pipefail
-to_main=0
+to_main=0; push_sha=""
 while read -r local_ref local_sha remote_ref remote_sha; do
-  case "$remote_ref" in refs/heads/main) to_main=1 ;; esac
+  case "$remote_ref" in refs/heads/main) to_main=1; push_sha="$local_sha" ;; esac
 done
 [ "$to_main" = 1 ] || exit 0
 
@@ -29,12 +29,17 @@ if [ "$level" = "WARN" ] || [ "$level" = "CRIT" ]; then
   [ -x "$OFFLOAD" ] || { echo "pre-push: laptop RAM guard is $level and $OFFLOAD is missing — gates cannot run; push refused" >&2; exit 1; }
   echo "pre-push: laptop RAM guard is $level — running gates on the VPS (offload-run node-full)…"
   log="${TMPDIR:-/tmp}/icmb-prepush-$(date +%s).log"
-  # Own remote slug: never share a node_modules with another session's offload run.
-  if "$OFFLOAD" --slug "icmb-prepush-${USER:-u}" --lane node-full --no-mark -- "$INSTALL && $GATES" > "$log" 2>&1 && grep -q '■ exit=0' "$log"; then
+  # Gate the exact commit being pushed, from a clean export (no untracked files, no _legacy venv,
+  # nothing another session left in the shared tree), in a remote directory unique to this process
+  # so two sessions on one machine can never race on the same node_modules.
+  export_dir=$(mktemp -d "${TMPDIR:-/tmp}/icmb-prepush.XXXXXX")
+  trap 'rm -rf "$export_dir"' EXIT
+  git archive "$push_sha" | tar -x -C "$export_dir"
+  if "$OFFLOAD" --dir "$export_dir" --slug "icmb-prepush-$$" --lane node-full --no-mark -- "npm ci --ignore-scripts >/dev/null && $GATES" > "$log" 2>&1 && grep -q '■ exit=0' "$log"; then
     grep -E "Tests |Test Files" "$log" || true
-    echo "pre-push: gates green (VPS)"; rm -f "$log"; exit 0
+    echo "pre-push: gates green (VPS, clean export of ${push_sha:0:7})"; rm -f "$log"; exit 0
   fi
-  grep -E "error TS|✖|FAIL|Tests |failed|Error:|npm error|■ exit" "$log" | head -25 >&2 || true
+  grep -E "error TS|✖|FAIL|Tests |failed|Error:|npm error|rsync|■ exit" "$log" | head -25 >&2 || true
   echo "pre-push: gates failed on the VPS (full log: $log) — fix the implementation (or the test, with a reason); push refused" >&2
   exit 1
 fi
