@@ -10,3 +10,4 @@ status column after verification. Never delete rows.
 | 2026-09-02T14:04Z | 4a32306 | chore(process): tests are the spec — AGENTS.md hierarchy, test-guard hook, VPS gates in the deploy script, release layer | FAILED on VPS | blocked | matthewkerns@Drs-MacBook-Pro |
 | 2026-09-02T14:19Z | 849da40 | fix(process): pre-push gates a clean export of the pushed commit in a per-process VPS dir | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
 | 2026-09-02T14:51Z | dafc551 | Merge remote-tracking branch 'origin/main' into agent/offer/landing | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
+| 2026-09-02T16:59Z | 6e4a5af | feat(landing): show the five assessment questions as the second diagram | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
