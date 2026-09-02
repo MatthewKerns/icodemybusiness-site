@@ -27,6 +27,7 @@ npm test
 - URL: https://staging.icodemybusiness.com
 - Deploy runbook: [`docs/DEPLOY.md`](DEPLOY.md) → `scripts/deploy-staging.sh <sha>`
 - Verification: `scripts/deploy-staging.sh status` (reads `DEPLOYED_SHA` on the VPS) + the script's route/no-price/noindex checks
+- No-price check scope: it scans static pages only (`/`). A rendered discovery report (`/assessment` after submit, `/portal/assessments`, the report email) legitimately echoes the visitor's own figures ("about $15,000 in overdue invoices"), so a `$\d` scan there is a false positive, not a leak. If the check ever covers rendered reports, match our rate-card terms instead of any currency amount.
 - Smoke routes: `/`, `/free-tools`, `/consulting`, `/book`, `/academy`, `/services`, `/assessment`, `/vsl`; `/subscribe` → 307
 - Hazards: `NEXT_PUBLIC_*` values are baked at build time (VPS `.env.build` + `--build-arg` in the VPS `deploy.sh`); Calendly env must point at a live event (`12kernsmatthew/new-meeting-1`); never `./deploy.sh run` (re-exposes the legacy host); Convex must be pushed before the app when `convex/` changed; GitHub Actions is informational only (billing-locked as of 2026-09-02)
 
