@@ -17,6 +17,12 @@ import { useLetterSurface } from "@/components/landing/letter/LetterSurface";
  * between is deliberately *optional* — it exists to make the report retrievable
  * later, not to gate it. A visitor who declines still gets the full assessment
  * and still gets it emailed; they just can't come back to it in the portal.
+ *
+ * The copy promises exactly what is implemented and no more. A completed report
+ * is claimed to the account and readable at /portal/assessments. Resuming an
+ * *unfinished* assessment only works in the same browser session — agentSessions
+ * carries no Clerk id — so this must not say "pick up where you left off", which
+ * it did until the gap was found. Widen the promise only when that is backed.
  */
 
 const ASSESSMENT_ANCHOR = "#top3";
@@ -139,9 +145,8 @@ export function AssessmentGate() {
                     Want your report saved?
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-text-muted">
-                    With an account, your assessment and everything you tell me
-                    is kept in one place — so you can come back to the full
-                    report, pick up where you left off, and we both start from
+                    With an account, your finished report is saved to it — so you
+                    can come back and read it any time, and we both start from
                     the same page on our call.
                   </p>
                 </div>
