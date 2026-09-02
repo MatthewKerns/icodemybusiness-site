@@ -138,9 +138,16 @@ engagement. Lands on the free intro call.
 
 ### R-005 · Single-scroll VSL sales letter at `/`
 
-`status: verify` · `owner: agent` · `evidence: verified`
+`status: done` · `owner: agent` · `evidence: verified`
 
-**Shipped `69a2ea7`** (2026-09-02) — awaiting prod verification on staging.
+**Shipped `69a2ea7`** and verified on staging 2026-09-02, independently by two
+sessions: all seven beats present in the rendered text, 4 CTAs → `/book`, zero
+visible currency amounts, and the four path cards stack to one column at 375px
+with no horizontal overflow (`scrollWidth === innerWidth === 375`).
+
+One false positive worth remembering: grepping the raw HTML for `$[0-9]` finds
+`$12` and `$16`. Those are Next.js RSC module reference ids, not prices — check
+`document.body.innerText`, not the HTML source, when verifying the no-price rule.
 
 `/` was a component collage — a hero fork, three generic story blocks, an offer
 grid, a workflows explainer, a chat demo and a community banner — that read as a
@@ -334,7 +341,18 @@ with its test and asset references.
 
 ### R-016 · Assessment gate's sign-in round-trip is unverified in prod
 
-`status: ready` · `owner: agent` · `evidence: verified`
+`status: blocked` · `owner: matthew` · `evidence: verified`
+
+**Partly verified 2026-09-02.** What was confirmed on staging: the gate opens,
+both links carry `redirect_url=https://staging.icodemybusiness.com/#top3`
+correctly encoded, `/sign-up` loads Clerk's form with the parameter preserved,
+and the guest door scrolls to the assessment (96px offset, matching
+`scroll-mt-24`).
+
+**Why it's blocked rather than done:** completing a sign-up means creating an
+account, which an agent must not do. The last leg — finish Clerk and confirm you
+land back on `/#top3` rather than the top of the page or a Clerk-hosted URL — has
+to be clicked by a person.
 
 The optional account gate sends visitors to `/sign-up` and `/sign-in` with a
 `redirect_url` back to `/#top3`. That round-trip has been reasoned about but not
