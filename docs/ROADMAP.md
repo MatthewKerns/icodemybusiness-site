@@ -433,9 +433,12 @@ and a specific this-week action. Public view carried no `internalBrief` and no
    builds it from `NEXT_PUBLIC_APP_URL` in the **Convex** env (same var and
    default as `convex/http.ts`), which is unset there, so the link is
    `https://icodemybusiness.com/book?…` — the GitHub Pages placeholder until
-   R-002. Set `NEXT_PUBLIC_APP_URL=https://staging.icodemybusiness.com` on
-   `neat-hamster-414` now (deploy session, env only), and flip it with the cutover.
-   Reports generated before that carry the dead link.
+   R-002. **Resolved 2026-09-02:** Matthew set
+   `NEXT_PUBLIC_APP_URL=https://staging.icodemybusiness.com` on `neat-hamster-414`
+   (`npx convex env get` confirms). Convex actions read env at call time, so
+   reports generated after that carry the staging host; the one walkthrough
+   report before it carries the dead link. Not re-verified inside an inbox (no
+   readable test inbox from a session). Flip the value to the apex with R-002.
 
 **Note for any no-price scan:** a report legitimately repeats the visitor's own
 figures (the walkthrough summary says "about $15,000 in overdue invoices"). A
