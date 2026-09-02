@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export function SplashScreen() {
   const splashRef = useRef<HTMLDivElement>(null);
@@ -52,65 +53,64 @@ export function SplashScreen() {
     <div
       ref={splashRef}
       role="banner"
-      className="relative flex h-screen flex-col items-center justify-center bg-bg-primary"
+      className="relative flex h-screen flex-col items-center justify-center bg-bg-primary px-4"
     >
-      <div className="flex flex-col items-center gap-2">
-        <motion.h1
+      <div className="flex flex-col items-center text-center">
+        {/* The commercial promise is deliberately subordinate — it sets up the payoff. */}
+        <motion.p
           custom={0}
           initial="hidden"
           animate="visible"
           variants={lineVariants}
-          className="text-display font-display font-semibold text-gold"
+          className="text-sm font-medium uppercase tracking-[0.2em] text-text-muted sm:text-base"
         >
-          Save Time.
-        </motion.h1>
+          Save time. Make money.
+        </motion.p>
+
+        {/* The payoff carries the page. */}
         <motion.h1
           custom={1}
           initial="hidden"
           animate="visible"
           variants={lineVariants}
-          className="text-display font-display font-semibold text-gold"
-        >
-          Make Money.
-        </motion.h1>
-        <motion.p
-          custom={2}
-          initial="hidden"
-          animate="visible"
-          variants={lineVariants}
-          className="text-display font-display italic text-gold"
+          className="mt-4 text-display font-display font-semibold italic text-gold"
         >
           Make a Difference.
-        </motion.p>
+        </motion.h1>
       </div>
 
       <motion.button
-        custom={3}
+        custom={2}
         initial="hidden"
         animate="visible"
         variants={lineVariants}
         onClick={scrollToContent}
-        aria-label="Start Now"
-        className="mt-12 text-lg font-medium text-blue focus-visible:ring-2 focus-visible:ring-blue-light"
+        className={cn(
+          "group mt-12 inline-flex items-center gap-2.5 rounded-md bg-gold px-8 py-4",
+          "text-base font-semibold tracking-wide text-black",
+          "transition-all duration-300 hover:bg-gold-light",
+          "hover:shadow-[0_0_34px_-6px_rgba(212,175,55,0.55)]",
+          "motion-safe:hover:-translate-y-px",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-light",
+          "focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
+        )}
       >
-        <motion.span
-          animate={
-            prefersReducedMotion
-              ? {}
-              : {
-                  opacity: [1, 0.5, 1],
-                  scale: [1, 1.05, 1],
-                }
-          }
-          transition={
-            prefersReducedMotion
-              ? {}
-              : { duration: 2, repeat: Infinity, ease: "easeInOut" }
-          }
-          className="inline-block"
+        Start Now
+        <svg
+          width="11"
+          height="7"
+          viewBox="0 0 11 7"
+          fill="none"
+          aria-hidden="true"
+          className="transition-transform duration-300 motion-safe:group-hover:translate-y-0.5"
         >
-          Start Now
-        </motion.span>
+          <path
+            d="M1 1L5.5 5.5L10 1"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
+        </svg>
       </motion.button>
     </div>
   );
