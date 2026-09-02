@@ -418,6 +418,30 @@ reaches `ready`; failed sends are audited and not marked sent.
 `RESEND_API_KEY` are set on the Convex deployment (`neat-hamster-414`); without
 the first, every report is the verbatim fallback with `processingError` set.
 
+**Staging walkthrough 2026-09-02 (849da40), server flow without a browser:**
+session created via Convex → five answers through `POST /api/agent/discovery/chat`
+each returned a real model reply and advanced exactly one stage (no forced or
+degraded turns) → `confirmRecap` → `submit` → report `ready` with `emailSent`
+→ `emailSends` row `discovery-report / sent` → the email arrived in the
+`kerns@inventoryhero.ai` inbox (not spam) with the five sections, path "build"
+and a specific this-week action. Public view carried no `internalBrief` and no
+`clerkUserId`. Test rows: session `da_walk_1788359149`, lead
+`kerns@inventoryhero.ai` — exclude from lead reporting like the other
+`staging-email-test` rows (R-011).
+
+3. **The email's booking button points at the apex.** `convex/discoveryProcessor.ts`
+   builds it from `NEXT_PUBLIC_APP_URL` in the **Convex** env (same var and
+   default as `convex/http.ts`), which is unset there, so the link is
+   `https://icodemybusiness.com/book?…` — the GitHub Pages placeholder until
+   R-002. Set `NEXT_PUBLIC_APP_URL=https://staging.icodemybusiness.com` on
+   `neat-hamster-414` now (deploy session, env only), and flip it with the cutover.
+   Reports generated before that carry the dead link.
+
+**Note for any no-price scan:** a report legitimately repeats the visitor's own
+figures (the walkthrough summary says "about $15,000 in overdue invoices"). A
+`$\d` scan of a rendered `/assessment` or `/portal/assessments` report, or of the
+email, will hit on the visitor's numbers, not on a price of ours.
+
 **Known gap, deliberate:** an unfinished assessment does not follow the account
 across devices (the session id lives in `sessionStorage`; `agentSessions` has no
 `clerkUserId`). The gate copy was narrowed to match (`1a2e011`).
