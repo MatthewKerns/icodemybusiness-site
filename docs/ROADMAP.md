@@ -294,13 +294,33 @@ toward. It is **internal only** and must never surface on the site.
 
 ### R-010 · Clerk sign-ins never reach the `users` table
 
-`status: ready` · `owner: agent` · `evidence: verified`
+`status: verify` · `owner: agent` · `evidence: verified`
 
-`users` has **0 rows**, yet the row in `leads` carries a real `clerkUserId`
-(`user_3BM9…`) — so someone authenticated and no user record was written.
-`useEnsureUser` is mounted in `Providers`; the write path needs tracing.
+**Root cause found and fixed.** `useEnsureUser` held two guards that no single
+value could satisfy:
 
-**Verify:** `npx convex data users --limit 5` → currently empty.
+```ts
+if (!isSignedIn || !clerkUser || convexUser !== null) return; // needs null
+if (convexUser !== undefined) return;                          // needs undefined
+```
+
+`useQuery` returns `undefined` while in flight and `null` once resolved to
+nothing, so reaching `ensureCurrentUser` required both at once. It never ran.
+That is why `users` was empty while `leads` carried a real `clerkUserId` — the
+sign-in worked; nothing recorded it.
+
+Fixed to the intended contract: fire once when the query has resolved to `null`.
+Covered by `src/hooks/__tests__/useEnsureUser.test.tsx` — resolved-to-null fires
+once, loading does not fire, existing record does not fire, signed-out does not
+fire. The first case was red before the change.
+
+**Verify in prod after deploy:** sign in, then `npx convex data users --limit 5`
+→ a row should exist. Until someone signs in on the deployed build the table
+stays empty, so an empty table alone does not mean this regressed.
+
+**Worth noting for anyone auditing similar code:** this bug was invisible to
+types, lint and tests, and produced no error — just silence and an empty table.
+The only signal was a data check.
 
 ---
 
