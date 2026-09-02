@@ -8,7 +8,10 @@ import { CommunityBanner } from "@/components/landing/CommunityBanner";
 import { ClipboardCheck, Users, Rocket } from "lucide-react";
 
 const CALENDLY_URL =
-  process.env.NEXT_PUBLIC_CALENDLY_URL ?? "https://calendly.com/12kernsmatthew/new-meeting";
+  // `new-meeting` was deactivated on Calendly (2026-09-02); the only live
+  // event is the 15-minute "Introduction Call". A live link beats a dead one
+  // even though this page's copy still describes a longer session (R-001).
+  process.env.NEXT_PUBLIC_CALENDLY_URL ?? "https://calendly.com/12kernsmatthew/new-meeting-1";
 
 const FAQ_ITEMS = [
   {
