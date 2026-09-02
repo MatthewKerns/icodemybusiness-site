@@ -138,24 +138,30 @@ engagement. Lands on the free intro call.
 
 ### R-005 · Single-scroll VSL sales letter at `/`
 
-`status: in-progress` · `owner: agent` · `evidence: verified`
+`status: verify` · `owner: agent` · `evidence: verified`
 
-Today `/` is a component collage — splash, then a desktop/mobile hero fork, three
-generic story blocks, an offer grid, a social-proof bar, an agent-workflows block,
-a chat demo, and a community banner. It reads as a services site, not a letter.
+**Shipped `69a2ea7`** (2026-09-02) — awaiting prod verification on staging.
 
-**Shape:** hook → problem → story/credibility → mechanism → the four engagement
-paths (R-007) → proof → objections (R-008) → risk reversal → close. A CTA to the
-free call recurs after each major beat, all pointing at the same booking anchor.
+`/` was a component collage — a hero fork, three generic story blocks, an offer
+grid, a workflows explainer, a chat demo and a community banner — that read as a
+services directory. It is now one letter, in this order:
 
-**Constraints:** no visible prices (R-009). Reuse `EmailCapture` and `CalendlyEmbed`
-— do not fork them. No hardcoded call durations until R-001 lands.
+> splash → promise + VSL → one action (assess) → the assessment → problem →
+> who I am → which path is you → objections → guarantee → close
 
-**Done when:** `/` is one continuous scroll, every CTA resolves to the booking
-anchor, `tsc` + `eslint` clean, and it holds up at 375px.
+A CTA to the intro call recurs after each beat rather than only at the end, each
+carrying a `placement` prop so we can see which beat earns the click.
 
-**Shipped so far:** the splash gate was restaged on the payoff line with a real CTA
-affordance (commit `c452ac9`, 2026-09-02) — that is the letter's opening beat.
+**Constraints held:** no visible prices (R-009); no hardcoded call durations while
+R-001 is open, so the copy says "intro call"; all copy in
+[src/content/landing.ts](../src/content/landing.ts) so rewording is a content edit.
+
+**Built across:** `c452ac9` (splash restaged on the payoff line with a real CTA
+affordance), `e158295` (single assessment CTA replacing the post-splash menu),
+`69a2ea7` (the letter body).
+
+**Remaining to verify in prod:** every CTA resolves to `/book`, zero currency
+amounts in the HTML, and the path cards stack cleanly at 375px.
 
 ---
 
@@ -171,14 +177,24 @@ asset URL **in code/config, not an environment variable** — it isn't a secret,
 new public env var costs a Dockerfile `ARG`+`ENV`, a `--build-arg` in `deploy.sh`, and
 a value on the VPS. Three moving parts for a URL that can live in the repo.
 
-**Done when:** Matthew supplies the recording and hosting choice (YouTube/Vimeo embed
-vs self-hosted MP4); the slot renders it with a poster frame and no autoplay.
+**Slot shipped `69a2ea7`.** `VSL` in [src/content/landing.ts](../src/content/landing.ts)
+takes `src` + `kind` (`youtube` | `vimeo` | `file`). While `src` is null the section
+renders a real poster state with copy pointing the reader onward — not a broken
+embed, and no fake play button. Setting `src` publishes it.
+
+**Done when:** Matthew supplies the recording and hosting choice; the slot renders
+it with a poster frame and no autoplay.
 
 ---
 
 ### R-007 · Present all four engagement paths, not one offer
 
-`status: ready` · `owner: agent` · `evidence: verified`
+`status: done` · `owner: agent` · `evidence: verified`
+
+**Closed by `69a2ea7`.** The "Which one is you?" section presents diagnose /
+have it built / bring me inside / rebuild how it runs, each with its timeline and
+depth of commitment, all four terminating at the same intro call. Copy in
+[src/content/landing.ts](../src/content/landing.ts) `PATHS`.
 
 Matthew's direction (2026-09-02): speak to **all** of done-for-you build, fractional
 partner, transformation program, and diagnostic-first — as routes a new client can
@@ -192,7 +208,11 @@ every route terminates at the same free intro call.
 
 ### R-008 · Objection handling inline in the letter
 
-`status: ready` · `owner: agent` · `evidence: verified`
+`status: done` · `owner: agent` · `evidence: verified`
+
+**Closed by `69a2ea7`.** Five objections answered in the letter body, including
+the cost question answered directly rather than dodged. Copy in
+[src/content/landing.ts](../src/content/landing.ts) `OBJECTIONS`.
 
 Long-form VSL practice: answer objections where they arise, not only in a trailing
 FAQ. Source material already exists in the `/book` and `/consulting` FAQ items.
@@ -206,7 +226,12 @@ still reads "Free · 15 minutes · No obligation" — same family, awaiting Matt
 
 ### R-009 · Signal the price tier without printing a price
 
-`status: ready` · `owner: agent` · `evidence: verified`
+`status: done` · `owner: agent` · `evidence: verified`
+
+**Closed by `69a2ea7`.** No number appears on the letter; the tier is carried by
+scope, capacity language ("very few of these at once", "a handful a year") and a
+direct answer to the cost objection. Keep the zero-price check in the deploy
+verification so this can't regress silently.
 
 Standing decision (2026-09-02): **no visible pricing anywhere.** `/subscribe`
 redirects to `/consulting`; the Stripe stack stays in-repo but dormant and unlinked.
@@ -284,6 +309,45 @@ letter, so the missing landing surface is a real gap.
 **aspirational drafts, not real client statements** — publishing them as genuine would
 be fabricated proof. Needs real, consented quotes before the gate comes off. The
 letter's proof section (R-005) must not depend on this.
+
+---
+
+### R-015 · Decide what happens to the five orphaned components
+
+`status: ready` · `owner: matthew` · `evidence: verified`
+
+The letter rebuild (`69a2ea7`) left five components built but unreferenced:
+`OfferGrid`, `AgentWorkflowsBlock`, `AgentSection`, `StoryBlock`,
+`HeroAuroraBackground`. They were deliberately **not** deleted — whether any of
+them earns a place back in the letter is a product decision, not a cleanup.
+
+**Verify:** `for c in OfferGrid AgentWorkflowsBlock AgentSection StoryBlock HeroAuroraBackground; do grep -rl "$c" src/ | grep -v "/$c.tsx"; done`
+
+**Watch out:** `AgentSection` is the Retell widget. With it off the homepage, the
+R-004 console errors no longer appear on `/` — a quiet console there says nothing
+about whether the voice agent works. Check another page that mounts it.
+
+**Done when:** each of the five is either reintroduced into the letter or deleted
+with its test and asset references.
+
+---
+
+### R-016 · Assessment gate's sign-in round-trip is unverified in prod
+
+`status: ready` · `owner: agent` · `evidence: verified`
+
+The optional account gate sends visitors to `/sign-up` and `/sign-in` with a
+`redirect_url` back to `/#top3`. That round-trip has been reasoned about but not
+exercised against a real build, and Clerk is still on development keys (R-003),
+which is exactly the condition most likely to make it behave differently in prod
+than locally.
+
+**Verify:** on staging, click "Assess where you are now" → "Create a free
+account", complete Clerk, and confirm you land back on `/` scrolled to the
+assessment rather than at the top of the page or on a Clerk-hosted URL.
+
+**Done when:** both doors return the visitor to the assessment, and the guest door
+scrolls there without a page load.
 
 ---
 
