@@ -18,6 +18,7 @@ import type * as conversations from "../conversations.js";
 import type * as crons from "../crons.js";
 import type * as deliverables from "../deliverables.js";
 import type * as email from "../email.js";
+import type * as emailSends from "../emailSends.js";
 import type * as emails from "../emails.js";
 import type * as http from "../http.js";
 import type * as intakeProcessor from "../intakeProcessor.js";
@@ -59,6 +60,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   deliverables: typeof deliverables;
   email: typeof email;
+  emailSends: typeof emailSends;
   emails: typeof emails;
   http: typeof http;
   intakeProcessor: typeof intakeProcessor;

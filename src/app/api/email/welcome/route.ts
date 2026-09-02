@@ -38,14 +38,28 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const resend = new Resend(apiKey);
   const fromAddress = process.env.RESEND_FROM_EMAIL ?? "hello@icodemybusiness.com";
 
+  const subject = "Welcome to iCodeMyBusiness — Your Free Tools Are Ready";
   const html = await render(WelcomeEmail({ email, name }));
 
   const { data, error } = await resend.emails.send({
     from: `iCodeMyBusiness <${fromAddress}>`,
     to: [email],
-    subject: "Welcome to iCodeMyBusiness — Your Free Tools Are Ready",
+    subject,
     html,
   });
+
+  // Persist the outcome (success or failure) so delivery is auditable from the
+  // database. Best-effort: a logging failure must never fail the request.
+  await convex
+    .mutation(api.emailSends.record, {
+      to: email,
+      template: "welcome",
+      subject,
+      status: error ? "failed" : "sent",
+      resendId: data?.id,
+      error: error?.message,
+    })
+    .catch((e: unknown) => console.error("emailSends.record failed:", e));
 
   if (error) {
     throw new InternalError(error.message);

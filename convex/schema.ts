@@ -26,11 +26,30 @@ export default defineSchema(
       sessionId: v.optional(v.string()),
       clerkUserId: v.optional(v.string()),
       createdAt: v.number(),
+      /** Set when the welcome email was accepted by Resend. */
+      welcomeEmailSentAt: v.optional(v.number()),
+      welcomeEmailResendId: v.optional(v.string()),
     })
       .index("by_email", ["email"])
       .index("by_source", ["source"])
       .index("by_sessionId", ["sessionId"])
       .index("by_clerkUserId", ["clerkUserId"]),
+
+    // APPEND-ONLY
+    // Every transactional email the app hands to Resend, success or failure,
+    // so delivery can be audited from the database without the Resend dashboard.
+    emailSends: defineTable({
+      to: v.string(),
+      template: v.string(),
+      subject: v.string(),
+      status: v.union(v.literal("sent"), v.literal("failed")),
+      resendId: v.optional(v.string()),
+      error: v.optional(v.string()),
+      leadId: v.optional(v.id("leads")),
+      createdAt: v.number(),
+    })
+      .index("by_to", ["to"])
+      .index("by_createdAt", ["createdAt"]),
 
     // APPEND-ONLY
     // Visitor events: durable system-of-record log of clicks and decisions made
