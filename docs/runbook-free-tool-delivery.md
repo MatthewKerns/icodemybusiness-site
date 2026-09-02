@@ -7,7 +7,7 @@ See `free-tool-delivery.md` for how the flow works.
 
 | Environment | URL | Serves the app? |
 |-------------|-----|-----------------|
-| **VPS (current prod for the app)** | `https://icodemybusiness.srv1757482.hstgr.cloud` | ✅ Yes |
+| **Staging (the only place the app runs)** | `https://staging.icodemybusiness.com` | ✅ Yes — Namecheap A record → VPS, Traefik router set by `./deploy.sh staging` (the old `*.hstgr.cloud` host is unrouted, 404) |
 | **Apex** | `https://icodemybusiness.com` | ❌ No — old static GitHub Pages placeholder |
 
 - VPS: Hostinger KVM, `root@2.25.207.149`, container `icodemybusiness-site` on
@@ -45,7 +45,7 @@ keys, Resend **live** key). Functional but promote to prod before heavy traffic.
 ### Quick health probe (no auth)
 ```bash
 node -e 'const https=require("https");
-const h="icodemybusiness.srv1757482.hstgr.cloud";
+const h="staging.icodemybusiness.com";
 ["/free-tools","/downloads/disk-space-optimizer-skill.zip"].forEach(p=>
  https.get({host:h,path:p},r=>console.log(r.statusCode,p)));
 const req=https.request({host:h,path:"/api/email/welcome",method:"POST",
@@ -116,8 +116,8 @@ rsync -az \
 ssh root@2.25.207.149 'cd /opt/icodemybusiness-site && ./deploy.sh build'
 ```
 - `./deploy.sh build` rebuilds the image **but does not restart the container** —
-  follow it with `./deploy.sh run` to swap the running container onto the new
-  `icodemybusiness-site:latest` image (test-host router only).
+  follow it with `./deploy.sh staging` to swap the running container onto the new
+  `icodemybusiness-site:latest` image (staging router only; `run` is the legacy hstgr-host mode).
 - `./deploy.sh cutover` additionally adds the apex+www Traefik router (only after
   the Namecheap DNS change above).
 - Secrets come from `/opt/icodemybusiness-site/.env.build` — never baked into the
