@@ -56,14 +56,9 @@ export const STORY = {
   ],
   proofPoints: [
     {
-      label: "Working software weekly",
+      label: "Weekly walkthroughs",
       detail:
-        "Every engagement ships something usable each week. If a week produces only a status update, that's a failure, and I treat it as one.",
-    },
-    {
-      label: "I do the work",
-      detail:
-        "No account manager, no handoff to a junior team. The person who scopes your system is the person who builds it.",
+        "Weekly updates come as a short video — a screen share run-through of what changed in the software that week.",
     },
     {
       label: "You own what I build",
