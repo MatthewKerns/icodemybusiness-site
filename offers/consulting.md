@@ -12,7 +12,7 @@ Internal reference for premium services. Contact me for custom projects.
 | Ongoing consulting | $100/hr | 50% off standard |
 | Standard rate | $200/hr | Full price |
 
-**Booking:** https://calendly.com/matthewkerns/discovery
+**Booking:** https://calendly.com/12kernsmatthew/new-meeting-1
 
 ---
 
@@ -96,7 +96,7 @@ Custom AI agent systems for personal optimization:
 4. **Go custom:** Contact me for a fully scoped custom AI project
 
 **Contact:**
-- Calendly: https://calendly.com/matthewkerns/discovery
+- Calendly: https://calendly.com/12kernsmatthew/new-meeting-1
 - Email: matthew@icodemybusiness.com
 - LinkedIn: https://www.linkedin.com/in/mkerns1/
 

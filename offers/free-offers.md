@@ -9,7 +9,7 @@ Internal reference for all free resources and lead magnets we provide.
 - **Format:** 30-minute video call via Calendly
 - **Value:** $100 per call (normally $200/hr)
 - **Availability:** 5 slots per month (scarcity-driven)
-- **Booking link:** https://calendly.com/matthewkerns/discovery-free
+- **Booking link:** https://calendly.com/12kernsmatthew/new-meeting-1 (the 15-minute "Introduction Call"; it is the only live event on the profile as of 2026-09-02, so the 30-minute format above is aspirational until a matching event exists)
 - **What they get:**
   - Deep dive into their specific business or wellness goals
   - Custom AI system recommendation
@@ -21,7 +21,7 @@ Internal reference for all free resources and lead magnets we provide.
 ## 2. Free Organic Marketing Audit
 
 - **Format:** Video call via Calendly
-- **Booking link:** https://calendly.com/matthewkerns/organic-audit
+- **Booking link:** none live. No `organic-audit` event exists on the current Calendly profile (2026-09-02); use https://calendly.com/12kernsmatthew/new-meeting-1 until one is created
 - **What's included:**
   - Analysis of current CAC and ad spend efficiency
   - Review of organic presence gaps
