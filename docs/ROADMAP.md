@@ -36,44 +36,28 @@ while any of these is open.
 
 ### R-001 · No 15-minute Calendly event exists
 
-`status: blocked` · `owner: matthew` · `evidence: verified`
+`status: done` · `owner: matthew` · `evidence: verified`
 
-Every CTA on the site promises a **free 15-minute intro call**. Matthew's Calendly
-profile exposes exactly one bookable event type — `new-meeting` ("New Meeting").
-There is no 15-minute event. The `30min` slug that the site used to point at was
-**deactivated**, not deleted.
+**Closed 2026-09-02.** Matthew created the event; the site now points at it.
 
-**Why it matters:** this is the destination of the entire sales letter. A visitor
-who does everything right lands on a generic meeting booking.
+**Verified directly, not taken secondhand:** the public listing
+(`calendly.com/api/booking/profiles/12kernsmatthew/event_types`) returns exactly
+one active type — `new-meeting-1`, "Introduction Call" — and the rendered booking
+page shows **15 min** with a live calendar. The old `new-meeting` and the
+deactivated `30min` are both off the active listing.
 
-**Trap:** `https://calendly.com/12kernsmatthew/30min` still returns **HTTP 200**, so a
-status-code check calls it healthy. It serves a bare SPA shell with no `og:` metadata,
-and Calendly's lookup reports `unavailability_reason=event_type_deactivated`. Compare
-against `/new-meeting`, which carries `og:title` "New Meeting - Matthew Kerns".
+Duration is not exposed by the JSON listing or the page's static HTML — Calendly
+renders it client-side — so confirming it needs a browser, not curl. Anyone
+re-checking this should render the page rather than grep the source.
 
-**Verify:**
+**Residual, small:** [offers/consulting.md](../offers/consulting.md) still
+advertises `calendly.com/matthewkerns/discovery`, a different account handle that
+was never reconciled. It is an internal reference doc, not a live surface, but it
+will mislead whoever reads it next.
 
-```bash
-curl -sS https://calendly.com/api/booking/profiles/12kernsmatthew/event_types | python3 -m json.tool
-```
-
-The profile listing only returns *active* types, so a deactivated event is invisible here.
-
-**Done when:** that call returns a 15-minute event, its slug is set as
-`NEXT_PUBLIC_CALENDLY_INTRO_URL` on the VPS, and `/book` embeds it.
-
-**Matthew's action:** create the event type in Calendly. Everything downstream is config.
-
-**Update 2026-09-02:** Matthew supplied `https://calendly.com/12kernsmatthew/new-meeting-1`
-("Introduction Call"). The profile listing now returns only that event, so the old
-`new-meeting` default was pointing at a deactivated one. `new-meeting-1` is now the
-in-code default in `src/app/book/page.tsx`; setting `NEXT_PUBLIC_CALENDLY_INTRO_URL`
-to the same value on the VPS makes the override explicit. Remaining: reconcile
-`offers/consulting.md`'s `matthewkerns/discovery` handle.
-
-**Also inconsistent:** [offers/consulting.md](../offers/consulting.md) advertises a
-*third* URL — `calendly.com/matthewkerns/discovery` (a different account handle). Pick
-one handle and reconcile all three.
+**Letter copy note:** the homepage still says "intro call" with no duration. That
+was deliberate while this was broken and is now simply accurate — there is no
+need to hardcode "15 minutes" into the letter to close this item.
 
 ---
 
