@@ -9,12 +9,22 @@ interface CalendlyEmbedProps {
   url: string;
   email?: string;
   name?: string;
+  /**
+   * Stored by Calendly on the invitee as `utm_content`, so a booking can be
+   * traced back to e.g. a discovery assessment session.
+   */
+  utmContent?: string;
 }
 
 const LOAD_TIMEOUT_MS = 15_000;
 const CALENDLY_MIN_HEIGHT = 660;
 
-function buildCalendlyUrl(base: string, email?: string, name?: string): string {
+function buildCalendlyUrl(
+  base: string,
+  email?: string,
+  name?: string,
+  utmContent?: string
+): string {
   const url = new URL(base);
   url.searchParams.set("hide_event_type_details", "1");
   url.searchParams.set("hide_gdpr_banner", "1");
@@ -23,6 +33,7 @@ function buildCalendlyUrl(base: string, email?: string, name?: string): string {
   url.searchParams.set("primary_color", "d4af37");
   if (email) url.searchParams.set("email", email);
   if (name) url.searchParams.set("name", name);
+  if (utmContent) url.searchParams.set("utm_content", utmContent);
   return url.toString();
 }
 
@@ -30,7 +41,7 @@ function buildCalendlyUrl(base: string, email?: string, name?: string): string {
  * Core CalendlyEmbed component (unwrapped)
  * Exported for testing and cases where error boundaries are not needed
  */
-export function CalendlyEmbedComponent({ url, email, name }: CalendlyEmbedProps) {
+export function CalendlyEmbedComponent({ url, email, name, utmContent }: CalendlyEmbedProps) {
   const [state, setState] = useState<"pending" | "loading" | "loaded" | "error">("pending");
   const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -92,7 +103,7 @@ export function CalendlyEmbedComponent({ url, email, name }: CalendlyEmbedProps)
   // Guard against empty URL (e.g. during static page generation when env var is unset)
   let iframeSrc: string;
   try {
-    iframeSrc = buildCalendlyUrl(url, email, name);
+    iframeSrc = buildCalendlyUrl(url, email, name, utmContent);
   } catch {
     iframeSrc = url || "#";
   }

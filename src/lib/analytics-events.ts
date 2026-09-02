@@ -28,6 +28,10 @@ export const ANALYTICS_EVENTS = {
   TOP3_COMPLETED: "top3_completed",
   /** Homepage "Assess where you are now" clicked — entry to the assessment. */
   ASSESSMENT_STARTED: "assessment_started",
+  /** Discovery assessment submitted (email given, report generation started). */
+  DISCOVERY_ASSESSMENT_COMPLETED: "discovery_assessment_completed",
+  /** Discovery assessment report finished generating and was shown to the visitor. */
+  DISCOVERY_REPORT_READY: "discovery_report_ready",
   /** Retell voice chat connected. */
   VOICE_CALL_STARTED: "voice_call_started",
   /** Subscription canceled (churn). */
@@ -56,6 +60,12 @@ export const ANALYTICS_EVENTS = {
    * retrievable later, so the guest share is the number worth watching.
    */
   ASSESSMENT_ACCOUNT_CHOICE: "assessment_account_choice",
+  /** Discovery assessment: a question stage was completed (props: stage, followUpsUsed, forced). */
+  DISCOVERY_STAGE_ADVANCED: "discovery_stage_advanced",
+  /** Discovery assessment: the visitor confirmed the recap in their own words. */
+  DISCOVERY_RECAP_CONFIRMED: "discovery_recap_confirmed",
+  /** Discovery assessment: the report was claimed into a signed-in account. */
+  DISCOVERY_ACCOUNT_CLAIMED: "discovery_account_claimed",
 
   // --- Operational: health signals ------------------------------------
   /** An API route returned an error (captured in errorResponse). */

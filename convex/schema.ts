@@ -209,7 +209,7 @@ export default defineSchema(
 
     // Native agent sessions (Top 3 Issues, e-commerce intake, future agents)
     agentSessions: defineTable({
-      agentKind: v.string(), // "top3-issues" | "ecommerce-intake"
+      agentKind: v.string(), // "top3-issues" | "ecommerce-intake" | "discovery-assessment"
       sessionId: v.string(), // client-generated, stable across anon visits
       leadId: v.optional(v.id("leads")),
       visitorEmail: v.optional(v.string()),
@@ -230,6 +230,10 @@ export default defineSchema(
       intakeReady: v.optional(v.boolean()),
       preDraft: v.optional(v.string()),
       preDraftStarted: v.optional(v.boolean()),
+      // Discovery assessment agent: server-owned stage state.
+      // { stage, followUpsUsed, answers, recapConfirmed } — see
+      // src/lib/agent/discovery-prompt.ts
+      discoveryState: v.optional(v.any()),
       fileIds: v.array(v.id("_storage")),
       fileMeta: v.array(
         v.object({
@@ -284,6 +288,53 @@ export default defineSchema(
       .index("by_email", ["email"])
       .index("by_clerkUserId", ["clerkUserId"])
       .index("by_sessionId", ["sessionId"])
+      .index("by_status", ["status"]),
+
+    // Discovery assessments. A "discovery-assessment" agent session becomes an
+    // assessment when the visitor confirms the recap and gives an email.
+    // Background processing writes the visitor-facing summary (emailed and
+    // shown on screen) and an internal pre-call brief (admin-only, never
+    // returned by a public query).
+    assessments: defineTable({
+      sessionId: v.string(), // links to agentSessions.sessionId
+      leadId: v.optional(v.id("leads")),
+      clerkUserId: v.optional(v.string()),
+      email: v.string(),
+      name: v.optional(v.string()),
+      answers: v.array(
+        v.object({
+          key: v.string(), // problem | cost | history | stakes | outcome
+          question: v.string(),
+          summary: v.string(),
+          quotes: v.array(v.string()),
+          numbers: v.optional(v.any()),
+        })
+      ),
+      summary: v.optional(
+        v.object({
+          problem: v.string(),
+          impact: v.string(),
+          history: v.string(),
+          stakes: v.string(),
+          idealOutcome: v.string(),
+          recommendedPath: v.string(), // one of PATHS[].key in src/content/landing.ts
+          thisWeekAction: v.string(),
+        })
+      ),
+      // INTERNAL — admin only, never returned by user-facing queries.
+      internalBrief: v.optional(v.string()),
+      internalBriefAt: v.optional(v.number()),
+      status: v.string(), // "processing" | "ready" | "failed"
+      processingError: v.optional(v.string()),
+      emailSent: v.boolean(),
+      emailSentAt: v.optional(v.number()),
+      source: v.optional(v.string()), // "homepage" | "assessment-page"
+      createdAt: v.number(),
+      completedAt: v.optional(v.number()),
+    })
+      .index("by_sessionId", ["sessionId"])
+      .index("by_clerkUserId", ["clerkUserId"])
+      .index("by_email", ["email"])
       .index("by_status", ["status"]),
 
     // ======================================================================

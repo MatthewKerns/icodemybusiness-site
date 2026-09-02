@@ -70,7 +70,7 @@ is broken.
 
 | Metric (event) | Fires from | Key props | Dashboard tile |
 |----------------|-----------|-----------|----------------|
-| **Leads captured** (`lead_captured`) | EmailCapture (client), free-tools (client), Top 3 complete (server) | `source`, `form_variant` | "Leads captured (30d)" + Tier 1 trend |
+| **Leads captured** (`lead_captured`) | EmailCapture (client), free-tools (client), Top 3 complete (server); discovery assessments write `leads.source = "discovery-assessment"` directly in Convex | `source`, `form_variant` | "Leads captured (30d)" + Tier 1 trend |
 | **Consultations booked** (`consultation_booked`) | CalendlyEmbed `postMessage` (client) | — | Tier 1 trend |
 | **Paid subscriptions** (`checkout_completed`) | Stripe webhook `checkout.session.completed` (server) | `plan` | "Paid subscriptions started (30d)" + Tier 1 trend |
 
@@ -84,8 +84,21 @@ diagnose Tier 1 movement.
 | **Checkout started** (`checkout_started`) | Stripe checkout route (server) | `plan` |
 | **Free tool accessed** (`free_tool_accessed`) | free-tools page (client) | — |
 | **Top 3 completed** (`top3_completed`) | Top 3 complete route (server) | `issueCount` |
+| **Discovery assessment completed** (`discovery_assessment_completed`) | DiscoveryAssessment on submit (client) | `source`, `degraded` |
+| **Discovery report ready** (`discovery_report_ready`) | DiscoveryResultView when status flips to ready (client) | `path` |
 | **Voice call started** (`voice_call_started`) | RetellVoiceWidget on `call_started` (client) | — |
 | **Subscription canceled** (`subscription_canceled`) | Stripe webhook `subscription.deleted` (server) | `subscriptionId` |
+
+### Discovery assessment decisions (dual-written to `visitorEvents`)
+
+| Event | Fires from | Key props |
+|-------|-----------|-----------|
+| `assessment_started` | AssessmentGate CTA (client) | `already_signed_in` |
+| `assessment_account_choice` | AssessmentGate doors (client) | `choice` |
+| `discovery_stage_advanced` | DiscoveryAssessment on each server `state` event with `advanced` (client) | `stage`, `followUpsUsed`, `forced`, `degraded` |
+| `discovery_recap_confirmed` | DiscoveryAssessment on "Yes, that's right" (client) | — |
+| `discovery_account_claimed` | DiscoveryAccountCta after `claim` succeeds (client) | — |
+| `book_call_clicked` | result-screen CTA (client) | `placement: "discovery-result"` |
 
 ### Operational — health
 

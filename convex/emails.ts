@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { internalAction } from "./_generated/server";
+import { api, internal } from "./_generated/api";
 
 // Email styles matching WelcomeEmail patterns: black bg, gold accent, Inter font, 580px container
 const emailStyles = {
@@ -38,16 +39,22 @@ function wrapHtml(subject: string, bodyContent: string): string {
 </html>`;
 }
 
+interface SendResult {
+  ok: boolean;
+  resendId?: string;
+  error?: string;
+}
+
 async function sendEmail(
   to: string,
   subject: string,
   html: string,
   fromName: string = "iCodeMyBusiness"
-): Promise<void> {
+): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.error("RESEND_API_KEY not configured — skipping email");
-    return;
+    return { ok: false, error: "RESEND_API_KEY not configured" };
   }
 
   const fromEmail = process.env.RESEND_FROM_EMAIL ?? "noreply@icodemybusiness.com";
@@ -69,7 +76,16 @@ async function sendEmail(
   if (!res.ok) {
     const text = await res.text();
     console.error(`Resend API error (${res.status}): ${text}`);
+    return { ok: false, error: `Resend ${res.status}: ${text.slice(0, 200)}` };
   }
+  let resendId: string | undefined;
+  try {
+    const data = (await res.json()) as { id?: string };
+    resendId = data.id;
+  } catch {
+    // Body is optional for our purposes.
+  }
+  return { ok: true, resendId };
 }
 
 function escapeHtml(s: string): string {
@@ -263,5 +279,89 @@ export const sendRoadmapNotification = internalAction({
     const subject = `New Roadmap Request — ${visitorDisplay}`;
     const html = wrapHtml(subject, bodyContent);
     await sendEmail(adminEmail, subject, html, "iCodeMyBusiness Alert");
+  },
+});
+
+// Discovery assessment report — the visitor-facing summary drafted in the
+// background (see discoveryProcessor.ts). Records the outcome in emailSends so
+// delivery can be audited from the database, then marks the assessment.
+export const sendDiscoveryReportEmail = internalAction({
+  args: {
+    assessmentId: v.id("assessments"),
+    email: v.string(),
+    name: v.optional(v.string()),
+    summary: v.object({
+      problem: v.string(),
+      impact: v.string(),
+      history: v.string(),
+      stakes: v.string(),
+      idealOutcome: v.string(),
+      recommendedPath: v.string(),
+      thisWeekAction: v.string(),
+    }),
+    pathName: v.string(),
+    pathWhat: v.string(),
+    bookingUrl: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const greeting = args.name ? `Hi ${escapeHtml(args.name)},` : "Hi there,";
+    const s = args.summary;
+    const row = (label: string, text: string) => `
+    <p style="${emailStyles.label}">${label}</p>
+    <p style="${emailStyles.value}">${escapeHtml(text)}</p>`;
+
+    const bodyContent = `
+  <div style="padding:24px 0;">
+    <p style="${emailStyles.heading}">${greeting}</p>
+    <p style="${emailStyles.paragraph}">
+      Here is the write-up from your assessment, in your own words. Keep it
+      whether or not we ever work together.
+    </p>
+    <hr style="${emailStyles.hr}">
+    ${row("The problem", s.problem)}
+    ${row("What it costs", s.impact)}
+    ${row("How long, and what you've tried", s.history)}
+    ${row("If nothing changes", s.stakes)}
+    ${row("The outcome you want", s.idealOutcome)}
+    <hr style="${emailStyles.hr}">
+    <p style="${emailStyles.label}">Where I'd start</p>
+    <p style="${emailStyles.value}"><span style="${emailStyles.badge}">${escapeHtml(args.pathName)}</span></p>
+    <p style="${emailStyles.paragraph}">${escapeHtml(args.pathWhat)}</p>
+    <p style="${emailStyles.label}">One thing you can do this week</p>
+    <p style="${emailStyles.paragraph}">${escapeHtml(s.thisWeekAction)}</p>
+    <div style="text-align:center;margin:28px 0;">
+      <a href="${args.bookingUrl}" style="${emailStyles.button}">Book an intro call</a>
+    </div>
+    <p style="${emailStyles.paragraph}">
+      On the call you tell me where the week goes; I tell you straight what I'd
+      fix first and whether I'm the right person to fix it. Reply to this email
+      any time &mdash; a real person reads every message.
+    </p>
+  </div>`;
+
+    const subject = "Your discovery assessment — the write-up";
+    const html = wrapHtml(subject, bodyContent);
+    const result = await sendEmail(args.email, subject, html);
+
+    // Audit row (only annotates addresses already captured as leads).
+    await ctx.runMutation(api.emailSends.record, {
+      to: args.email,
+      template: "discovery-report",
+      subject,
+      status: result.ok ? "sent" : "failed",
+      resendId: result.resendId,
+      error: result.error,
+    });
+
+    if (result.ok) {
+      await ctx.runMutation(internal.discoveryAssessments.internalMarkEmailSent, {
+        assessmentId: args.assessmentId,
+      });
+    } else {
+      await ctx.runMutation(internal.discoveryAssessments.internalSetError, {
+        assessmentId: args.assessmentId,
+        error: `Report email failed: ${result.error ?? "unknown"}`,
+      });
+    }
   },
 });

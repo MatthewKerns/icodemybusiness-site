@@ -337,6 +337,12 @@ about whether the voice agent works. Check another page that mounts it.
 **Done when:** each of the five is either reintroduced into the letter or deleted
 with its test and asset references.
 
+**Added 2026-09-02:** the Discovery Assessment (R-017) replaces `Top3IssuesAgent`
+at `#top3`, so `src/components/agent/top3issues/*`, `src/lib/agent/top3-prompt.ts`,
+`src/app/api/agent/top3/*` and `src/emails/Top3IssuesSummaryEmail.tsx` join this
+list. Still referenced from `/consulting` copy only by anchor (`/#top3`), which
+now opens the new assessment. Not deleted for the same reason as the others.
+
 ---
 
 ### R-016 · Assessment gate's sign-in round-trip is unverified in prod
@@ -366,6 +372,47 @@ assessment rather than at the top of the page or on a Clerk-hosted URL.
 
 **Done when:** both doors return the visitor to the assessment, and the guest door
 scrolls there without a page load.
+
+---
+
+### R-017 · Discovery Assessment — two legs an agent cannot verify
+
+`status: in-progress` · `owner: matthew` · `evidence: verified`
+
+**Shipped (working tree, 2026-09-02).** The five-question discovery intake
+(`src/content/discovery-questions.ts`, generalised from the ecommerce
+`5-questions-framework.md`) replaces the freeform Top 3 chat at `/#top3` and is
+also served at `/assessment`. The UI asks each anchor question; Claude drills
+down at most twice per question (server-clamped in
+`src/lib/agent/discovery-prompt.ts`); a recap in the visitor's words is
+confirmed; `convex/discoveryAssessments.submit` captures the lead and schedules
+`convex/discoveryProcessor.finalizeAssessment`, which writes the visitor summary
++ the admin-only brief and sends the report email (audited in `emailSends`).
+The whole flow completes with Anthropic unavailable: each turn degrades to the
+visitor's verbatim answer and the processor falls back to a verbatim summary.
+
+**Verified by tests:** stage clamp + forced completion; brief never in a public
+or portal query; claim binds only the verified identity; fallback path still
+reaches `ready`; failed sends are audited and not marked sent.
+
+**Not verifiable by an agent — Matthew's clicks:**
+
+1. **Sign-up round-trip from the result screen** (same family as R-016, still on
+   Clerk dev keys): click "Create a free account to keep this report", finish
+   Clerk, confirm you land back on `/assessment` or `/#top3` with the report
+   shown as "Saved to your account", and that `/portal/assessments` lists it.
+2. **A real Calendly booking from the result screen:** confirm the invitee
+   record in Calendly carries `utm_content=assessment:<sessionId>` and the
+   prefilled email/name, so a booking can be matched to its report in
+   `/admin/assessments`.
+
+**Also confirm before trusting real output:** `ANTHROPIC_API_KEY` and
+`RESEND_API_KEY` are set on the Convex deployment (`neat-hamster-414`); without
+the first, every report is the verbatim fallback with `processingError` set.
+
+**Known gap, deliberate:** an unfinished assessment does not follow the account
+across devices (the session id lives in `sessionStorage`; `agentSessions` has no
+`clerkUserId`). The gate copy was narrowed to match (`1a2e011`).
 
 ---
 

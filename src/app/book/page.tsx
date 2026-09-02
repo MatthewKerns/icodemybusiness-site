@@ -68,7 +68,28 @@ const FAQ_ITEMS = [
   },
 ];
 
-export default function BookPage() {
+type SearchParams = Record<string, string | string[] | undefined>;
+
+function first(value: string | string[] | undefined): string | undefined {
+  const v = Array.isArray(value) ? value[0] : value;
+  return v && v.trim() ? v.trim() : undefined;
+}
+
+/**
+ * `/book?session=…&email=…&name=…` is how the discovery assessment hands a
+ * visitor over: the address and name prefill Calendly, and the session id
+ * rides along as utm_content so the booking can be matched to the report.
+ */
+export default function BookPage({
+  searchParams,
+}: {
+  searchParams?: SearchParams;
+}) {
+  const email = first(searchParams?.email);
+  const name = first(searchParams?.name);
+  const session = first(searchParams?.session);
+  const utmContent = session ? `assessment:${session}` : undefined;
+
   return (
     <main
       id="main-content"
@@ -156,7 +177,12 @@ export default function BookPage() {
             </p>
 
             <div className="mt-8">
-              <CalendlyEmbed url={CALENDLY_INTRO_URL} />
+              <CalendlyEmbed
+                url={CALENDLY_INTRO_URL}
+                email={email}
+                name={name}
+                utmContent={utmContent}
+              />
             </div>
           </div>
         </section>

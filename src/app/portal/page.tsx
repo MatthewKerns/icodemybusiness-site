@@ -145,6 +145,12 @@ export default function PortalDashboard() {
             icon={FileText}
           />
           <QuickLinkCard
+            title="Your Assessment"
+            description="The write-up from your discovery assessment"
+            href="/portal/assessments"
+            icon={FileText}
+          />
+          <QuickLinkCard
             title="Deliverables"
             description="Download your project files"
             href="/portal/deliverables"

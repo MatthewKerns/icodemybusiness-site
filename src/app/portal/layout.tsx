@@ -7,13 +7,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignOutButton } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
-import { Home, FolderKanban, FileText, Activity, Gift, LogOut } from "lucide-react";
+import { Home, FolderKanban, FileText, Activity, Gift, LogOut, ClipboardList } from "lucide-react";
 
 const PORTAL_LINKS = [
   { href: "/portal", label: "Dashboard", icon: Home },
   { href: "/portal/projects", label: "Projects", icon: FolderKanban },
   { href: "/portal/deliverables", label: "Deliverables", icon: FileText },
   { href: "/portal/resources", label: "Resources", icon: Gift },
+  { href: "/portal/assessments", label: "Assessment", icon: ClipboardList },
   { href: "/portal/activity", label: "Activity", icon: Activity },
 ] as const;
 

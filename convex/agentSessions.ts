@@ -233,6 +233,26 @@ export const updateIntakeProfile = mutation({
   },
 });
 
+// --- Discovery assessment agent ---
+
+// Persist the server-owned stage state after each turn. Only the Next.js chat
+// route writes this, after clamping the model's claim (see
+// src/lib/agent/discovery-prompt.ts); the client never sends it.
+export const updateDiscoveryState = mutation({
+  args: {
+    sessionId: v.string(),
+    discoveryState: v.any(),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
+      .first();
+    if (!session) return;
+    await ctx.db.patch(session._id, { discoveryState: args.discoveryState });
+  },
+});
+
 // Start the background "pre-draft" once context is rich enough — runs while the
 // user is still chatting, without blocking their input. Idempotent.
 export const kickoffPreDraft = mutation({
