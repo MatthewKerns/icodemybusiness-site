@@ -62,3 +62,11 @@ the deploy script's own gates stay.
 **Lesson.** An empty table where writes are expected is a finding, not a baseline. When a table that a signed-in path should populate is empty, trace the write path end to end before attributing it to traffic. Gates cannot catch a guard that is merely contradictory.
 
 **Verification.** Cannot be done by curl: someone signs in on the deployed build, then `npx convex data users --limit 5` shows a row. Until a real sign-in happens the table stays empty, so an empty table is not evidence either way. Queue status for 71ee7aa stays "deployed, sign-in unverified" until Matthew's browser round-trip (R-016).
+
+## 2026-09-02 — evening "VPS stalls" were packet loss on the laptop→Hostinger route, not the host
+
+**What happened.** From ~17:15Z the VPS went unreachable from the deploy laptop in ~10-minute episodes, then for longer: ssh SYNs timing out, later "Connection closed by … port 22" right after the banner, HTTPS accepting TCP but never completing TLS. The deploy script mistook one episode for a build failure (its ssh session dropped; the image had built) and left a stale lock; two sessions then reasoned their way to fail2ban / sshd MaxStartups / a filling disk — each plausible from the client side and each wrong.
+
+**What it was.** Measured: TCP connects to the VPS succeeded 7/12 with 0.2–1.5 s handshakes (normally ~0.1 s), a control site 6/6; plain HTTP returned a 301 in 3 s; third-party fetches (r.jina.ai) got the page in 0.35 s throughout; Hostinger metrics were flat (CPU 30 %, RAM 3.8 GB, disk 306.9 GB, no reboot). Multi-packet exchanges (TLS, SSH KEX, rsync) failed while single-packet ones limped through: ~40 % loss on the path (Cox → Cogent → Hostinger DC). Visitors were never affected.
+
+**Rule.** Before acting on the host for a "VPS down" symptom, run the three-step path test (third-party fetch, 12× TCP-connect ratio vs a control, Hostinger metrics). "Connection closed by … port 22" after the banner is not evidence of fail2ban. When the path is lossy, stop all VPS jobs (offload-run, pre-push gates, deploys) — they hang or half-complete, and a half-completed deploy is worse than a delayed one; the gate refusing a push it cannot run is the correct behaviour and was observed.
