@@ -42,8 +42,8 @@ export const VSL: {
 export const PROBLEM = {
   heading: "You already know something is leaking",
   body: [
-    "You can feel it in the week. Work that should take an hour takes a day. The same question gets answered three times by three people. A customer falls through a gap nobody owned. You've bought tools to fix it and the tools became another thing to manage.",
-    "The usual advice is to add software. More often the real problem is that nobody has mapped where the hours actually go — so every fix lands in the wrong place, and the business pays for it twice.",
+    "Work that should take an hour takes a day. The same question gets answered three times. A customer falls through a gap nobody owned.",
+    "The usual advice is to add software — but until someone maps where the hours actually go, every fix lands in the wrong place and the business pays for it twice.",
   ],
 };
 
@@ -52,8 +52,7 @@ export const STORY = {
   heading: "How I work, and why it's different",
   body: [
     "Most consultants give you a slide deck and an invoice. I give you a working system.",
-    "Before a real engagement starts, I spend hours inside your business — your workflows, your industry, your competitors — so the first working session is execution, not discovery. I write the architecture myself, use AI to build faster, and review every line. You get senior engineering end to end, not a junior team billed at senior rates.",
-    "Then you see software every week. Not wireframes, not status decks — something your team can actually use. That rhythm is the whole method: short loops, visible progress, and a system you can run without me.",
+    "I research your business before the first working session, write the architecture myself, and review every line. Then you see software every week — not wireframes, not status decks, something your team can actually use.",
   ],
   proofPoints: [
     {
@@ -75,13 +74,47 @@ export const STORY = {
 };
 
 /**
+ * Plot data for the paths diagram. These three fields exist purely for the
+ * drawing; the prose fields beside them are what a reader actually reads.
+ *
+ * They are explicit rather than derived because the prose can't be parsed into
+ * coordinates: `timeline` reads "Ongoing, reviewed each quarter", which has no
+ * number in it at all, and any parser would silently mis-plot the first time the
+ * wording changed.
+ */
+export type PathPlot = {
+  /** 1 = one conversation … 4 = the whole operation. An ordering, not a measurement. */
+  depth: 1 | 2 | 3 | 4;
+  /** Weeks from the intro call. `null` means the engagement doesn't end. */
+  weeks: number | null;
+  /** Three or four words, drawn on the chart. The prose lives in `timeline`. */
+  shortTimeline: string;
+};
+
+export type Path = {
+  key: string;
+  name: string;
+  forWho: string;
+  what: string;
+  timeline: string;
+  commitment: string;
+  highlight: boolean;
+  plot: PathPlot;
+};
+
+/**
  * The four routes in. Presented as a diagnosis — "which one is you" — rather
  * than a menu, so the reader's own situation picks the path for them.
  *
  * `commitment` is the tier signal: it's how the reader works out this is a
- * serious engagement without a number ever appearing.
+ * serious engagement without a number ever appearing. It is load-bearing — the
+ * paths diagram can show depth and duration but cannot carry selectivity, so
+ * these strings must stay on the page even when the cards don't.
+ *
+ * The explicit `Path[]` annotation is deliberate: adding a fifth route becomes a
+ * compile error until someone has decided where it sits on the chart.
  */
-export const PATHS = [
+export const PATHS: Path[] = [
   {
     key: "diagnostic",
     name: "Start with a diagnosis",
@@ -90,6 +123,7 @@ export const PATHS = [
     timeline: "A few minutes on the assessment, then a call",
     commitment: "Free. This is where most people should start.",
     highlight: true,
+    plot: { depth: 1, weeks: 1, shortTimeline: "One call" },
   },
   {
     key: "build",
@@ -99,6 +133,7 @@ export const PATHS = [
     timeline: "Typically six to twelve weeks",
     commitment: "A defined project engagement, scoped on the call.",
     highlight: false,
+    plot: { depth: 2, weeks: 12, shortTimeline: "6\u201312 weeks" },
   },
   {
     key: "fractional",
@@ -108,6 +143,7 @@ export const PATHS = [
     timeline: "Ongoing, reviewed each quarter",
     commitment: "A monthly retainer, capacity-limited — I hold very few of these at once.",
     highlight: false,
+    plot: { depth: 3, weeks: null, shortTimeline: "Ongoing" },
   },
   {
     key: "program",
@@ -117,6 +153,7 @@ export const PATHS = [
     timeline: "A defined ninety-day program",
     commitment: "The deepest engagement I offer. A handful a year.",
     highlight: false,
+    plot: { depth: 4, weeks: 13, shortTimeline: "90 days" },
   },
 ];
 

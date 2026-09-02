@@ -1,17 +1,17 @@
 /**
- * The three things the VSL has to communicate, drawn rather than narrated.
+ * The letter's diagrams — the argument drawn rather than narrated.
  *
- * These are a stand-in for the recording, not decoration: each one carries a
- * beat the video will eventually deliver — where the time goes, what I actually
- * do about it, and why the delivery rhythm de-risks the engagement. When the
- * video lands these stay, because a reader who won't press play still needs the
- * argument.
+ * These are not decoration and not a stand-in that gets deleted when the VSL is
+ * recorded: a reader who won't press play still needs the argument, so the
+ * video joins them rather than replacing them.
  *
  * Drawing notes: single scale per diagram, every label naming a value the
  * drawing reaches, all colours from the site tokens (gold #D4AF37, dim #A08628,
  * text #E6ECF1 / #9AA7B2 / #6B7885), and enough room in each viewBox for the
  * outermost text so nothing clips.
  */
+
+import { PATHS } from "@/content/landing";
 
 const GOLD = "#D4AF37";
 const GOLD_DIM = "#A08628";
@@ -352,6 +352,137 @@ export function RhythmDiagram() {
         <text x="30" y="232" fill={MUTED} fontSize="13">
           Six chances to correct course, against one.
         </text>
+      </svg>
+    </Figure>
+  );
+}
+
+
+/**
+ * The four routes in, as a shared-origin fan.
+ *
+ * Reads `PATHS` directly so the drawing and the copy cannot disagree. The shape
+ * draws the sentence the letter already makes — "they all begin the same way,
+ * with one conversation" — with every track leaving the same origin and the
+ * short gold one being the free diagnosis.
+ *
+ * Two honesty constraints, same discipline as WeekDiagram's caption:
+ *   - `weeks: null` runs to the edge with an explicit "ongoing" label. An arrow
+ *     that merely stopped at the axis end would assert a duration that isn't real.
+ *   - The vertical axis is an ORDERING, not a measurement, so it carries named
+ *     ends and no numeric ticks. Ticks would imply a scale that doesn't exist.
+ */
+export function PathsDiagram() {
+  const X0 = 190;
+  const X1 = 630;
+  const MAX_WEEKS = 14;
+  const perWeek = (X1 - X0) / MAX_WEEKS;
+  const rowY = (depth: number) => 236 - (depth - 1) * 52;
+
+  return (
+    <Figure caption="Typical shapes, not fixed packages — and the vertical axis is an ordering, not a measurement. Every route starts with the same conversation.">
+      <svg
+        viewBox="0 0 660 300"
+        className="h-auto w-full min-w-[520px]"
+        role="img"
+        aria-labelledby="paths-t paths-d"
+      >
+        <title id="paths-t">The four ways of working together</title>
+        {/* This desc is the entire paths section for a screen-reader user, so it
+            enumerates all four routes rather than describing the picture. */}
+        <desc id="paths-d">
+          {PATHS.map(
+            (p) => `${p.name}: ${p.forWho} ${p.timeline}. ${p.commitment}`
+          ).join(" ")}
+        </desc>
+
+        <text x="30" y="28" fill={TEXT} fontSize="16" fontWeight="600">
+          Four ways in, one starting point
+        </text>
+
+        {/* Depth axis — named ends only, deliberately no numeric ticks. */}
+        <text x="30" y={rowY(4) - 16} fill={DIM} fontSize="10.5" letterSpacing="0.5">
+          THE WHOLE OPERATION
+        </text>
+        <text x="30" y={rowY(1) + 30} fill={DIM} fontSize="10.5" letterSpacing="0.5">
+          ONE CONVERSATION
+        </text>
+        <line
+          x1="34" y1={rowY(4) - 8} x2="34" y2={rowY(1) + 16}
+          stroke={LINE} strokeWidth="1"
+        />
+
+        {/* Week scale — every label names a value a track actually reaches. */}
+        {[0, 4, 8, 12].map((w) => (
+          <g key={w}>
+            <line
+              x1={X0 + w * perWeek} y1="46" x2={X0 + w * perWeek} y2="262"
+              stroke={LINE} strokeWidth="1" strokeDasharray="2 5"
+            />
+            {/* week 0 is labelled by the origin marker below — don't draw it twice */}
+            {w > 0 && (
+              <text
+                x={X0 + w * perWeek} y="282"
+                fill={DIM} fontSize="11" textAnchor="middle"
+              >
+                week {w}
+              </text>
+            )}
+          </g>
+        ))}
+
+        {PATHS.map((path) => {
+          const y = rowY(path.plot.depth);
+          const ongoing = path.plot.weeks === null;
+          const endX = ongoing
+            ? X1
+            : X0 + Math.min(path.plot.weeks ?? 0, MAX_WEEKS) * perWeek;
+          const stroke = path.highlight ? GOLD : GOLD_DIM;
+
+          return (
+            <g key={path.key}>
+              <text x="30" y={y - 6} fill={TEXT} fontSize="13" fontWeight="600">
+                {path.name}
+              </text>
+              <text x="30" y={y + 11} fill={DIM} fontSize="11">
+                {path.plot.shortTimeline}
+              </text>
+
+              {/* Every track leaves the same origin. */}
+              <path
+                d={`M ${X0} 250 C ${X0 + 40} 250, ${X0 + 20} ${y}, ${endX} ${y}`}
+                fill="none"
+                stroke={stroke}
+                strokeWidth={path.highlight ? 2.5 : 1.5}
+                opacity={path.highlight ? 1 : 0.75}
+                markerEnd={ongoing ? "url(#pathArrow)" : undefined}
+              />
+              {!ongoing && (
+                <circle cx={endX} cy={y} r="3.5" fill={stroke} />
+              )}
+              {ongoing && (
+                <text x={X1 - 6} y={y - 10} fill={GOLD_DIM} fontSize="10.5" textAnchor="end">
+                  ongoing
+                </text>
+              )}
+            </g>
+          );
+        })}
+
+        {/* The shared origin, drawn last so it sits above the tracks. */}
+        <circle cx={X0} cy="250" r="5" fill={GOLD} />
+        <text x={X0} y="282" fill={GOLD} fontSize="11" textAnchor="middle">
+          start
+        </text>
+
+        <defs>
+          <marker
+            id="pathArrow" markerWidth="7" markerHeight="7"
+            refX="6" refY="3.5" orient="auto"
+          >
+            <path d="M0,0 L7,3.5 L0,7 z" fill={GOLD_DIM} />
+          </marker>
+        </defs>
       </svg>
     </Figure>
   );

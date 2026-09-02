@@ -1,6 +1,7 @@
 import { Check, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CtaBand } from "./CtaBand";
+import { PathsDiagram } from "./Diagrams";
 import {
   PROBLEM,
   STORY,
@@ -86,59 +87,45 @@ export function SalesLetter() {
         <CtaBand placement="after-story" variant="inline" />
       </Beat>
 
-      {/* The four routes in. Framed as a diagnosis so the reader's own
-          situation picks the path, rather than as a menu to choose from. */}
+      {/* The four routes in. The diagram carries shape — depth and duration —
+          and the list beneath carries selectivity, which a chart cannot draw.
+          Those commitment lines ARE the no-price tier signal (docs/ROADMAP.md
+          R-009); dropping them for a prettier section would quietly regress it. */}
       <section className="py-14 md:py-20">
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-4xl">
           <div className="mx-auto max-w-3xl">
             <BeatHeading>Which one is you?</BeatHeading>
             <p className="mt-6 text-lg leading-relaxed text-text-muted">
-              There are four ways people end up working with me. They differ in
-              depth and in how much of the business they touch — but they all
-              begin the same way, with one conversation.
+              Four ways people end up working with me. They differ in depth and in
+              how much of the business they touch — but they all begin the same
+              way, with one conversation.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
-            {PATHS.map((path) => (
-              <article
-                key={path.key}
-                className={cn(
-                  "flex flex-col rounded-xl border bg-bg-secondary p-7",
-                  "transition-colors duration-300",
-                  path.highlight
-                    ? "border-gold"
-                    : "border-border hover:border-gold-dim"
-                )}
-              >
-                {path.highlight && (
-                  <p className="mb-3 font-accent text-xs uppercase tracking-[0.18em] text-gold">
-                    Start here
-                  </p>
-                )}
-                <h3 className="text-h3 font-semibold text-text-primary">
-                  {path.name}
-                </h3>
-                <p className="mt-3 font-medium leading-relaxed text-text-primary">
-                  {path.forWho}
-                </p>
-                <p className="mt-3 leading-relaxed text-text-muted">
-                  {path.what}
-                </p>
-
-                <dl className="mt-6 space-y-2.5 border-t border-border pt-5 text-sm">
-                  <div className="flex gap-3">
-                    <dt className="w-24 flex-none text-text-dim">Timeline</dt>
-                    <dd className="text-text-muted">{path.timeline}</dd>
-                  </div>
-                  <div className="flex gap-3">
-                    <dt className="w-24 flex-none text-text-dim">Commitment</dt>
-                    <dd className="text-text-muted">{path.commitment}</dd>
-                  </div>
-                </dl>
-              </article>
-            ))}
+          <div className="mt-10">
+            <PathsDiagram />
           </div>
+
+          <dl className="mt-10 divide-y divide-border border-t border-border">
+            {PATHS.map((path) => (
+              <div
+                key={path.key}
+                className="grid gap-1.5 py-4 sm:grid-cols-[13rem_1fr] sm:gap-6"
+              >
+                <dt
+                  className={cn(
+                    "font-semibold",
+                    path.highlight ? "text-gold" : "text-text-primary"
+                  )}
+                >
+                  {path.name}
+                </dt>
+                <dd className="leading-relaxed text-text-muted">
+                  {path.commitment}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
 

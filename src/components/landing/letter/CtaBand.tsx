@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useTrackEvent } from "@/hooks/useTrackEvent";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import { CTA } from "@/content/landing";
+import { useLetterSurface } from "./LetterSurface";
 
 /**
  * The recurring call to action.
@@ -27,12 +28,16 @@ export function CtaBand({
   label?: string;
 }) {
   const track = useTrackEvent();
+  const surface = useLetterSurface();
   const text = label ?? CTA.primary;
 
+  // `placement` (which beat) and `surface` (which hero) are independent
+  // dimensions. Encoding the page into placement would break every existing
+  // query filtering on it, so this adds a key rather than mutating one.
   const onClick = () => {
     track(
       ANALYTICS_EVENTS.BOOK_CALL_CLICKED,
-      { placement, variant },
+      { placement, variant, ...(surface ? { surface } : {}) },
       "decision"
     );
   };

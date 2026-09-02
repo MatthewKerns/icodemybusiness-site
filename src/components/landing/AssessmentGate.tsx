@@ -7,6 +7,7 @@ import { ArrowRight, BookmarkCheck, LogIn, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTrackEvent } from "@/hooks/useTrackEvent";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
+import { useLetterSurface } from "@/components/landing/letter/LetterSurface";
 
 /**
  * The single next action after the splash.
@@ -30,6 +31,7 @@ export function AssessmentGate() {
   const [gateOpen, setGateOpen] = useState(false);
   const { isSignedIn, isLoaded } = useAuth();
   const track = useTrackEvent();
+  const surface = useLetterSurface();
   const prefersReducedMotion = useReducedMotion();
 
   const scrollToAssessment = useCallback(() => {
@@ -41,7 +43,10 @@ export function AssessmentGate() {
   const startAssessment = useCallback(() => {
     track(
       ANALYTICS_EVENTS.ASSESSMENT_STARTED,
-      { already_signed_in: Boolean(isSignedIn) },
+      {
+        already_signed_in: Boolean(isSignedIn),
+        ...(surface ? { surface } : {}),
+      },
       "click"
     );
 
@@ -52,7 +57,7 @@ export function AssessmentGate() {
       return;
     }
     setGateOpen(true);
-  }, [isSignedIn, scrollToAssessment, track]);
+  }, [isSignedIn, scrollToAssessment, track, surface]);
 
   const chooseGuest = useCallback(() => {
     track(
