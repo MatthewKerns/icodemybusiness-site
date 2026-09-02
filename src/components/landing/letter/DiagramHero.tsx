@@ -1,13 +1,18 @@
-import { WeekDiagram } from "./Diagrams";
+import { WeekDiagram, AssessmentDiagram } from "./Diagrams";
 
 /**
  * The diagram-led hero, used by `/`.
  *
  * The argument the VSL will eventually narrate, drawn: where the month actually
- * goes, and how little of it reaches the work that grows the business. Not a
+ * goes and how little of it reaches the work that grows the business, then what
+ * the assessment will ask before the reader commits to starting it. Not a
  * placeholder — when the video is recorded it joins the diagrams on /vsl rather
  * than replacing them, because a reader who won't press play still needs the
  * argument.
+ *
+ * Both diagrams state things that are checkable rather than claimed: where the
+ * hours go is captioned as illustrative, and the five questions are read from
+ * the assessment itself. Neither asserts a result.
  *
  * Which diagrams appear here is a one-line editorial decision, deliberately kept
  * that cheap. Two others exist in ./Diagrams and are deliberately not rendered:
@@ -25,6 +30,7 @@ export function DiagramHero() {
   return (
     <div className="mx-auto mt-12 max-w-4xl space-y-16">
       <WeekDiagram />
+      <AssessmentDiagram />
     </div>
   );
 }

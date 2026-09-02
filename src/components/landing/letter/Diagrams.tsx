@@ -12,6 +12,7 @@
  */
 
 import { PATHS } from "@/content/landing";
+import { DISCOVERY_QUESTIONS } from "@/content/discovery-questions";
 
 const GOLD = "#D4AF37";
 const GOLD_DIM = "#A08628";
@@ -531,6 +532,112 @@ export function PathsDiagram() {
             <path d="M0,0 L7,3.5 L0,7 z" fill={GOLD_DIM} />
           </marker>
         </defs>
+      </svg>
+    </Figure>
+  );
+}
+
+/**
+ * Wraps a string to a rough character width. SVG has no text flow, so long
+ * labels have to be broken into <tspan> lines by hand or they run past the
+ * viewBox and get clipped.
+ */
+function wrap(text: string, max: number): string[] {
+  const out: string[] = [];
+  let line = "";
+  for (const word of text.split(" ")) {
+    if ((line + " " + word).trim().length > max) {
+      out.push(line.trim());
+      line = word;
+    } else {
+      line = (line + " " + word).trim();
+    }
+  }
+  if (line) out.push(line);
+  return out;
+}
+
+/**
+ * What the assessment actually asks, before anyone starts it.
+ *
+ * Reads DISCOVERY_QUESTIONS directly, so it shows the real five questions and
+ * cannot drift from the flow if they are reworded — the same discipline as
+ * PathsDiagram reading PATHS.
+ *
+ * This diagram deliberately makes no claim about outcomes. It states what
+ * happens, which the reader can verify by doing it — the one kind of assertion
+ * this page can make without Matthew having to stand behind a number.
+ */
+export function AssessmentDiagram() {
+  const ROW_H = 52;
+  const X_NODE = 44;
+  const X_TEXT = 78;
+  const top = 56;
+  const height = top + DISCOVERY_QUESTIONS.length * ROW_H + 64;
+
+  return (
+    <Figure caption="No forms and no multiple choice — you answer in your own words, and the write-up comes back in the same language you used.">
+      <svg
+        viewBox={`0 0 660 ${height}`}
+        className="h-auto w-full min-w-[520px]"
+        role="img"
+        aria-labelledby="assess-t assess-d"
+      >
+        <title id="assess-t">The five questions the assessment asks</title>
+        <desc id="assess-d">
+          {DISCOVERY_QUESTIONS.map((q, i) => `${i + 1}. ${q.label}: ${q.anchor}`).join(" ")}
+        </desc>
+
+        <text x="30" y="28" fill={TEXT} fontSize="16" fontWeight="600">
+          Five questions, in your own words
+        </text>
+
+        {/* The spine, drawn first so the nodes sit on top of it. */}
+        <line
+          x1={X_NODE} y1={top}
+          x2={X_NODE} y2={top + (DISCOVERY_QUESTIONS.length - 1) * ROW_H + 34}
+          stroke={LINE} strokeWidth="1"
+        />
+
+        {DISCOVERY_QUESTIONS.map((q, i) => {
+          const y = top + i * ROW_H;
+          const lines = wrap(q.anchor, 62);
+          return (
+            <g key={q.key}>
+              <circle cx={X_NODE} cy={y} r="11" fill="#0A0A0A" stroke={GOLD_DIM} strokeWidth="1" />
+              <text x={X_NODE} y={y + 4} fill={GOLD} fontSize="11" fontWeight="600" textAnchor="middle">
+                {i + 1}
+              </text>
+              <text x={X_TEXT} y={y - 3} fill={TEXT} fontSize="13" fontWeight="600">
+                {q.label}
+              </text>
+              {lines.map((line, li) => (
+                <text key={line} x={X_TEXT} y={y + 15 + li * 15} fill={MUTED} fontSize="12">
+                  {line}
+                </text>
+              ))}
+            </g>
+          );
+        })}
+
+        {/* What comes out. The only gold-filled node, because it is the point. */}
+        <g>
+          <circle
+            cx={X_NODE}
+            cy={top + DISCOVERY_QUESTIONS.length * ROW_H - 6}
+            r="11"
+            fill={GOLD}
+          />
+          <text
+            x={X_TEXT}
+            y={top + DISCOVERY_QUESTIONS.length * ROW_H - 1}
+            fill={GOLD}
+            fontSize="13"
+            fontWeight="600"
+          >
+            Your write-up — the one thing to fix first, and where to start
+          </text>
+        </g>
       </svg>
     </Figure>
   );
