@@ -1,12 +1,9 @@
 import { SplashScreen } from "@/components/landing/SplashScreen";
+import { VslSection } from "@/components/landing/letter/VslSection";
 import { AssessmentGate } from "@/components/landing/AssessmentGate";
-import { StoryBlock } from "@/components/landing/StoryBlock";
-import { OfferGrid } from "@/components/landing/OfferGrid";
+import { SalesLetter } from "@/components/landing/letter/SalesLetter";
 import { SocialProofBar } from "@/components/landing/SocialProofBar";
 import { CommunityBanner } from "@/components/landing/CommunityBanner";
-// eslint-disable-next-line no-restricted-imports -- voice agent is now live on the homepage (Epic 7 in progress)
-import { AgentSection } from "@/components/agent/AgentSection";
-import { AgentWorkflowsBlock } from "@/components/landing/AgentWorkflowsBlock";
 import dynamic from "next/dynamic";
 
 const Top3IssuesAgent = dynamic(
@@ -17,19 +14,32 @@ const Top3IssuesAgent = dynamic(
   { ssr: false }
 );
 
+/**
+ * The homepage is one continuous sales letter, read top to bottom:
+ *
+ *   splash → promise + VSL → one action (assess) → the assessment itself
+ *   → problem → who I am → which path is you → objections → guarantee → close
+ *
+ * A CTA to the intro call recurs after each major beat rather than waiting for
+ * the end. No prices appear anywhere; the tier is signalled through scope and
+ * commitment instead (docs/ROADMAP.md R-009). Copy lives in
+ * src/content/landing.ts so rewording it isn't a component edit.
+ */
 export default function Home() {
   return (
     <>
       <SplashScreen />
       <main
         id="main-content"
-        className="min-h-screen bg-bg-primary px-4 py-12 md:px-6 lg:px-12"
+        className="min-h-screen bg-bg-primary px-4 md:px-6 lg:px-12"
       >
         <div className="mx-auto max-w-7xl">
+          <VslSection />
+
           {/*
-            One action, not a menu. A visitor who just clicked into the site is
-            looking for the next thing to click — so give them exactly one, and
-            make it the assessment rather than a pitch.
+            One action, not a menu. A visitor who has just clicked in is looking
+            for the next thing to click, so give them exactly one — and make it
+            the assessment rather than a pitch.
           */}
           <AssessmentGate />
 
@@ -40,40 +50,10 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="lg:hidden">
-            <StoryBlock
-              number="01"
-              heading="Save time with AI"
-              body="Stop spending hours on repetitive tasks. AI automation handles the busywork so you can focus on growing your business."
-              accentWord="AI"
-            />
-            <StoryBlock
-              number="02"
-              heading="Make money doing what matters"
-              body="Free up your time to focus on the high-value work that actually makes you money. Let automation handle the rest."
-              accentWord="money"
-            />
-            <StoryBlock
-              number="03"
-              heading="The system works for you"
-              body="A complete system built around your business. Automated workflows, smart tools, and consulting that delivers results."
-              accentWord="system"
-            />
-          </section>
-
-          {/* Service cards */}
-          <OfferGrid />
+          <SalesLetter />
 
           {/* Credibility metrics */}
           <SocialProofBar />
-
-          {/* Philosophy: modern software runs via agent workflows */}
-          <AgentWorkflowsBlock />
-
-          {/* AI Agent */}
-          <section className="py-12 lg:py-20">
-            <AgentSection />
-          </section>
 
           {/* Community */}
           <CommunityBanner />
