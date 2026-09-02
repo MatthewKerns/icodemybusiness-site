@@ -71,15 +71,18 @@ export default function OffersPage() {
         <section className="py-16 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
             <p className="font-accent text-sm uppercase tracking-wider text-gold">
-              Amazon-trained engineer &middot; AI specialist
+              Professional Engineering &middot; AI specialist
             </p>
             <h1 className="mt-4 text-h1 font-bold text-text-primary">
               I build AI-powered business tools
             </h1>
             <p className="mt-4 text-lg leading-relaxed text-text-muted">
-              Full-stack development meets practical AI. I turn manual
-              workflows into automated systems that save real hours every
-              week — not theoretical improvements, measurable ones.
+              Full-stack development meets practical AI.
+            </p>
+            <p className="mt-4 text-lg leading-relaxed text-text-muted">
+              I ask a lot of questions to help pinpoint the root causes and
+              underlying problems holding your business back from its true
+              growth potential.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               {SHOW_CASE_STUDIES && (
@@ -138,8 +141,8 @@ export default function OffersPage() {
                 </h3>
                 <p className="mt-3 leading-relaxed text-text-muted">
                   Most agencies staff your project with junior devs and bill
-                  big-agency rates. I work differently: you get a senior,
-                  Amazon-trained engineer end to end. I write the architecture,
+                  big-agency rates. I work differently: you get senior,
+                  professional engineering end to end. I write the architecture,
                   use AI to build faster, and review every line myself — so you
                   get senior-quality work without the agency overhead or the
                   junior-dev guesswork.
