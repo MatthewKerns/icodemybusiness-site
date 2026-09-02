@@ -26,6 +26,8 @@ export const ANALYTICS_EVENTS = {
   FREE_TOOL_ACCESSED: "free_tool_accessed",
   /** Top 3 Issues agent finished + summary emailed. */
   TOP3_COMPLETED: "top3_completed",
+  /** Homepage "Assess where you are now" clicked — entry to the assessment. */
+  ASSESSMENT_STARTED: "assessment_started",
   /** Retell voice chat connected. */
   VOICE_CALL_STARTED: "voice_call_started",
   /** Subscription canceled (churn). */
@@ -48,6 +50,12 @@ export const ANALYTICS_EVENTS = {
   BOOK_CALL_CLICKED: "book_call_clicked",
   /** The e-commerce intake agent was submitted into an application. */
   ECOMMERCE_INTAKE_COMPLETED: "ecommerce_intake_completed",
+  /**
+   * Which door the visitor took at the assessment's optional account gate:
+   * `create_account` | `sign_in` | `guest`. Signing in is what makes the report
+   * retrievable later, so the guest share is the number worth watching.
+   */
+  ASSESSMENT_ACCOUNT_CHOICE: "assessment_account_choice",
 
   // --- Operational: health signals ------------------------------------
   /** An API route returned an error (captured in errorResponse). */

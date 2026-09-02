@@ -1,5 +1,5 @@
 import { SplashScreen } from "@/components/landing/SplashScreen";
-import { ImmersiveHero } from "@/components/landing/ImmersiveHero";
+import { AssessmentGate } from "@/components/landing/AssessmentGate";
 import { StoryBlock } from "@/components/landing/StoryBlock";
 import { OfferGrid } from "@/components/landing/OfferGrid";
 import { SocialProofBar } from "@/components/landing/SocialProofBar";
@@ -17,20 +17,6 @@ const Top3IssuesAgent = dynamic(
   { ssr: false }
 );
 
-function HeroContent() {
-  return (
-    <>
-      <h2 className="text-display font-semibold text-text-primary">
-        Premium Consulting &amp; AI Automation
-      </h2>
-      <p className="mt-4 max-w-2xl mx-auto text-text-muted">
-        Helping business owners save time and make money with AI-powered
-        tools, consulting, and automation systems.
-      </p>
-    </>
-  );
-}
-
 export default function Home() {
   return (
     <>
@@ -40,19 +26,21 @@ export default function Home() {
         className="min-h-screen bg-bg-primary px-4 py-12 md:px-6 lg:px-12"
       >
         <div className="mx-auto max-w-7xl">
-          {/* Desktop Hero — visible at lg+ */}
-          <section className="hidden lg:block">
-            <ImmersiveHero>
-              <HeroContent />
-            </ImmersiveHero>
+          {/*
+            One action, not a menu. A visitor who just clicked into the site is
+            looking for the next thing to click — so give them exactly one, and
+            make it the assessment rather than a pitch.
+          */}
+          <AssessmentGate />
+
+          {/* The assessment itself, directly beneath the door that opens it. */}
+          <section id="top3" className="scroll-mt-24 py-12 lg:py-20">
+            <div className="mx-auto max-w-5xl">
+              <Top3IssuesAgent />
+            </div>
           </section>
 
-          {/* Mobile Hero + Story Blocks — visible below lg */}
           <section className="lg:hidden">
-            <div className="py-12">
-              <HeroContent />
-            </div>
-
             <StoryBlock
               number="01"
               heading="Save time with AI"
@@ -81,13 +69,6 @@ export default function Home() {
 
           {/* Philosophy: modern software runs via agent workflows */}
           <AgentWorkflowsBlock />
-
-          {/* Demo: Top 3 Issues live chat agent */}
-          <section id="top3" className="scroll-mt-24 py-12 lg:py-20">
-            <div className="mx-auto max-w-5xl">
-              <Top3IssuesAgent />
-            </div>
-          </section>
 
           {/* AI Agent */}
           <section className="py-12 lg:py-20">
