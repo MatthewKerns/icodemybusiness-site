@@ -50,10 +50,18 @@ Duration is not exposed by the JSON listing or the page's static HTML — Calend
 renders it client-side — so confirming it needs a browser, not curl. Anyone
 re-checking this should render the page rather than grep the source.
 
-**Residual, small:** [offers/consulting.md](../offers/consulting.md) still
-advertises `calendly.com/matthewkerns/discovery`, a different account handle that
-was never reconciled. It is an internal reference doc, not a live surface, but it
-will mislead whoever reads it next.
+**Residual cleared `46bf410`:** `offers/consulting.md` and `offers/free-offers.md`
+now point at the live Introduction Call, and the offers that have no event
+(`discovery-free`, `organic-audit`) say so plainly instead of linking somewhere
+dead.
+
+**Still stale, deliberately untouched:** `_legacy/` carries a dozen links to the
+old `matthewkerns/discovery*` handles, and `_legacy/blog/post-template.html`
+advertises "Book Call - $50/hr". That directory is excluded from the deploy
+rsync so none of it is served — but it is the only place in the repo that still
+contradicts the no-pricing decision (R-009), so anyone grepping the repo for
+prices will find it. Delete or archive it as its own decision; don't let a
+future no-price audit report it as a live regression.
 
 **Letter copy note:** the homepage still says "intro call" with no duration. That
 was deliberate while this was broken and is now simply accurate — there is no
