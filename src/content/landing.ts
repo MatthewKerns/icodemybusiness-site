@@ -119,7 +119,7 @@ export const PATHS: Path[] = [
     key: "diagnostic",
     name: "Start with a diagnosis",
     forWho: "You know something's wrong, but not what to fix first.",
-    what: "We find the three things costing you the most time and money right now, in your actual workflows — and you get the write-up whether or not we go further.",
+    what: "Five questions, in your own words, to find the one thing costing you the most time and money right now — and you get the write-up whether or not we go further.",
     timeline: "A few minutes on the assessment, then a call",
     commitment: "Free. This is where most people should start.",
     highlight: true,

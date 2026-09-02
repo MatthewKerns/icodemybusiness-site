@@ -9,11 +9,18 @@ import dynamic from "next/dynamic";
  * Calling `dynamic(..., { ssr: false })` from a Server Component is legal on
  * Next 14 but is an error on Next 15 — the indirection removes that upgrade
  * landmine at the cost of one small file.
+ *
+ * `source="homepage"` distinguishes this from the same component rendered at
+ * /assessment, which shares the visitor's session.
  */
-export const Top3IssuesAgentLazy = dynamic(
+const DiscoveryAssessment = dynamic(
   () =>
-    import("@/components/agent/top3issues/Top3IssuesAgent").then(
-      (m) => m.Top3IssuesAgent
+    import("@/components/agent/discovery/DiscoveryAssessment").then(
+      (m) => m.DiscoveryAssessment
     ),
   { ssr: false }
 );
+
+export function DiscoveryAssessmentLazy() {
+  return <DiscoveryAssessment source="homepage" />;
+}

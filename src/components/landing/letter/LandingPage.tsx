@@ -3,7 +3,7 @@ import { AssessmentGate } from "@/components/landing/AssessmentGate";
 import { SalesLetter } from "@/components/landing/letter/SalesLetter";
 import { SocialProofBar } from "@/components/landing/SocialProofBar";
 import { CommunityBanner } from "@/components/landing/CommunityBanner";
-import { Top3IssuesAgentLazy } from "./Top3IssuesAgentLazy";
+import { DiscoveryAssessmentLazy } from "./DiscoveryAssessmentLazy";
 import { LetterSurfaceProvider, type LetterSurface } from "./LetterSurface";
 import { VSL } from "@/content/landing";
 
@@ -58,7 +58,7 @@ export function LandingPage({
 
             <section id="top3" className="scroll-mt-24 py-12 lg:py-20">
               <div className="mx-auto max-w-5xl">
-                <Top3IssuesAgentLazy />
+                <DiscoveryAssessmentLazy />
               </div>
             </section>
 

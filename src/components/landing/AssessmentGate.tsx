@@ -92,9 +92,10 @@ export function AssessmentGate() {
           Let&apos;s start with where you actually are
         </h2>
         <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-text-muted">
-          Before we talk about what to build, we find the three things costing
-          you the most time and money right now. It takes a few minutes, and you
-          leave with the report whether or not we ever work together.
+          Before we talk about what to build, we find the one thing costing you
+          the most time and money right now. Five questions, in your own words.
+          It takes a few minutes, and you leave with the write-up whether or not
+          we ever work together.
         </p>
 
         {!gateOpen && (
