@@ -491,19 +491,64 @@ by accident.
 
 ### R-019 · The homepage headline promises three things; the assessment finds one
 
+`status: done` · `owner: matthew` · `evidence: verified`
+
+**Closed by `dafc551`.** Matthew cut the second sentence: the headline is now
+"Most businesses don't need more software." full stop. The gate paragraph went
+with it, and `PATHS[diagnostic].what` had already been rewritten to five
+questions and one problem (`07cb539`).
+
+**Verified live:** `curl staging.icodemybusiness.com/ | grep -c "three things fixed"` → 0.
+
+**Not a regression:** the month diagram's caption still contains the phrase "the
+same three things every week". That describes the three time-sinks the chart
+draws, not a promise about what gets fixed. Don't 'fix' it.
+
+---
+
+### R-020 · The mechanism beat has no diagram
+
 `status: blocked` · `owner: matthew` · `evidence: verified`
 
-`VSL.headline` reads *"Most businesses don't need more software. They need the
-right three things fixed."* The discovery assessment traces **one** problem
-through five questions. The gate copy and `PATHS[diagnostic].what` were corrected
-to match the flow (`07cb539`); the headline deliberately was not, because it is
-the letter's positioning rather than a description of the assessment.
+`MechanismDiagram` (Map → Build → Hand over) is built but **pulled off the page**
+— Matthew, 2026-09-02: *"a good start but we need to work through this — it's not
+good enough to deploy to prod."*
 
-They now sit on the same page saying different numbers.
+The diagnosis is worth recording, because polishing it would be the wrong move:
+it is three labelled boxes showing nothing the sentence didn't already say, and
+what it says is **the internal process** — which `docs/copy-principles.md` §1 now
+forbids on a customer-facing page. The component predates that rule.
 
-**Done when:** Matthew either moves the headline to single-problem framing or
-confirms it stands as positioning. Not an agent's call — it's the page's central
-promise.
+Three replacements were rendered for Matthew, all outcome-shaped rather than
+process-shaped: the same month redrawn after the grind is gone; the 192 grind
+hours split into gone / run by a system / still yours; and the compounding gap
+over six months.
+
+**Every number in all three is a placeholder.** An "after" state is a claim about
+results delivered, which is Matthew's to assert (§2). The shapes are the decision;
+the figures come from him.
+
+**Done when:** one of them is chosen with real numbers, or the beat is dropped and
+the letter goes straight from the month diagram to the assessment.
+
+---
+
+### R-021 · Placeholder numbers inside the month diagram
+
+`status: ready` · `owner: matthew` · `evidence: verified`
+
+The month chart on `/` splits the first 48 hours of every week into 20h repeating
+work, 16h chasing information, 12h fixing broken handoffs.
+
+**The weekly totals (50–60h) and the 48-hour threshold are Matthew's.** That
+three-way split is **not** — it is a shape chosen to fill the bar. The caption
+says the whole diagram is illustrative and not measured, which is honest, but the
+numbers are specific enough to be quoted back at him.
+
+**Verify:** `SINKS` in `src/components/landing/letter/Diagrams.tsx`.
+
+**Done when:** Matthew replaces the split with what he actually sees, or confirms
+the placeholder is close enough to stand.
 
 ---
 
