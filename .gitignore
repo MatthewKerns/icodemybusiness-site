@@ -1,5 +1,8 @@
 # Dependencies
 node_modules/
+# also the bare name: a symlink called node_modules was once committed and
+# every checkout/stash re-created it over real installs
+node_modules
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
