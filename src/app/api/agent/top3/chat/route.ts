@@ -7,6 +7,7 @@ import {
   extractTop3Issues,
   stripIssuesFence,
 } from "@/lib/agent/top3-prompt";
+import { visitorSafeAgentError } from "@/lib/agent/errors";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -210,9 +211,7 @@ export async function POST(req: NextRequest) {
         send("done", { visibleText });
         controller.close();
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Unknown streaming error";
-        send("error", { message });
+        send("error", { message: visitorSafeAgentError(err, "top3-chat") });
         controller.close();
       }
     },
