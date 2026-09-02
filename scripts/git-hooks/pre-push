@@ -14,6 +14,9 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 done
 [ "$to_main" = 1 ] || exit 0
 
+# Install only when the lockfile changed: `npm ci` wipes node_modules and races with any other
+# run in the same directory (seen as ENOTEMPTY on the VPS lane).
+INSTALL='h=$(md5sum package-lock.json | cut -c1-32); if [ "$(cat node_modules/.lock-hash 2>/dev/null)" != "$h" ]; then npm ci --ignore-scripts && echo "$h" > node_modules/.lock-hash; fi'
 GATES='npx tsc --noEmit && npx vitest run --reporter=dot'
 STATUS="$HOME/.claude/ram-guard/state/status.json"
 OFFLOAD="$HOME/bin/offload-run"
@@ -25,14 +28,15 @@ fi
 if [ "$level" = "WARN" ] || [ "$level" = "CRIT" ]; then
   [ -x "$OFFLOAD" ] || { echo "pre-push: laptop RAM guard is $level and $OFFLOAD is missing — gates cannot run; push refused" >&2; exit 1; }
   echo "pre-push: laptop RAM guard is $level — running gates on the VPS (offload-run node-full)…"
-  log=$(mktemp)
-  if "$OFFLOAD" --lane node-full --no-mark -- "npm ci --ignore-scripts && $GATES" > "$log" 2>&1 && grep -q '■ exit=0' "$log"; then
+  log="${TMPDIR:-/tmp}/icmb-prepush-$(date +%s).log"
+  # Own remote slug: never share a node_modules with another session's offload run.
+  if "$OFFLOAD" --slug "icmb-prepush-${USER:-u}" --lane node-full --no-mark -- "$INSTALL && $GATES" > "$log" 2>&1 && grep -q '■ exit=0' "$log"; then
     grep -E "Tests |Test Files" "$log" || true
     echo "pre-push: gates green (VPS)"; rm -f "$log"; exit 0
   fi
-  grep -E "error TS|✖|FAIL|Tests |failed|Error:" "$log" | head -25 >&2 || true
-  echo "pre-push: gates failed on the VPS — fix the implementation (or the test, with a reason); push refused" >&2
-  rm -f "$log"; exit 1
+  grep -E "error TS|✖|FAIL|Tests |failed|Error:|npm error|■ exit" "$log" | head -25 >&2 || true
+  echo "pre-push: gates failed on the VPS (full log: $log) — fix the implementation (or the test, with a reason); push refused" >&2
+  exit 1
 fi
 
 echo "pre-push: gates for main (tsc + tests, local — RAM guard $level)…"
