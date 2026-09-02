@@ -44,6 +44,9 @@ import type * as projects from "../projects.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as users from "../users.js";
 import type * as visitorEvents from "../visitorEvents.js";
+import type * as xAssets from "../xAssets.js";
+import type * as xPosts from "../xPosts.js";
+import type * as xTactics from "../xTactics.js";
 
 import type {
   ApiFromModules,
@@ -88,6 +91,9 @@ declare const fullApi: ApiFromModules<{
   subscriptions: typeof subscriptions;
   users: typeof users;
   visitorEvents: typeof visitorEvents;
+  xAssets: typeof xAssets;
+  xPosts: typeof xPosts;
+  xTactics: typeof xTactics;
 }>;
 
 /**
