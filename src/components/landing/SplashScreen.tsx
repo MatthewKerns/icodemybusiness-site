@@ -3,19 +3,27 @@
 import { useRef, useEffect, useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useTrackEvent } from "@/hooks/useTrackEvent";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 export function SplashScreen() {
   const splashRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  const track = useTrackEvent();
 
   const scrollToContent = useCallback(() => {
+    // The first measurable step in the funnel. Without it, page views and
+    // assessment_started have an unexplained gap between them and there is no
+    // way to tell how many arrivals never get past the opener.
+    track(ANALYTICS_EVENTS.SPLASH_ENTERED, {}, "click");
+
     const content = document.getElementById("main-content");
     if (content) {
       content.scrollIntoView({
         behavior: prefersReducedMotion ? "auto" : "smooth",
       });
     }
-  }, [prefersReducedMotion]);
+  }, [prefersReducedMotion, track]);
 
   useEffect(() => {
     const el = splashRef.current;

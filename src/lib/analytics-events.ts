@@ -26,6 +26,12 @@ export const ANALYTICS_EVENTS = {
   FREE_TOOL_ACCESSED: "free_tool_accessed",
   /** Top 3 Issues agent finished + summary emailed. */
   TOP3_COMPLETED: "top3_completed",
+  /**
+   * The splash gate was passed — "Start Now" clicked on the full-screen opener.
+   * The first funnel step there is: page views before this are arrivals, and the
+   * drop between them is the gate's bounce rate, which nothing measured before.
+   */
+  SPLASH_ENTERED: "splash_entered",
   /** Homepage "Assess where you are now" clicked — entry to the assessment. */
   ASSESSMENT_STARTED: "assessment_started",
   /** Discovery assessment submitted (email given, report generation started). */

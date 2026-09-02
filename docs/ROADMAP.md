@@ -326,23 +326,31 @@ The only signal was a data check.
 
 ### R-011 · Almost nothing is instrumented
 
-`status: ready` · `owner: agent` · `evidence: verified`
+`status: verify` · `owner: agent` · `evidence: verified`
 
-`pageViews` has 315 rows and the pipeline demonstrably works (a page load writes a
-row within seconds). But `visitorEvents` has only **4** rows — the durable
-click/decision log is nearly empty because few controls call `useTrackEvent`.
+`pageViews` had 315 rows and a working pipeline; `visitorEvents` had **4**,
+because few controls called `useTrackEvent`.
 
-**Correction on record:** an earlier sweep reported these tables as *empty*. That was a
-bad `grep` against the Convex CLI's table output, not a real finding. The pipeline is
-healthy; the gap is instrumentation coverage.
+**Closed the biggest hole:** the splash gate's "Start Now" emitted nothing. That
+is the *first* step of the funnel and a full-screen opener is exactly where
+people leave, so page views and `assessment_started` had an unexplained gap with
+no way to tell how many arrivals never got past the door. Now emits
+`splash_entered` (`36959a8`-onward).
 
-**Done when:** every CTA on the new letter emits a Tier-1 event per
-[src/lib/analytics-events.ts](../src/lib/analytics-events.ts) — never a hardcoded
-event-name string.
+**Instrumented today:** splash entry, the assessment CTA and its account-gate
+choice, every `CtaBand` (with `placement` and `surface`, so which beat and which
+hero earned the click are separable).
 
-**Test data warning:** the `leads` table contains deliberate `staging-email-test`
-rows (addresses `kerns@inventoryhero.ai`, `support@infinityvaultcards.com`) created
-while testing welcome-email delivery. Exclude them from any lead reporting.
+**Still uninstrumented, deliberately not chased:** `CommunityBanner`'s outbound
+Skool link and `SocialProofBar`. Neither is a conversion step, and adding events
+nobody will read is worse than leaving the gap visible.
+
+**Correction on record:** an early sweep reported these tables as *empty*. That
+was a bad `grep` against the Convex CLI's output, not a finding. The pipeline was
+always healthy — the gap was coverage.
+
+**Verify:** after a deploy, click through the splash on staging, then
+`npx convex run visitorEvents:adminListEvents '{"name":"splash_entered","limit":5}'`.
 
 ---
 
