@@ -6,6 +6,24 @@ When working on Convex code, **always read `convex/_generated/ai/guidelines.md` 
 Convex agent skills for common tasks can be installed by running `npx convex ai-files install`.
 <!-- convex-ai-end -->
 
+## Writing customer-facing copy
+
+**Read [`docs/copy-principles.md`](docs/copy-principles.md) before editing any
+visitor-facing words.** Two rules matter most and are easy to break by accident:
+
+- **Write outcomes, not process.** Meet the reader where they are and speak to
+  what they are trying to achieve. Do not describe how the work gets done
+  internally — that is not the reader's question. (Matthew's rule, 2026-09-02.)
+- **Never author a claim about the business.** Capacity, timelines, delivery
+  standards, prices, "every time" statements — these are facts about Matthew's
+  business and only he can assert them. Nine agent-invented claims reached the
+  live homepage on 2026-09-02 before anyone noticed; all were plausible, none
+  were his. If you need one and don't have it, ask or leave it out.
+
+Homepage copy lives in [`src/content/landing.ts`](src/content/landing.ts), not in
+components. No visible pricing anywhere — see the doc for how the tier is
+signalled instead, and for how to verify it without a false positive.
+
 ## Analytics & Observability
 
 - **Product analytics + error health:** PostHog project **206048** (EU cloud). Main dashboard: "iCodeMyBusiness — Operations" (`/project/206048/dashboard/761841`). **Deep error debugging:** Sentry.

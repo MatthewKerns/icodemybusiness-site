@@ -47,12 +47,18 @@ export const PROBLEM = {
   ],
 };
 
-/** Credibility, told as a way of working rather than a résumé. */
+/**
+ * Credibility, stated as what the reader ends up with.
+ *
+ * Standing editorial rule (Matthew, 2026-09-02): customer-facing pages do not
+ * describe the internal process. They meet the reader where they are — why they
+ * are on this page — and speak to the outcome they came for. So this section
+ * says what you get, not how it gets made.
+ */
 export const STORY = {
-  heading: "How I work, and why it's different",
+  heading: "What you end up with",
   body: [
-    "Most consultants give you a slide deck and an invoice. I give you a working system.",
-    "I research your business before the first working session, write the architecture myself, and review every line. Then you see software every week — not wireframes, not status decks, something your team can actually use.",
+    "Most consultants leave you with a slide deck and an invoice. You end up with a working system your team can run — and the hours back that it frees up.",
   ],
   proofPoints: [
     {
@@ -61,9 +67,9 @@ export const STORY = {
         "Weekly updates come as a short video — a screen share run-through of what changed in the software that week.",
     },
     {
-      label: "You own what I build",
+      label: "You own it outright",
       detail:
-        "Architecture, code, and the plain-language explanation of how it runs. Nothing is designed to keep you dependent on me.",
+        "The system, and a plain-language explanation of how it runs. Nothing about it is designed to keep you dependent on me.",
     },
   ],
 };
@@ -124,7 +130,7 @@ export const PATHS: Path[] = [
     key: "build",
     name: "Have it built for you",
     forWho: "You already know what needs to exist, and you want it built properly the first time.",
-    what: "A defined scope with a fixed shape: architecture, weekly working software, and a system your team runs afterwards. I build it; you own it.",
+    what: "A defined scope with a fixed shape, and at the end of it a system your team runs without you having to think about it again.",
     timeline: "Typically six to twelve weeks",
     commitment: "A defined project engagement, scoped on the call.",
     highlight: false,
@@ -134,7 +140,7 @@ export const PATHS: Path[] = [
     key: "fractional",
     name: "Bring me inside the business",
     forWho: "This isn't one project — you need the capability in-house, permanently.",
-    what: "I work as your engineering and AI partner: setting direction, building, and levelling up whoever you already have. The role a senior hire would fill, without the search or the seat.",
+    what: "The capability of a senior engineering hire inside your business — without the search, the seat, or the salary — including levelling up whoever you already have.",
     timeline: "Ongoing, reviewed each quarter",
     commitment: "A monthly retainer, capacity-limited — I hold very few of these at once.",
     highlight: false,
@@ -171,7 +177,7 @@ export const OBJECTIONS = [
   },
   {
     q: "How is this different from the last consultant who disappointed me?",
-    a: "Two things. I research your business before the first working session, so we skip discovery. And you see working software every week — which means you find out early if it isn't going well, instead of at the end.",
+    a: "You'll know inside the first week whether this is working, because you'll be looking at working software rather than a progress report. If it isn't going where you want, you find that out early enough to change it — not at the end, when the budget is gone.",
   },
   {
     q: "What does this actually cost?",
