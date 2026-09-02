@@ -18,7 +18,7 @@ Sentry exception.
 
 ## Operational notes
 
-- **Hosting:** Dokploy/Docker, `output: standalone` (long-running Node server — posthog-node batching with `flushAt:1` flushes promptly).
+- **Hosting:** Hostinger VPS (Docker + Traefik; see docs/DEPLOY.md), `output: standalone` (long-running Node server — posthog-node batching with `flushAt:1` flushes promptly).
 - **Dependencies:** Convex (data), Clerk (auth), Stripe (payments), Resend (email), Retell (voice), Calendly (booking), PostHog (analytics), Sentry (errors).
 - **Analytics never blocks a request** — all capture is wrapped; failures are swallowed. A broken PostHog will *not* take down a route.
 

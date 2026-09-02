@@ -87,7 +87,7 @@ At the moment the session has 3 confirmed issues, the agent asks for an email to
 - Not on a dated milestone critical path. High-value demonstration of positioning → completing it unblocks marketing copy updates and conversion-rate testing.
 
 ### External Dependencies
-- **`ANTHROPIC_API_KEY`** — must be provisioned in `.env.local` and deployment env (Dokploy staging + prod). Status: **needs provisioning** (flag for user).
+- **`ANTHROPIC_API_KEY`** — must be provisioned in `.env.local` and deployment env (the Hostinger VPS (staging now, prod after cutover)). Status: **needs provisioning** (flag for user).
 - `@anthropic-ai/sdk` npm package — add dependency.
 - Convex `_storage` — already available.
 - Resend — already configured.

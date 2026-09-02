@@ -13,6 +13,15 @@ else commits, pushes, and hands off. This page is the whole process.
 `git push` deploys nothing. CI (`.github/workflows/ci.yml`) lints, typechecks,
 tests, and proves the Docker image compiles — it does not deploy.
 
+## Tests are the spec
+
+A red test means the implementation is wrong. Never delete, skip, exclude, `@ts-ignore` or bypass a
+test or typecheck to make a build or deploy pass; a type error in a test is a failing test. If a test
+itself is wrong, fix it with the reason in the commit body and Matthew's OK. Mechanically enforced by
+`.claude/hooks/test-guard.sh` (blocks the patterns in agent sessions), `scripts/git-hooks/pre-push`
+(tsc + tests before any push to `main`), and the deploy script's gates (no skip flag). A gate that
+could not run is not a passed gate. See `docs/ENGINEERING_LOG.md` for why.
+
 ## The rule that matters
 
 **Deploy only committed code, from a clean export.** Several agent sessions
@@ -40,6 +49,7 @@ that.
    ```
    ready to deploy: <sha> (on origin/main)
    Convex changes: yes/no   New env vars: none | NAME=… (Matthew to set)
+   Gates: <paste the lint / tsc / test result lines you ran>
    Verify: <what to look at on staging>
    ```
 6. The deploy session runs `scripts/deploy-staging.sh <sha>`, reports the
@@ -52,15 +62,17 @@ in the shared main checkout without telling the others — it has wiped
 ## What the script does
 
 ```
-scripts/deploy-staging.sh <ref> [--skip-ci] [--allow-unmerged] [--no-convex] [--dry-run]
+scripts/deploy-staging.sh <ref> [--allow-unmerged] [--no-convex] [--dry-run]
 scripts/deploy-staging.sh status
 ```
 
 1. Resolves the ref and **requires it to be on `origin/main`** (`--allow-unmerged`
    for a throwaway preview only).
-2. Checks GitHub Actions for that commit via `gh` (warns if none, fails on a
-   failed run unless `--skip-ci`).
-3. `git archive`s the commit into a temp dir.
+2. Reports GitHub Actions status for that commit — informational only.
+3. `git archive`s the commit into a temp dir, then **runs the gates on the VPS**
+   against that export (`npm ci`, `npm run lint`, `npx tsc --noEmit`, `npm test` via
+   `~/bin/offload-run --lane node-full`). Red = nothing deployed, a `blocked` row in
+   `docs/release/DEPLOY_QUEUE.md`. There is no flag to skip this.
 4. Compares with the sha recorded on the VPS (`DEPLOYED_SHA`) to see whether
    `convex/` changed.
 5. Takes a lock on the VPS (`.deploy.lock`) and refuses if a Docker build is
@@ -73,7 +85,10 @@ scripts/deploy-staging.sh status
 8. `./deploy.sh build` then `./deploy.sh staging` on the VPS, records
    `DEPLOYED_SHA` and appends to `DEPLOY_LOG`.
 9. Verifies: every listed route is 200, `/subscribe` redirects, zero visible
-   currency amounts on `/`, `/vsl` carries `noindex`.
+   currency amounts on `/`, `/vsl` carries `noindex` — and appends the evidence row
+   (sha, gates, result, who) to `docs/release/DEPLOY_QUEUE.md` (commit it) and to
+   `DEPLOY_LOG` on the VPS. Project-layer facts for the guide's `release-*` skills:
+   `docs/RELEASE_PIPELINE.md`.
 
 Rollback = deploy the previous sha: `scripts/deploy-staging.sh <prev-sha>`
 (the script prints it on failure; `DEPLOY_LOG` on the VPS has the history).

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# pre-push: tests are the spec. Before anything reaches origin/main, run the gates.
+# Installed by `npm run prepare` (git config core.hooksPath scripts/git-hooks).
+# Bypassing with --no-verify is blocked by .claude/hooks/test-guard.sh in agent sessions.
+set -euo pipefail
+remote="$1"
+to_main=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+  case "$remote_ref" in refs/heads/main) to_main=1 ;; esac
+done
+[ "$to_main" = 1 ] || exit 0
+
+echo "pre-push: gates for main (tsc + tests)…"
+if [ ! -d node_modules ]; then
+  echo "pre-push: node_modules missing — run: npm ci --ignore-scripts (gates cannot run; push refused)" >&2
+  exit 1
+fi
+npx tsc --noEmit || { echo "pre-push: typecheck failed — fix the implementation (or the test, with a reason)" >&2; exit 1; }
+npx vitest run --reporter=dot || { echo "pre-push: tests failed — push refused" >&2; exit 1; }
+echo "pre-push: gates green"

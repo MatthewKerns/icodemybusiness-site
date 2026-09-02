@@ -60,7 +60,7 @@ jobs:
           # `next build` prerenders the Clerk-wrapped pages, so it hard-fails on
           # a missing/blank publishable key. Feed it a syntactically valid
           # placeholder (decodes to foo-bar-13.clerk.accounts.dev$) so the job
-          # proves the app compiles. Real values are injected by Dokploy's
+          # proves the app compiles. Real values are injected by the VPS deploy script's
           # build args at deploy time and must never be placeholders there.
           build-args: |
             NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_Zm9vLWJhci0xMy5jbGVyay5hY2NvdW50cy5kZXYk

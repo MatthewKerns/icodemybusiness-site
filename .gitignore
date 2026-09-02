@@ -35,7 +35,9 @@ build/
 convex/_generated/ai/
 
 # Claude
-.claude/
+.claude/*
+!.claude/hooks/
+!.claude/settings.json
 
 # Testing
 coverage/

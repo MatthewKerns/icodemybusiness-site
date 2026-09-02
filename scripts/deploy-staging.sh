@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 # Deploy a COMMITTED git ref of icodemybusiness-site to staging.icodemybusiness.com.
 #
-#   scripts/deploy-staging.sh <ref> [--skip-ci] [--allow-unmerged] [--no-convex] [--dry-run]
+#   scripts/deploy-staging.sh <ref> [--allow-unmerged] [--no-convex] [--dry-run]
 #   scripts/deploy-staging.sh status
 #
 # Why this exists: several agent sessions share one working tree. Deploying by
 # rsyncing that tree shipped other people's uncommitted work (and once, a
 # secrets file). This script only ever deploys `git archive <ref>` — a clean
-# export of exactly one commit that is already on origin/main — pushes Convex
-# first when convex/ changed, builds on the VPS, swaps the staging container,
-# verifies, and records the deployed sha on the VPS.
+# export of exactly one commit that is already on origin/main — runs the gates
+# (lint, tsc, tests) ON THE VPS against that export, pushes Convex first when
+# convex/ changed, builds on the VPS, swaps the staging container, verifies, and
+# records the deployed sha + gate evidence (VPS DEPLOY_LOG, docs/release/DEPLOY_QUEUE.md).
 #
+# Tests are the spec: there is no flag that skips the gates. A gate that could
+# not run is not a passed gate — the deploy aborts. GitHub CI is informational.
 # Never rsyncs: deploy.sh, .env*, build.log, node_modules, .git, docs, _bmad, _legacy.
 set -euo pipefail
 
@@ -18,12 +21,15 @@ VPS="${ICMB_VPS:-root@2.25.207.149}"
 DIR="${ICMB_DIR:-/opt/icodemybusiness-site}"
 STAGING="${ICMB_STAGING_URL:-https://staging.icodemybusiness.com}"
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
+QUEUE="$REPO/docs/release/DEPLOY_QUEUE.md"
+OFFLOAD="${ICMB_OFFLOAD:-$HOME/bin/offload-run}"
+GATES='npm ci --ignore-scripts && npm run lint && npx tsc --noEmit && npm test'
 ROUTES=(/ /free-tools /consulting /book /academy /services /vsl /assessment)
 
-SKIP_CI=0; ALLOW_UNMERGED=0; NO_CONVEX=0; DRY=0; REF=""
+ALLOW_UNMERGED=0; NO_CONVEX=0; DRY=0; REF=""
 for a in "$@"; do
   case "$a" in
-    --skip-ci) SKIP_CI=1 ;;
+    --skip-ci) echo "--skip-ci no longer exists: gates always run (see AGENTS.md > Testing Protocol)" >&2; exit 1 ;;
     --allow-unmerged) ALLOW_UNMERGED=1 ;;
     --no-convex) NO_CONVEX=1 ;;
     --dry-run) DRY=1 ;;
@@ -78,25 +84,12 @@ else
   log "WARNING: deploying an unmerged ref (--allow-unmerged)"
 fi
 
-# 2. CI gate (GitHub Actions on push to main).
-if [ "$SKIP_CI" = 0 ] && command -v gh >/dev/null 2>&1; then
-  runs=$(gh run list --commit "$SHA" --json status,conclusion,name --limit 5 2>/dev/null || echo "[]")
-  if [ "$runs" = "[]" ] || [ -z "$runs" ]; then
-    log "no CI runs found for $SHORT (not pushed yet, or CI still queued) — continuing; the VPS build is the gate"
-  elif printf '%s' "$runs" | grep -q '"conclusion":"failure"'; then
-    # Distinguish a real red run from one whose jobs never started (e.g. GitHub Actions billing lock).
-    rid=$(gh run list --commit "$SHA" --limit 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || echo "")
-    steps=$(gh run view "$rid" --json jobs --jq '[.jobs[].steps | length] | add' 2>/dev/null || echo "?")
-    if [ "$steps" = "0" ] || [ "$steps" = "null" ]; then
-      log "CI run $rid for $SHORT never started (0 steps — GitHub Actions unavailable, e.g. billing lock). Continuing; the VPS build is the gate."
-    else
-      fail "CI failed for $SHORT (run $rid) — fix it or pass --skip-ci"
-    fi
-  elif printf '%s' "$runs" | grep -q '"status":"in_progress"\|"status":"queued"'; then
-    log "CI still running for $SHORT — continuing; the VPS build is the gate"
-  else
-    ok "CI green for $SHORT"
-  fi
+# 2. GitHub CI status — informational only (the gates below are authoritative).
+if command -v gh >/dev/null 2>&1; then
+  runs=$(gh run list --commit "$SHA" --json status,conclusion --limit 3 2>/dev/null || echo "[]")
+  if printf '%s' "$runs" | grep -q '"conclusion":"success"'; then log "GitHub CI: green for $SHORT"
+  elif printf '%s' "$runs" | grep -q '"conclusion":"failure"'; then log "GitHub CI: red or never started for $SHORT (informational — VPS gates decide)"
+  else log "GitHub CI: no result for $SHORT (informational)"; fi
 fi
 
 # 3. Clean export of exactly this commit.
@@ -104,6 +97,27 @@ T=$(mktemp -d "${TMPDIR:-/tmp}/icmb-deploy.XXXXXX")
 trap 'rm -rf "$T"' EXIT
 git archive "$SHA" | tar -x -C "$T"
 ok "clean export → $T ($(find "$T" -type f | wc -l | tr -d ' ') files)"
+
+# 3b. Gates on the VPS, against the export. No skip flag exists.
+GATE_RESULT="not run"
+record_queue() { # $1 result text
+  [ -f "$QUEUE" ] && printf '| %s | %s | %s | %s | %s | %s |\n' "$(date -u +%FT%H:%MZ)" "$SHORT" "$(printf '%s' "$SUBJECT" | tr '|' '/')" "$GATE_RESULT" "$1" "${USER:-deploy}@$(hostname -s)" >> "$QUEUE"
+}
+if [ "$DRY" = 0 ]; then
+  [ -x "$OFFLOAD" ] || fail "gate runner $OFFLOAD not found — a gate that cannot run is not a passed gate"
+  log "gates on the VPS (lint, tsc, tests) against the clean export"
+  GLOG="$T/gates.log"
+  if "$OFFLOAD" --dir "$T" --lane node-full --no-mark -- "$GATES" > "$GLOG" 2>&1 \
+     && grep -qE '■ exit=0' "$GLOG"; then
+    GATE_RESULT="lint/tsc/test green on VPS"
+    ok "$GATE_RESULT"
+  else
+    GATE_RESULT="FAILED on VPS"
+    grep -E "error TS|✖|FAIL|Tests |failed|Error:" "$GLOG" | head -25 >&2 || true
+    record_queue "blocked"
+    fail "gates failed for $SHORT — fix the implementation (or the test, with a stated reason); nothing was deployed"
+  fi
+fi
 
 # 4. What changed since the last deploy?
 PREV=$(remote "cat $DIR/DEPLOYED_SHA 2>/dev/null" || true)
@@ -116,7 +130,7 @@ else
 fi
 
 if [ "$DRY" = 1 ]; then
-  log "dry run — would: $( [ "$CONVEX_CHANGED" = 1 ] && [ "$NO_CONVEX" = 0 ] && printf 'push Convex, ' )sync src/ convex/ public/ + root config, build, swap staging, verify"
+  log "dry run — would: run gates on the VPS ($GATES), $( [ "$CONVEX_CHANGED" = 1 ] && [ "$NO_CONVEX" = 0 ] && printf 'push Convex, ' )sync src/ convex/ public/ + root config, build, swap staging, verify, record evidence"
   exit 0
 fi
 
@@ -155,10 +169,16 @@ if ! remote "cd $DIR && ./deploy.sh build > build.log 2>&1"; then
   remote "grep -nE 'Failed to compile|Type error|error TS|ERROR' $DIR/build.log | head -20" || true
   fail "VPS build failed — see $DIR/build.log"
 fi
-remote "cd $DIR && ./deploy.sh staging >/dev/null && echo $SHA > DEPLOYED_SHA && echo \"\$(date -u +%FT%TZ) $SHORT $(printf '%q' "$SUBJECT")\" >> DEPLOY_LOG"
+remote "cd $DIR && ./deploy.sh staging >/dev/null && echo $SHA > DEPLOYED_SHA && echo \"\$(date -u +%FT%TZ) $SHORT gates=[$GATE_RESULT] $(printf '%q' "$SUBJECT")\" >> DEPLOY_LOG"
 ok "container swapped; DEPLOYED_SHA=$SHORT"
 sleep 8
 
-# 9. Verify.
+# 9. Verify and record evidence.
 log "verifying $STAGING"
-if verify; then ok "staging is serving $SHORT"; else fail "verification failed — inspect above; roll back with: $0 $(git rev-parse --short "${PREV:-HEAD~1}")"; fi
+if verify; then
+  record_queue "staging-verified (script checks)"
+  ok "staging is serving $SHORT — evidence appended to docs/release/DEPLOY_QUEUE.md (commit it)"
+else
+  record_queue "deployed but verification failed"
+  fail "verification failed — inspect above; roll back with: $0 $(git rev-parse --short "${PREV:-HEAD~1}")"
+fi
