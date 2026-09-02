@@ -78,8 +78,21 @@ welcome-email CTA points straight at the public `/free-tools` page.
 | "View on GitHub" 404s | The two skills not yet pushed to the public repo | Push `skills/disk-space-optimizer` + `skills/google-drive-archiver` to `software-development-best-practices-guide` |
 | `POST /api/email/welcome` returns 400 "No matching lead" | The email never went through `createLead` first (direct API call, or a typo) | Expected for an unknown email — capture it via the form first |
 
-Resend send results are logged (`data?.id` on success, `error.message` on
-failure) — check the container logs / Resend dashboard to confirm delivery.
+Every send is recorded in Convex (append-only `emailSends` table: to, template,
+subject, `sent`/`failed`, Resend id, error, leadId) and a successful welcome
+send stamps `welcomeEmailSentAt` / `welcomeEmailResendId` on the lead. Audit
+from the database without the Resend dashboard:
+
+```bash
+npx convex run emailSends:listRecent '{"limit":10}'
+npx convex run emailSends:listForEmail '{"email":"someone@example.com"}'
+```
+
+The VPS Resend key is a *sending-only* key: `GET /domains` and `GET /emails/:id`
+return 401 with it, so Resend-side delivery events can't be read from the
+server — a 200 + id from `emails.send` already proves the from-domain is
+verified (Resend rejects unverified domains), and inbox arrival is the
+delivery check. Measured 2026-09-02 on staging: Resend accepted in ~1s.
 
 ## Free tools catalog
 
