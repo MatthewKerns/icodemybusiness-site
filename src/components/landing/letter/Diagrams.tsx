@@ -38,108 +38,135 @@ function Figure({
 }
 
 /**
- * Beat 1 — the problem, as proportions of a working week.
+ * Beat 1 — the problem, as a month of weeks against a 48-hour threshold.
  *
- * Deliberately labelled as an example rather than a statistic: these are the
- * shapes I keep finding, not a measured average, and presenting them as data
- * would be inventing evidence.
+ * Matthew's shape: weeks run 50-60 hours, and growth work doesn't begin until
+ * hour 48 in any of them. So the bar is mostly grind and the gold slice at the
+ * end is whatever was left — the visual argument is that the valuable work is
+ * not squeezed, it is *last in the queue*.
+ *
+ * Colour does the arguing: three greys for the three time-sinks, gold only for
+ * growth. Gold is the brand's premium colour and there is almost none of it on
+ * the chart, which is the point.
+ *
+ * Illustrative, and captioned as such. The weekly totals are Matthew's; the
+ * split of the first 48 hours between the three sinks is a placeholder shape,
+ * not a measurement.
  */
 export function WeekDiagram() {
-  // One scale: 40 hours across 600 user units of bar.
-  const HOURS = 40;
-  const BAR_W = 600;
-  const perHour = BAR_W / HOURS;
-  const segments = [
-    { label: "Repeating the same work", hours: 13, fill: GOLD },
-    { label: "Chasing information", hours: 9, fill: GOLD_DIM },
-    { label: "Fixing broken handoffs", hours: 6, fill: "#5A4A18" },
-    { label: "Actually growing the business", hours: 12, fill: "#1E2732" },
+  const MAX_HOURS = 60;
+  const GROWTH_STARTS = 48;
+  const X0 = 92;
+  const X1 = 624;
+  const perHour = (X1 - X0) / MAX_HOURS;
+
+  // The first 48 hours: the same three things every week.
+  const SINKS = [
+    { label: "Repeating the same work", hours: 20, fill: "#4A5766" },
+    { label: "Chasing information", hours: 16, fill: "#3A4654" },
+    { label: "Fixing broken handoffs", hours: 12, fill: "#2A3441" },
+  ];
+  // Total hours per week. Everything past 48 is growth.
+  const WEEKS = [
+    { name: "Week 1", total: 52 },
+    { name: "Week 2", total: 58 },
+    { name: "Week 3", total: 50 },
+    { name: "Week 4", total: 56 },
   ];
 
-  let x = 0;
-  const placed = segments.map((s) => {
-    const seg = { ...s, x, w: s.hours * perHour };
-    x += seg.w;
-    return seg;
-  });
+  const rowY = (i: number) => 62 + i * 46;
+  const BAR_H = 26;
+  const monthTotal = WEEKS.reduce((n, w) => n + w.total, 0);
+  const growthTotal = WEEKS.reduce((n, w) => n + (w.total - GROWTH_STARTS), 0);
+  const growthX = X0 + GROWTH_STARTS * perHour;
 
   return (
-    <Figure caption="An example of the shape we find, not a measured average — the point is that the work worth paying you for is the smallest block on the bar.">
+    <Figure caption={`Illustrative, not measured. Four weeks at 50-60 hours each — ${monthTotal} hours in the month, of which ${growthTotal} went to growing the business. The other ${monthTotal - growthTotal} went to the same three things every week.`}>
       <svg
-        viewBox="0 0 660 250"
+        viewBox="0 0 660 332"
         className="h-auto w-full min-w-[520px]"
         role="img"
         aria-labelledby="week-t week-d"
       >
-        <title id="week-t">Where a 40-hour week goes before any automation</title>
+        <title id="week-t">A month of weeks against the hour that growth starts</title>
         <desc id="week-d">
-          A single bar representing 40 hours, split into four blocks: repeating
-          the same work 13 hours, chasing information 9 hours, fixing broken
-          handoffs 6 hours, and actually growing the business 12 hours.
+          {`Four stacked bars, one per week, each 50 to 60 hours long. In every week the first 48 hours go to repeating the same work, chasing information and fixing broken handoffs. Only the hours after 48 go to growing the business: ${WEEKS.map((w) => `${w.name} ${w.total - GROWTH_STARTS}`).join(", ")}. Across the month that is ${growthTotal} hours out of ${monthTotal}.`}
         </desc>
 
         <text x="30" y="28" fill={TEXT} fontSize="16" fontWeight="600">
-          A week, before we touch it
+          Your typical week might look like this
         </text>
 
-        <g transform="translate(30, 50)">
-          {placed.map((s) => (
-            <g key={s.label}>
-              <rect
-                x={s.x}
-                y={0}
-                width={s.w - 2}
-                height={44}
-                fill={s.fill}
-                rx="2"
-              />
-              <text
-                x={s.x + (s.w - 2) / 2}
-                y={28}
-                fill={s.hours >= 9 ? "#14110A" : TEXT}
-                fontSize="14"
-                fontWeight="600"
-                textAnchor="middle"
-              >
-                {s.hours}h
-              </text>
-            </g>
-          ))}
-          {/* Scale ticks — every label names a value the bar reaches. */}
-          <line x1="0" y1="56" x2={BAR_W} y2="56" stroke={LINE} strokeWidth="1" />
-          {[0, 10, 20, 30, 40].map((h) => (
-            <g key={h}>
-              <line
-                x1={h * perHour}
-                y1="56"
-                x2={h * perHour}
-                y2="62"
-                stroke={LINE}
-                strokeWidth="1"
-              />
-              <text
-                x={h * perHour}
-                y="76"
-                fill={DIM}
-                fontSize="11"
-                textAnchor="middle"
-              >
-                {h}h
-              </text>
-            </g>
-          ))}
-        </g>
+        {/* The threshold is the argument, so it is drawn before the bars and
+            labelled above them rather than tucked into the axis. */}
+        <line
+          x1={growthX} y1="44" x2={growthX} y2={rowY(3) + BAR_H + 10}
+          stroke={GOLD} strokeWidth="1" strokeDasharray="3 3" opacity="0.7"
+        />
+        <text x={growthX - 8} y="40" fill={GOLD} fontSize="11" fontWeight="600" textAnchor="end">
+          growth starts here
+        </text>
 
-        {/* Legend, two per row so labels never collide with the bar. */}
-        <g transform="translate(30, 150)">
-          {placed.map((s, i) => (
-            <g
-              key={s.label}
-              transform={`translate(${(i % 2) * 320}, ${Math.floor(i / 2) * 30})`}
+        {WEEKS.map((week, i) => {
+          const y = rowY(i);
+          const growth = week.total - GROWTH_STARTS;
+          let x = X0;
+          return (
+            <g key={week.name}>
+              <text x="30" y={y + 17} fill={MUTED} fontSize="12">
+                {week.name}
+              </text>
+              {SINKS.map((sink) => {
+                const w = sink.hours * perHour;
+                const seg = (
+                  <rect
+                    key={sink.label}
+                    x={x} y={y} width={w - 1.5} height={BAR_H}
+                    fill={sink.fill}
+                  />
+                );
+                x += w;
+                return seg;
+              })}
+              <rect
+                x={growthX} y={y} width={growth * perHour} height={BAR_H}
+                fill={GOLD}
+              />
+              <text
+                x={growthX + growth * perHour + 8} y={y + 17}
+                fill={GOLD} fontSize="11.5" fontWeight="600"
+              >
+                {growth}h
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Hour scale */}
+        <line x1={X0} y1={rowY(3) + BAR_H + 10} x2={X1} y2={rowY(3) + BAR_H + 10} stroke={LINE} strokeWidth="1" />
+        {[0, 12, 24, 36, 48, 60].map((h) => (
+          <g key={h}>
+            <line
+              x1={X0 + h * perHour} y1={rowY(3) + BAR_H + 10}
+              x2={X0 + h * perHour} y2={rowY(3) + BAR_H + 16}
+              stroke={LINE} strokeWidth="1"
+            />
+            <text
+              x={X0 + h * perHour} y={rowY(3) + BAR_H + 30}
+              fill={DIM} fontSize="11" textAnchor="middle"
             >
-              <rect x="0" y="0" width="11" height="11" fill={s.fill} rx="2" />
-              <text x="20" y="10" fill={MUTED} fontSize="13">
-                {s.label}
+              {h}h
+            </text>
+          </g>
+        ))}
+
+        {/* Legend */}
+        <g transform={`translate(30, ${rowY(3) + BAR_H + 52})`}>
+          {[...SINKS, { label: "Growing the business", hours: 0, fill: GOLD }].map((item, i) => (
+            <g key={item.label} transform={`translate(${(i % 2) * 320}, ${Math.floor(i / 2) * 24})`}>
+              <rect x="0" y="0" width="11" height="11" fill={item.fill} rx="2" />
+              <text x="20" y="10" fill={MUTED} fontSize="12.5">
+                {item.label}
               </text>
             </g>
           ))}
