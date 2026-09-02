@@ -73,22 +73,54 @@ need to hardcode "15 minutes" into the letter to close this item.
 
 `status: blocked` · `owner: matthew` · `evidence: verified`
 
-`icodemybusiness.com` resolves to GitHub Pages (`185.199.109.153`) and serves the
-old static "Internal design portfolio" page. The real app is only on
-`staging.icodemybusiness.com`.
+**This is the last thing standing between the work and the public.** Everything
+built is live and verified on `staging.icodemybusiness.com`; none of it is
+reachable at the domain anyone would actually type.
 
-**Verify:** `curl -sS -o /dev/null -w '%{remote_ip}\n' https://icodemybusiness.com`
-→ a `185.199.*` address means still on Pages.
+**Re-verified 2026-09-02, first-hand, because "we can't do this" deserves
+checking rather than repeating:**
 
-**Done when:** apex `A` → `2.25.207.149`, `www` CNAME → `icodemybusiness.com`
-(Namecheap — no API credentials available, dashboard only), then `./deploy.sh cutover`.
+```
+dig +short NS icodemybusiness.com   → dns1/dns2.registrar-servers.com   (Namecheap)
+whois                                → Registrar: NameCheap, Inc.
+dig +short A icodemybusiness.com    → 185.199.108-111.153               (GitHub Pages)
+dig +short www...                   → matthewkerns.github.io
+dig +short A staging...             → 2.25.207.149                      (correct already)
+Hostinger domains_getDomainListV1    → []
+Hostinger DNS_getDNSRecordsV1        → []
+```
 
-**Sequencing trap:** retire `CNAME` + `.github/workflows/deploy-apex.yml` in the
-**same change** as the cutover. Removing them earlier unpublishes the custom domain
-on GitHub's side and the apex 404s until DNS moves.
+So the domain is not in the Hostinger account and its DNS is not served by
+Hostinger — the MCP tooling available to agents cannot touch it. There is no
+route around the Namecheap dashboard. **Matthew has to make this change.**
 
-**After cutover:** check Google Safe Browsing status for the domain. The apex was
-previously flagged; that history is why the static placeholder exists at all.
+**The exact change**, in Namecheap → Domain List → Manage → Advanced DNS:
+
+| Type | Host | Current | Change to |
+|---|---|---|---|
+| A | `@` | `185.199.108.153` (+ .109/.110/.111) | `2.25.207.149` — delete the other three |
+| CNAME | `www` | `matthewkerns.github.io` | `icodemybusiness.com` |
+
+Leave the `staging` A record alone; it is already correct.
+
+**Then, in one change and in this order:**
+1. Delete `CNAME` and `.github/workflows/deploy-apex.yml` from the repo. Doing
+   this *before* DNS moves unpublishes the custom domain on GitHub's side and the
+   apex 404s in the gap; doing it after leaves Pages fighting for the domain.
+2. `./deploy.sh cutover` on the VPS (deploy session) — adds the apex and www
+   routers alongside staging. Traefik issues the certificate on first HTTPS hit,
+   so expect a few seconds of TLS warming.
+3. Check Google Safe Browsing for the domain. The apex was flagged before, which
+   is the entire reason a static placeholder is sitting there — see below.
+
+**Couples with R-003:** a Clerk production instance is domain-bound. Provisioning
+it against the final apex at the same time avoids doing that work twice.
+
+**The risk to actually watch.** The placeholder exists because the apex was once
+flagged by Safe Browsing. Cutting a full app with forms onto it re-opens that
+exposure. Two things reduce it and are already true: there is no visible pricing
+anywhere, and no surface collects payment details. Check the flag status after
+cutover rather than assuming it is historic.
 
 ---
 
