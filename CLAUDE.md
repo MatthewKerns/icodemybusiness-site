@@ -16,7 +16,10 @@ Convex agent skills for common tasks can be installed by running `npx convex ai-
 
 ## Deployment
 
-- **Hosting:** Dokploy (Docker-based)
-- **Staging:** Every push to `main` auto-deploys to `staging.icodemybusiness.com`
-- **Build:** Uses `Dockerfile` (multi-stage: deps → build → runner with standalone output)
-- **Note:** `docker-compose.yml` exists for local dev / env reference but Dokploy should be configured to use `Dockerfile` directly, not docker-compose
+- **Hosting:** Hostinger VPS (`root@2.25.207.149`), Docker container `icodemybusiness-site` behind Traefik. Not Dokploy.
+- **Staging = the only place the app runs:** `https://staging.icodemybusiness.com` (Namecheap A record → the VPS). The old `icodemybusiness.srv1757482.hstgr.cloud` host is unrouted on purpose. The apex `icodemybusiness.com` still serves the old static GitHub Pages placeholder until cutover.
+- **`git push` deploys nothing** (CI is `push: false`). Deploy with `scripts/deploy-staging.sh <sha>`: it exports a clean `git archive` of one commit that is already on `origin/main`, pushes Convex first when `convex/` changed, syncs, rebuilds and swaps the staging container, verifies, and records `DEPLOYED_SHA` on the VPS. Never rsync the shared working tree — other sessions' uncommitted files ride along. Full process, branch flow and hand-off format: `docs/DEPLOY.md`.
+- **Only the deploy session deploys.** Other sessions commit + push and send `ready to deploy: <sha>` with Convex/env notes.
+- **Convex deploys separately** from the Docker image and must go first; the script handles it (`npx convex dev --once` from the export, using the laptop's Convex login — the VPS has no Convex access).
+- **VPS-only files, never in git:** `deploy.sh` (modes `build` | `staging` | `cutover`; `run` is the legacy hstgr-host mode — don't use it), `.env.build` (runtime + build-arg values), `build.log`, `DEPLOYED_SHA`, `DEPLOY_LOG`. Deleted files linger on the VPS unless synced with `--delete` — the script does that for `src/ convex/ public/`.
+- **Build:** `Dockerfile` (multi-stage: deps → build → runner with standalone output); `docker-compose.yml` is local-dev/env reference only.
