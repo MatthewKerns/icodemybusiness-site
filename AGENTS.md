@@ -25,7 +25,8 @@ are NOT restated here — consult `~/workspace/software-development-best-practic
   (`npm ci --ignore-scripts` there). Several sessions share this checkout; uncommitted files are not yours to move.
 - Run the gates before any hand-off: `npm run lint && npx tsc --noEmit && npm test` — on the VPS via
   `~/bin/offload-run --lane node-full -- '<the three commands>'` when the laptop RAM guard is WARN/CRIT.
-  A gate that could not run is not a passed gate.
+  The `pre-push` hook and the deploy script do this routing themselves (pre-push reads the guard's
+  status; the deploy script always uses the VPS). A gate that could not run is not a passed gate.
 - Hand off deploys to the **deploy session** with: `ready to deploy: <sha> / Convex: y|n / env: none|NAME=… / gates: <pasted result> / verify: <what a human must look at>`.
 - Wrap API routes in `withErrorHandler`; surface agent/LLM failures with `visitorSafeAgentError`; record every transactional send with `api.emailSends.record`.
 - Add analytics events to `src/lib/analytics-events.ts` first; never hardcode event names. PostHog project 206048, EU host only.

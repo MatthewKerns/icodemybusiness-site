@@ -6,6 +6,7 @@
   `docs/release/DEPLOY_QUEUE.md` and `DEPLOY_LOG` on the VPS.
 - There is no flag to skip the gates. If a gate cannot run, the deploy does not happen.
 - `git-hooks/pre-push` is installed by `npm run prepare` (`core.hooksPath`); it runs `tsc` + the test
-  suite before any push to `main`. Do not bypass it with `--no-verify` (blocked by the test-guard hook).
+  suite before any push to `main` — locally when the laptop RAM guard is OK, on the VPS via
+  `offload-run` when it is WARN/CRIT. If it cannot run, the push is refused. Do not bypass it with `--no-verify` (blocked by the test-guard hook).
 - The VPS-side `deploy.sh` (modes `build` | `staging` | `cutover`) is not in git; changes to it are
   made over ssh and recorded in `docs/DEPLOY.md`.

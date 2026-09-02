@@ -2,15 +2,40 @@
 # pre-push: tests are the spec. Before anything reaches origin/main, run the gates.
 # Installed by `npm run prepare` (git config core.hooksPath scripts/git-hooks).
 # Bypassing with --no-verify is blocked by .claude/hooks/test-guard.sh in agent sessions.
+#
+# Where the gates run: on this machine when the laptop RAM guard is OK; on the VPS
+# (~/bin/offload-run, node-full lane, same working tree synced) when the guard reports
+# WARN or CRIT — the point is that the gate runs, not where. A gate that could not run
+# is not a passed gate: any failure to run refuses the push.
 set -euo pipefail
-remote="$1"
 to_main=0
 while read -r local_ref local_sha remote_ref remote_sha; do
   case "$remote_ref" in refs/heads/main) to_main=1 ;; esac
 done
 [ "$to_main" = 1 ] || exit 0
 
-echo "pre-push: gates for main (tsc + tests)…"
+GATES='npx tsc --noEmit && npx vitest run --reporter=dot'
+STATUS="$HOME/.claude/ram-guard/state/status.json"
+OFFLOAD="$HOME/bin/offload-run"
+level="OK"
+if [ -f "$STATUS" ]; then
+  level=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("laptop",{}).get("level") or "OK")' "$STATUS" 2>/dev/null || echo OK)
+fi
+
+if [ "$level" = "WARN" ] || [ "$level" = "CRIT" ]; then
+  [ -x "$OFFLOAD" ] || { echo "pre-push: laptop RAM guard is $level and $OFFLOAD is missing — gates cannot run; push refused" >&2; exit 1; }
+  echo "pre-push: laptop RAM guard is $level — running gates on the VPS (offload-run node-full)…"
+  log=$(mktemp)
+  if "$OFFLOAD" --lane node-full --no-mark -- "npm ci --ignore-scripts && $GATES" > "$log" 2>&1 && grep -q '■ exit=0' "$log"; then
+    grep -E "Tests |Test Files" "$log" || true
+    echo "pre-push: gates green (VPS)"; rm -f "$log"; exit 0
+  fi
+  grep -E "error TS|✖|FAIL|Tests |failed|Error:" "$log" | head -25 >&2 || true
+  echo "pre-push: gates failed on the VPS — fix the implementation (or the test, with a reason); push refused" >&2
+  rm -f "$log"; exit 1
+fi
+
+echo "pre-push: gates for main (tsc + tests, local — RAM guard $level)…"
 if [ ! -d node_modules ]; then
   echo "pre-push: node_modules missing — run: npm ci --ignore-scripts (gates cannot run; push refused)" >&2
   exit 1
