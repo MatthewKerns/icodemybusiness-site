@@ -482,6 +482,106 @@ export default defineSchema(
       objectiveId: v.optional(v.id("objectives")),
       createdAt: v.number(),
     }).index("by_createdAt", ["createdAt"]),
+
+    // X (Twitter) post engine — accumulative tactic memory. One row per tactic
+    // Matthew wants to post about; every published post must trace back to an
+    // approved row here (docs/copy-principles.md §2: only Matthew asserts facts
+    // about his own practice, so `source` records where each tactic came from).
+    xTactics: defineTable({
+      tacticId: v.string(), // "CLK-001" | "PPR-001" | "WRT-001" | "CLD-001"
+      pillar: v.union(
+        v.literal("clockify"),
+        v.literal("paper"),
+        v.literal("writing"),
+        v.literal("claude")
+      ),
+      text: v.string(),
+      /** Where the tactic came from: "interview 2026-09-02", "clockify-entry", "admin-ui", a Drive file, ... */
+      source: v.string(),
+      /** Another tacticId this one pairs with for cross-pillar "loop" posts. */
+      tiesTo: v.optional(v.string()),
+      sourceAssetIds: v.optional(v.array(v.id("xAssets"))),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("approved"),
+        v.literal("retired")
+      ),
+      createdAt: v.number(),
+      approvedAt: v.optional(v.number()),
+    })
+      .index("by_pillar", ["pillar"])
+      .index("by_status", ["status"])
+      .index("by_tacticId", ["tacticId"]),
+
+    // Files Matthew uploads to the X source Drive folder (video/audio needing
+    // transcription, plan files, docs) so tactics can point at the material
+    // they came from and unprocessed work stays visible.
+    xAssets: defineTable({
+      driveFileId: v.string(),
+      driveUrl: v.string(),
+      name: v.string(),
+      mimeType: v.optional(v.string()),
+      kind: v.union(
+        v.literal("video"),
+        v.literal("audio"),
+        v.literal("doc"),
+        v.literal("plan"),
+        v.literal("image"),
+        v.literal("other")
+      ),
+      status: v.union(
+        v.literal("unprocessed"),
+        v.literal("transcribed"),
+        v.literal("processed"),
+        v.literal("skipped")
+      ),
+      transcript: v.optional(v.string()),
+      note: v.optional(v.string()),
+      createdAt: v.number(),
+      processedAt: v.optional(v.number()),
+    })
+      .index("by_status", ["status"])
+      .index("by_driveFileId", ["driveFileId"]),
+
+    // One row per X post. Field shape maps directly onto the X POST /2/tweets
+    // payload (text + optional reply/quote/media settings) plus review
+    // lifecycle and posting-result metadata. Only `signedOff` rows may be
+    // uploaded; the review is Matthew's until content reviewers exist.
+    xPosts: defineTable({
+      text: v.string(), // the exact tweet text; house cap 140 chars
+      replySettings: v.optional(v.string()),
+      mediaIds: v.optional(v.array(v.string())),
+      quoteTweetId: v.optional(v.string()),
+      replyToTweetId: v.optional(v.string()),
+      pillar: v.union(
+        v.literal("clockify"),
+        v.literal("paper"),
+        v.literal("writing"),
+        v.literal("claude")
+      ),
+      /** Tactic IDs this post traces to; loop posts carry two. */
+      tacticIds: v.array(v.string()),
+      isLoop: v.boolean(),
+      /** Review batch key — a day ("2026-09-02") or a week ("2026-W37"). */
+      batchKey: v.string(),
+      charCount: v.number(),
+      status: v.union(
+        v.literal("draft"),
+        v.literal("edited"),
+        v.literal("signedOff"),
+        v.literal("rejected"),
+        v.literal("posted")
+      ),
+      reviewNote: v.optional(v.string()),
+      signedOffAt: v.optional(v.number()),
+      postedAt: v.optional(v.number()),
+      tweetId: v.optional(v.string()),
+      postError: v.optional(v.string()),
+      createdAt: v.number(),
+    })
+      .index("by_batchKey", ["batchKey"])
+      .index("by_status", ["status"])
+      .index("by_pillar", ["pillar"]),
   },
   { schemaValidation: true }
 );
