@@ -218,6 +218,7 @@ export const finalizeAssessment = internalAction({
       pathName: path.name,
       pathWhat: path.what,
       bookingUrl: bookingUrlFor(doc.sessionId, doc.email, doc.name),
+      degraded: !result,
     });
   },
 });

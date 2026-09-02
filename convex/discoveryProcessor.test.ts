@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { convexTest } from "convex-test";
+import { convexTest, type TestConvex } from "convex-test";
 import { api } from "./_generated/api";
 import schema from "./schema";
 import { bookingUrlFor } from "./discoveryProcessor";
@@ -8,7 +8,7 @@ import { bookingUrlFor } from "./discoveryProcessor";
 const modules = import.meta.glob("./**/*.ts");
 
 /** requireRole("admin") needs a users row, not just the JWT: seed the owner. */
-async function asAdmin(t: ReturnType<typeof convexTest>) {
+async function asAdmin(t: TestConvex<typeof schema>) {
   const owner = t.withIdentity(OWNER);
   await owner.mutation(api.users.ensureCurrentUser, {});
   return owner;
@@ -189,7 +189,7 @@ describe("finalizeAssessment", () => {
 
   it("still reaches ready with a verbatim summary when the model is down", async () => {
     const { t, id } = await submitted();
-    stubUpstreams(GOOD, { anthropicStatus: 402 });
+    const calls = stubUpstreams(GOOD, { anthropicStatus: 402 });
     await t.finishAllScheduledFunctions(vi.runAllTimers);
     const admin = await (await asAdmin(t)).query(
       api.discoveryAssessments.adminGetAssessment,
@@ -200,8 +200,10 @@ describe("finalizeAssessment", () => {
     expect(admin?.summary?.recommendedPath).toBe("diagnostic");
     expect(admin?.internalBrief).toMatch(/Auto-draft unavailable/);
     expect(admin?.processingError).toMatch(/drafting unavailable/);
-    // The email still goes.
+    // The email still goes, and says what it is.
     expect(admin?.emailSent).toBe(true);
+    const resend = calls.find((c) => c.url.includes("resend"))!.body as { html: string };
+    expect(resend.html).toContain("exactly as you gave them");
   });
 
   it("records a failed send without marking the email sent", async () => {

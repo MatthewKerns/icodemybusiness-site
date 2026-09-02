@@ -93,7 +93,8 @@ export function DiscoveryResultView({
           <p className="mt-2 text-sm leading-relaxed text-text-muted">
             One conversation. I&apos;ll have read this before we talk, so the
             call is about what I&apos;d fix first and whether I&apos;m the right
-            person to fix it.
+            person to fix it. The more you told the assessment, the more of
+            your context I bring.
           </p>
         </div>
         <a

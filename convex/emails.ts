@@ -302,9 +302,14 @@ export const sendDiscoveryReportEmail = internalAction({
     pathName: v.string(),
     pathWhat: v.string(),
     bookingUrl: v.string(),
+    /** True when the model was unavailable and the summary is the raw answers. */
+    degraded: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const greeting = args.name ? `Hi ${escapeHtml(args.name)},` : "Hi there,";
+    const intro = args.degraded
+      ? "Here are your answers from the assessment, exactly as you gave them. My read on them comes on the call. Keep this whether or not we ever work together."
+      : "Here is the write-up from your assessment, in your own words. Keep it whether or not we ever work together.";
     const s = args.summary;
     const row = (label: string, text: string) => `
     <p style="${emailStyles.label}">${label}</p>
@@ -313,10 +318,7 @@ export const sendDiscoveryReportEmail = internalAction({
     const bodyContent = `
   <div style="padding:24px 0;">
     <p style="${emailStyles.heading}">${greeting}</p>
-    <p style="${emailStyles.paragraph}">
-      Here is the write-up from your assessment, in your own words. Keep it
-      whether or not we ever work together.
-    </p>
+    <p style="${emailStyles.paragraph}">${intro}</p>
     <hr style="${emailStyles.hr}">
     ${row("The problem", s.problem)}
     ${row("What it costs", s.impact)}
@@ -334,8 +336,9 @@ export const sendDiscoveryReportEmail = internalAction({
     </div>
     <p style="${emailStyles.paragraph}">
       On the call you tell me where the week goes; I tell you straight what I'd
-      fix first and whether I'm the right person to fix it. Reply to this email
-      any time &mdash; a real person reads every message.
+      fix first and whether I'm the right person to fix it. The more you told
+      the assessment, the more of your context I bring. Reply to this email any
+      time &mdash; a real person reads every message.
     </p>
   </div>`;
 

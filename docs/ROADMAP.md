@@ -64,6 +64,13 @@ The profile listing only returns *active* types, so a deactivated event is invis
 
 **Matthew's action:** create the event type in Calendly. Everything downstream is config.
 
+**Update 2026-09-02:** Matthew supplied `https://calendly.com/12kernsmatthew/new-meeting-1`
+("Introduction Call"). The profile listing now returns only that event, so the old
+`new-meeting` default was pointing at a deactivated one. `new-meeting-1` is now the
+in-code default in `src/app/book/page.tsx`; setting `NEXT_PUBLIC_CALENDLY_INTRO_URL`
+to the same value on the VPS makes the override explicit. Remaining: reconcile
+`offers/consulting.md`'s `matthewkerns/discovery` handle.
+
 **Also inconsistent:** [offers/consulting.md](../offers/consulting.md) advertises a
 *third* URL — `calendly.com/matthewkerns/discovery` (a different account handle). Pick
 one handle and reconcile all three.

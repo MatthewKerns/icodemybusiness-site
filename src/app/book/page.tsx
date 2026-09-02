@@ -4,12 +4,14 @@ import { CalendlyEmbed } from "@/components/shared/CalendlyEmbed";
 import { FAQAccordion } from "@/components/landing/FAQAccordion";
 import { Clock, MessageCircle, Sparkles, ShieldCheck } from "lucide-react";
 
-// Dedicated event type for the free 15-minute intro call.
-// Falls back to the generic account URL if the intro-specific link isn't set yet.
+// The free 15-minute "Introduction Call" event (Matthew, 2026-09-02). Kept in
+// code rather than only in env: the URL isn't a secret, and the previous
+// default (`new-meeting`) was deactivated on Calendly, which is exactly the
+// failure an env-only value hides. Env still wins if set.
 const CALENDLY_INTRO_URL =
   process.env.NEXT_PUBLIC_CALENDLY_INTRO_URL ??
   process.env.NEXT_PUBLIC_CALENDLY_URL ??
-  "https://calendly.com/12kernsmatthew/new-meeting";
+  "https://calendly.com/12kernsmatthew/new-meeting-1";
 
 export const metadata: Metadata = {
   title: "Book a Free 15-Minute Intro Call | iCodeMyBusiness",
@@ -176,7 +178,28 @@ export default function BookPage({
               invite with the call details.
             </p>
 
-            <div className="mt-8">
+            {/*
+              Matthew (2026-09-02): the assessment is how he prepares. Say it
+              plainly where the slot is picked, and route people who arrived
+              without one to it. No conditional "more likely if" framing.
+            */}
+            <div className="mt-8 rounded-xl border border-border-gold bg-gold/5 p-5 text-left">
+              <p className="text-sm leading-relaxed text-text-primary">
+                {session
+                  ? "I'll have your assessment answers with me. The more you told it, the more context I bring to the call."
+                  : "The more you tell the assessment, the more context I bring to the call. It takes a few minutes, and booking a week or two out gives me time to read it."}
+              </p>
+              {!session && (
+                <a
+                  href="/assessment"
+                  className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-gold underline-offset-4 hover:underline"
+                >
+                  Do the assessment first &rarr;
+                </a>
+              )}
+            </div>
+
+            <div className="mt-6">
               <CalendlyEmbed
                 url={CALENDLY_INTRO_URL}
                 email={email}

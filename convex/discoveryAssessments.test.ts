@@ -1,13 +1,13 @@
 /// <reference types="vite/client" />
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { convexTest } from "convex-test";
+import { convexTest, type TestConvex } from "convex-test";
 import { api, internal } from "./_generated/api";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
 
 /** requireRole("admin") needs a users row, not just the JWT: seed the owner. */
-async function asAdmin(t: ReturnType<typeof convexTest>) {
+async function asAdmin(t: TestConvex<typeof schema>) {
   const owner = t.withIdentity(OWNER);
   await owner.mutation(api.users.ensureCurrentUser, {});
   return owner;
