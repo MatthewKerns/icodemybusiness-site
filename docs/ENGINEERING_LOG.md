@@ -52,3 +52,11 @@ the deploy script's own gates stay.
 **Why it got through.** No rule or hook distinguished "commit the file I staged" from "commit everything staged". Moving a branch pointer with a dirty shared tree is never safe and was not on the Never list.
 
 **Fixes.** (1) `AGENTS.md` Never Do: no `commit -a`, no commit without `-- <paths>`, no `reset --hard` / `update-ref` on a branch in the shared checkout; when behind origin, commit in a temp worktree. (2) `.claude/hooks/shared-checkout-guard.sh` blocks those shapes (override `SHARED_CHECKOUT_APPROVED`). (3) This entry. Sessions that were already on their own worktree were unaffected — the durable fix is still every session on its own worktree (`AGENTS.md` Always Do).
+
+## 2026-09-02 — sign-in never created a user record; every gate was green (71ee7aa)
+
+**What happened.** `useEnsureUser` had two guards that no value could satisfy at once (`convexUser !== null` → return, then `convexUser !== undefined` → return), so `ensureCurrentUser` never ran. Types, lint and the full suite were green throughout; nothing threw. The only symptom was an empty `users` table, which looks exactly like "no users yet" — noted this morning and explained away as low traffic while `leads` already carried a real `clerkUserId`. Found by the offer session reading the hook with a specific question (R-010), fixed with four tests that were red on the unfixed code first.
+
+**Lesson.** An empty table where writes are expected is a finding, not a baseline. When a table that a signed-in path should populate is empty, trace the write path end to end before attributing it to traffic. Gates cannot catch a guard that is merely contradictory.
+
+**Verification.** Cannot be done by curl: someone signs in on the deployed build, then `npx convex data users --limit 5` shows a row. Until a real sign-in happens the table stays empty, so an empty table is not evidence either way. Queue status for 71ee7aa stays "deployed, sign-in unverified" until Matthew's browser round-trip (R-016).

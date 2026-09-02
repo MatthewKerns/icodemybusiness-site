@@ -11,3 +11,5 @@ status column after verification. Never delete rows.
 | 2026-09-02T14:19Z | 849da40 | fix(process): pre-push gates a clean export of the pushed commit in a per-process VPS dir | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
 | 2026-09-02T14:51Z | dafc551 | Merge remote-tracking branch 'origin/main' into agent/offer/landing | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
 | 2026-09-02T16:59Z | 6e4a5af | feat(landing): show the five assessment questions as the second diagram | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
+| 2026-09-02T17:11Z | 5bdcdee | fix(landing): the hero diagrams were unreadable on a phone | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
+| 2026-09-02T17:16Z | 71ee7aa | fix(auth): signing in never created a user record | lint/tsc/test green on VPS | deployed — sign-in leg unverified (needs a real sign-in, then `npx convex data users --limit 5`) | matthewkerns@Drs-MacBook-Pro |
