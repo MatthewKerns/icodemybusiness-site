@@ -7,6 +7,7 @@ import { useTrackEvent } from "@/hooks/useTrackEvent";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import { DiscoverySummaryCard, type DiscoverySummary } from "./DiscoverySummaryCard";
 import { DiscoveryAccountCta } from "./DiscoveryAccountCta";
+import { bookingHref } from "@/lib/agent/discovery-booking";
 
 export interface PublicAssessment {
   sessionId: string;
@@ -16,12 +17,6 @@ export interface PublicAssessment {
   status: string;
   emailSent: boolean;
   claimed: boolean;
-}
-
-export function bookingHref(a: { sessionId: string; email: string; name?: string }) {
-  const params = new URLSearchParams({ session: a.sessionId, email: a.email });
-  if (a.name) params.set("name", a.name);
-  return `/book?${params.toString()}`;
 }
 
 /**

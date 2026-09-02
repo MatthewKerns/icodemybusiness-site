@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DiscoveryAssessment } from "@/components/agent/discovery/DiscoveryAssessment";
+import { AssessmentClient } from "./AssessmentClient";
 
 export const metadata: Metadata = {
   title: "Discovery Assessment | iCodeMyBusiness",
@@ -38,7 +38,7 @@ export default function AssessmentPage() {
             together.
           </p>
         </div>
-        <DiscoveryAssessment source="assessment-page" />
+        <AssessmentClient />
       </div>
     </main>
   );

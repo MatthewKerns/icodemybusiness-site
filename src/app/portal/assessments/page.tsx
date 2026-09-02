@@ -1,12 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useQuery } from "convex/react";
 import { ArrowRight, ClipboardList, Loader2 } from "lucide-react";
 import { api } from "../../../../convex/_generated/api";
-import { DiscoverySummaryCard } from "@/components/agent/discovery/DiscoverySummaryCard";
-import { bookingHref } from "@/components/agent/discovery/DiscoveryResultView";
+import { bookingHref } from "@/lib/agent/discovery-booking";
 import { cn } from "@/lib/utils";
+
+// Agent components are reached through a dynamic import, matching the other
+// pages (custom-tools, the letter): the ESLint phase rule restricts static
+// imports of `@/components/agent/*` from app routes.
+const DiscoverySummaryCard = dynamic(
+  () =>
+    import("@/components/agent/discovery/DiscoverySummaryCard").then(
+      (m) => m.DiscoverySummaryCard
+    ),
+  { ssr: false }
+);
 
 /**
  * The visitor's own discovery reports. Only assessments bound to this account
