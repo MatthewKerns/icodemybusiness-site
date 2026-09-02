@@ -18,7 +18,7 @@ VPS="${ICMB_VPS:-root@2.25.207.149}"
 DIR="${ICMB_DIR:-/opt/icodemybusiness-site}"
 STAGING="${ICMB_STAGING_URL:-https://staging.icodemybusiness.com}"
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
-ROUTES=(/ /free-tools /consulting /book /academy /services /vsl)
+ROUTES=(/ /free-tools /consulting /book /academy /services /vsl /assessment)
 
 SKIP_CI=0; ALLOW_UNMERGED=0; NO_CONVEX=0; DRY=0; REF=""
 for a in "$@"; do
@@ -84,7 +84,14 @@ if [ "$SKIP_CI" = 0 ] && command -v gh >/dev/null 2>&1; then
   if [ "$runs" = "[]" ] || [ -z "$runs" ]; then
     log "no CI runs found for $SHORT (not pushed yet, or CI still queued) — continuing; the VPS build is the gate"
   elif printf '%s' "$runs" | grep -q '"conclusion":"failure"'; then
-    fail "CI failed for $SHORT — fix it or pass --skip-ci"
+    # Distinguish a real red run from one whose jobs never started (e.g. GitHub Actions billing lock).
+    rid=$(gh run list --commit "$SHA" --limit 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || echo "")
+    steps=$(gh run view "$rid" --json jobs --jq '[.jobs[].steps | length] | add' 2>/dev/null || echo "?")
+    if [ "$steps" = "0" ] || [ "$steps" = "null" ]; then
+      log "CI run $rid for $SHORT never started (0 steps — GitHub Actions unavailable, e.g. billing lock). Continuing; the VPS build is the gate."
+    else
+      fail "CI failed for $SHORT (run $rid) — fix it or pass --skip-ci"
+    fi
   elif printf '%s' "$runs" | grep -q '"status":"in_progress"\|"status":"queued"'; then
     log "CI still running for $SHORT — continuing; the VPS build is the gate"
   else
@@ -124,7 +131,8 @@ if [ "$CONVEX_CHANGED" = 1 ] && [ "$NO_CONVEX" = 0 ]; then
   [ -d "$REPO/node_modules" ] || fail "node_modules missing in $REPO — run: npm ci --ignore-scripts"
   ln -s "$REPO/node_modules" "$T/node_modules"
   # CONVEX_DEPLOYMENT is read from the repo's untracked local env (value never printed).
-  DEP=$(grep -E '^CONVEX_DEPLOYMENT=' "$REPO/.env.local" | head -1 | cut -d= -f2- | tr -d '"' || true)
+  # Line format is CONVEX_DEPLOYMENT=dev:name # team: t, project: p  -> keep only the value.
+  DEP=$(grep -E '^CONVEX_DEPLOYMENT=' "$REPO/.env.local" | head -1 | cut -d= -f2- | cut -d'#' -f1 | tr -d '[:space:]"')
   [ -n "$DEP" ] || fail "CONVEX_DEPLOYMENT not found in .env.local"
   ( cd "$T" && CONVEX_DEPLOYMENT="$DEP" npx convex dev --once >"$T/convex-push.log" 2>&1 ) \
     || { tail -20 "$T/convex-push.log"; fail "Convex push failed"; }
