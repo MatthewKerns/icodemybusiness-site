@@ -9,7 +9,7 @@ import { Clock, MessageCircle, Sparkles, ShieldCheck } from "lucide-react";
 const CALENDLY_INTRO_URL =
   process.env.NEXT_PUBLIC_CALENDLY_INTRO_URL ??
   process.env.NEXT_PUBLIC_CALENDLY_URL ??
-  "https://calendly.com/icodemybusiness/15min";
+  "https://calendly.com/12kernsmatthew/new-meeting";
 
 export const metadata: Metadata = {
   title: "Book a Free 15-Minute Intro Call | iCodeMyBusiness",
@@ -40,7 +40,7 @@ const WHAT_WE_COVER = [
     icon: ShieldCheck,
     title: "Your honest next step",
     description:
-      "Whether that's a paid session, a DIY tip, or nothing at all. No pitch, no pressure, no obligation.",
+      "Whether that's a paid session, a DIY tip, or nothing at all.",
   },
 ];
 
@@ -92,7 +92,7 @@ export default function BookPage() {
             <p className="mx-auto mt-6 max-w-2xl text-lg text-text-muted">
               Book a free 15-minute intro call. We&apos;ll talk through your
               business, spot your biggest time-sink, and figure out whether AI
-              can actually help — no pitch, no pressure, no obligation.
+              can actually help.
             </p>
 
             {/* CTA */}

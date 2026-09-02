@@ -8,7 +8,7 @@ import { CommunityBanner } from "@/components/landing/CommunityBanner";
 import { ClipboardCheck, Users, Rocket } from "lucide-react";
 
 const CALENDLY_URL =
-  process.env.NEXT_PUBLIC_CALENDLY_URL ?? "https://calendly.com/12kernsmatthew/30min";
+  process.env.NEXT_PUBLIC_CALENDLY_URL ?? "https://calendly.com/12kernsmatthew/new-meeting";
 
 const FAQ_ITEMS = [
   {
