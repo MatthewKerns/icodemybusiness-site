@@ -135,7 +135,7 @@ if [ "$DRY" = 1 ]; then
 fi
 
 # 5. Serialize against other deploys / builds on the VPS.
-remote "if pgrep -f '^docker build' >/dev/null; then echo 'another build is running'; exit 1; fi; if [ -e $DIR/.deploy.lock ]; then echo \"lock held: \$(cat $DIR/.deploy.lock)\"; exit 1; fi; echo \"$SHORT \$(date -u +%FT%TZ) by \$USER@\$(hostname)\" > $DIR/.deploy.lock" \
+remote "if pgrep -f '^docker build' >/dev/null; then echo 'another build is running'; exit 1; fi; if [ -e $DIR/.deploy.lock ]; then if [ -z \"\$(find $DIR/.deploy.lock -mmin -40)\" ]; then mv $DIR/.deploy.lock $DIR/.deploy.lock.stale-\$(date -u +%H%M); echo \"stale lock (>40 min, no build running) moved aside\"; else echo \"lock held: \$(cat $DIR/.deploy.lock)\"; exit 1; fi; fi; echo \"$SHORT \$(date -u +%FT%TZ) by \$USER@\$(hostname)\" > $DIR/.deploy.lock" \
   || fail "VPS busy — try again shortly"
 trap 'remote "rm -f $DIR/.deploy.lock" >/dev/null 2>&1; rm -rf "$T"' EXIT
 
@@ -166,6 +166,12 @@ ok "synced"
 # 8. Build + swap on the VPS.
 log "building on the VPS (this takes a few minutes)"
 if ! remote "cd $DIR && ./deploy.sh build > build.log 2>&1"; then
+  rc=$?
+  if [ "$rc" = 255 ]; then
+    # ssh's own exit code: the session dropped (host stall, network), not necessarily the build.
+    # Seen 2026-09-02: the image had built and tagged fine while the script reported a failure.
+    fail "ssh session to the VPS dropped during the build (exit 255) — the build may have finished; check $DIR/build.log, then re-run. The lock is released on exit."
+  fi
   remote "grep -nE 'Failed to compile|Type error|error TS|ERROR' $DIR/build.log | head -20" || true
   fail "VPS build failed — see $DIR/build.log"
 fi
