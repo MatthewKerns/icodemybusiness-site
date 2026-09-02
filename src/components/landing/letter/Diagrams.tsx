@@ -23,14 +23,36 @@ const LINE = "#2A3441";
 
 function Figure({
   caption,
+  legend,
   children,
 }: {
   caption: string;
+  /**
+   * Key rendered as HTML rather than inside the SVG. A legend is the widest
+   * thing on most of these charts, and keeping it in the drawing forced a
+   * minimum width that pushed the chart itself off a phone screen. Out here it
+   * wraps.
+   */
+  legend?: { label: string; fill: string }[];
   children: React.ReactNode;
 }) {
   return (
     <figure className="m-0">
       <div className="overflow-x-auto">{children}</div>
+      {legend && (
+        <ul className="mt-4 flex list-none flex-wrap gap-x-6 gap-y-2 p-0">
+          {legend.map((item) => (
+            <li key={item.label} className="flex items-center gap-2">
+              <span
+                aria-hidden="true"
+                className="h-3 w-3 flex-none rounded-sm"
+                style={{ backgroundColor: item.fill }}
+              />
+              <span className="text-sm text-text-muted">{item.label}</span>
+            </li>
+          ))}
+        </ul>
+      )}
       <figcaption className="mt-4 text-sm leading-relaxed text-text-dim">
         {caption}
       </figcaption>
@@ -82,10 +104,16 @@ export function WeekDiagram() {
   const growthX = X0 + GROWTH_STARTS * perHour;
 
   return (
-    <Figure caption={`Illustrative, not measured. Four weeks at 50-60 hours each — ${monthTotal} hours in the month, of which ${growthTotal} went to growing the business. The other ${monthTotal - growthTotal} went to the same three things every week.`}>
+    <Figure
+      caption={`Illustrative, not measured. Four weeks at 50-60 hours each — ${monthTotal} hours in the month, of which ${growthTotal} went to growing the business. The other ${monthTotal - growthTotal} went to the same three things every week.`}
+      legend={[
+        ...SINKS.map((s) => ({ label: s.label, fill: s.fill })),
+        { label: "Growing the business", fill: GOLD },
+      ]}
+    >
       <svg
-        viewBox="0 0 660 332"
-        className="h-auto w-full min-w-[520px]"
+        viewBox="0 0 660 276"
+        className="h-auto w-full min-w-[430px]"
         role="img"
         aria-labelledby="week-t week-d"
       >
@@ -161,17 +189,6 @@ export function WeekDiagram() {
           </g>
         ))}
 
-        {/* Legend */}
-        <g transform={`translate(30, ${rowY(3) + BAR_H + 52})`}>
-          {[...SINKS, { label: "Growing the business", hours: 0, fill: GOLD }].map((item, i) => (
-            <g key={item.label} transform={`translate(${(i % 2) * 320}, ${Math.floor(i / 2) * 24})`}>
-              <rect x="0" y="0" width="11" height="11" fill={item.fill} rx="2" />
-              <text x="20" y="10" fill={MUTED} fontSize="12.5">
-                {item.label}
-              </text>
-            </g>
-          ))}
-        </g>
       </svg>
     </Figure>
   );
@@ -538,107 +555,73 @@ export function PathsDiagram() {
 }
 
 /**
- * Wraps a string to a rough character width. SVG has no text flow, so long
- * labels have to be broken into <tspan> lines by hand or they run past the
- * viewBox and get clipped.
- */
-function wrap(text: string, max: number): string[] {
-  const out: string[] = [];
-  let line = "";
-  for (const word of text.split(" ")) {
-    if ((line + " " + word).trim().length > max) {
-      out.push(line.trim());
-      line = word;
-    } else {
-      line = (line + " " + word).trim();
-    }
-  }
-  if (line) out.push(line);
-  return out;
-}
-
-/**
  * What the assessment actually asks, before anyone starts it.
+ *
+ * Deliberately NOT an SVG. This is a list, not a drawing — there is no geometry
+ * to preserve — and the first version was an SVG, which meant hand-wrapping the
+ * question text and forcing a 520px minimum width. On a 375px phone that pushed
+ * a third of every question off-screen behind a sideways scroll: the page-level
+ * overflow check passed while the reader saw "in dollars or in" and nothing
+ * more. Real text in real elements wraps on its own and needs no minimum width.
  *
  * Reads DISCOVERY_QUESTIONS directly, so it shows the real five questions and
  * cannot drift from the flow if they are reworded — the same discipline as
  * PathsDiagram reading PATHS.
  *
- * This diagram deliberately makes no claim about outcomes. It states what
- * happens, which the reader can verify by doing it — the one kind of assertion
- * this page can make without Matthew having to stand behind a number.
+ * Makes no claim about outcomes. It states what happens, which the reader can
+ * verify by doing it — the one kind of assertion this page can make without
+ * Matthew having to stand behind a number (docs/copy-principles.md §2).
  */
 export function AssessmentDiagram() {
-  const ROW_H = 52;
-  const X_NODE = 44;
-  const X_TEXT = 78;
-  const top = 56;
-  const height = top + DISCOVERY_QUESTIONS.length * ROW_H + 64;
-
   return (
-    <Figure caption="No forms and no multiple choice — you answer in your own words, and the write-up comes back in the same language you used.">
-      <svg
-        viewBox={`0 0 660 ${height}`}
-        className="h-auto w-full min-w-[520px]"
-        role="img"
-        aria-labelledby="assess-t assess-d"
-      >
-        <title id="assess-t">The five questions the assessment asks</title>
-        <desc id="assess-d">
-          {DISCOVERY_QUESTIONS.map((q, i) => `${i + 1}. ${q.label}: ${q.anchor}`).join(" ")}
-        </desc>
+    <figure className="m-0">
+      <p className="text-base font-semibold text-text-primary">
+        Five questions, in your own words
+      </p>
 
-        <text x="30" y="28" fill={TEXT} fontSize="16" fontWeight="600">
-          Five questions, in your own words
-        </text>
-
-        {/* The spine, drawn first so the nodes sit on top of it. */}
-        <line
-          x1={X_NODE} y1={top}
-          x2={X_NODE} y2={top + (DISCOVERY_QUESTIONS.length - 1) * ROW_H + 34}
-          stroke={LINE} strokeWidth="1"
-        />
-
-        {DISCOVERY_QUESTIONS.map((q, i) => {
-          const y = top + i * ROW_H;
-          const lines = wrap(q.anchor, 62);
-          return (
-            <g key={q.key}>
-              <circle cx={X_NODE} cy={y} r="11" fill="#0A0A0A" stroke={GOLD_DIM} strokeWidth="1" />
-              <text x={X_NODE} y={y + 4} fill={GOLD} fontSize="11" fontWeight="600" textAnchor="middle">
-                {i + 1}
-              </text>
-              <text x={X_TEXT} y={y - 3} fill={TEXT} fontSize="13" fontWeight="600">
+      <ol className="mt-6 list-none space-y-0 p-0">
+        {DISCOVERY_QUESTIONS.map((q, i) => (
+          <li key={q.key} className="relative flex gap-4 pb-7 last:pb-0">
+            {/* The spine. Stops at the last item rather than trailing into space. */}
+            {i < DISCOVERY_QUESTIONS.length - 1 && (
+              <span
+                aria-hidden="true"
+                className="absolute left-[11px] top-6 h-full w-px bg-border"
+              />
+            )}
+            <span
+              aria-hidden="true"
+              className="relative z-10 flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full border border-gold-dim bg-bg-primary text-[11px] font-semibold text-gold"
+            >
+              {i + 1}
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-text-primary">
                 {q.label}
-              </text>
-              {lines.map((line, li) => (
-                <text key={line} x={X_TEXT} y={y + 15 + li * 15} fill={MUTED} fontSize="12">
-                  {line}
-                </text>
-              ))}
-            </g>
-          );
-        })}
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-text-muted">
+                {q.anchor}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
 
-        {/* What comes out. The only gold-filled node, because it is the point. */}
-        <g>
-          <circle
-            cx={X_NODE}
-            cy={top + DISCOVERY_QUESTIONS.length * ROW_H - 6}
-            r="11"
-            fill={GOLD}
-          />
-          <text
-            x={X_TEXT}
-            y={top + DISCOVERY_QUESTIONS.length * ROW_H - 1}
-            fill={GOLD}
-            fontSize="13"
-            fontWeight="600"
-          >
-            Your write-up — the one thing to fix first, and where to start
-          </text>
-        </g>
-      </svg>
-    </Figure>
+      {/* What comes out — the only filled marker, because it is the point. */}
+      <div className="mt-2 flex gap-4">
+        <span
+          aria-hidden="true"
+          className="h-[22px] w-[22px] flex-none rounded-full bg-gold"
+        />
+        <p className="pt-0.5 text-sm font-semibold leading-relaxed text-gold">
+          Your write-up — the one thing to fix first, and where to start
+        </p>
+      </div>
+
+      <figcaption className="mt-6 text-sm leading-relaxed text-text-dim">
+        No forms and no multiple choice — you answer in your own words, and the
+        write-up comes back in the same language you used.
+      </figcaption>
+    </figure>
   );
 }
