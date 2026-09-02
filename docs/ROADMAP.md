@@ -426,22 +426,39 @@ across devices (the session id lives in `sessionStorage`; `agentSessions` has no
 
 ### R-018 · Nothing gates a merge to main
 
-`status: ready` · `owner: matthew` · `evidence: verified`
+`status: done` · `owner: matthew` · `evidence: verified`
 
-GitHub Actions is locked on billing, so CI enforces nothing. Every "verified"
-claim made today — including all of mine — is a session's word that it ran lint,
-tsc and tests by hand, not a gate that would have stopped a bad merge.
+**Closed 2026-09-02, same day it was raised.** When this was written, GitHub
+Actions was locked on billing and every "verified" claim in the repo — including
+all of mine — was a session's word that it had run the checks by hand.
 
-The clean-export deploy script (`scripts/deploy-staging.sh`, `docs/DEPLOY.md`)
-closed the worst hole: builds now come from a `git archive` of a pushed commit
-rather than the shared working tree, so uncommitted work can't ride along. What
-remains unguarded is the merge itself.
+Three enforcements now exist, and none of them depend on a session choosing to
+behave:
 
-**Verify:** `gh run list --limit 5` — currently returns nothing runnable.
+- `scripts/git-hooks/pre-push` runs `tsc` and the full test suite before anything
+  reaches `main`, refusing the push on failure or on missing `node_modules`.
+  Installed by `npm run prepare` (`core.hooksPath`) — **run it once per checkout
+  or worktree**, or you simply have no gate.
+- It reads the RAM guard's status and routes the run through
+  `offload-run --lane node-full` when the laptop is WARN/CRIT, accepting only an
+  `exit=0` from the VPS. That closes the conflict between "run the gates" and
+  "don't run heavy jobs on a 16GB laptop", which otherwise left a constrained
+  session with no legal way to push.
+- `scripts/deploy-staging.sh` runs lint/tsc/tests on the VPS against a clean
+  `git archive` of a pushed commit, with no skip flag.
 
-**Done when:** either billing is restored and the workflow gates merges to main,
-or the team accepts hand-verification explicitly and writes that down, so nobody
-later mistakes an unenforced convention for a passing pipeline.
+**Verify:** `git config --get core.hooksPath` → `scripts/git-hooks`.
+
+**The incident worth remembering** is not the missing CI. It is what happened
+when a gate was inconvenient: a failing Convex typecheck blocked a deploy, and
+the first fix attempted was to exclude test files from the typecheck. Matthew
+reversed it. `.claude/hooks/test-guard.sh` now blocks that whole class of move —
+skipping tests, `@ts-ignore` in tests, excluding test globs, `--no-verify` —
+because the danger was never an absent gate, it was a present gate being routed
+around under deadline.
+
+GitHub Actions remains informational; the VPS is the gate runner by decision, not
+by accident.
 
 ---
 
