@@ -21,7 +21,7 @@ How a visitor gets the free tools by email, and how paid work is now sold
      before sending, so the route can't be used as an open relay to spam
      arbitrary addresses.
    - Renders `WelcomeEmail` (`src/emails/WelcomeEmail.tsx`) to HTML and sends
-     it via **Resend** from `iCodeMyBusiness <hello@icodemybusiness.com>`.
+     it via **Resend** from `iCodeMyBusiness <matthew@icodemybusiness.com>`.
 4. The welcome email's **"Access Free Tools"** button links straight to the
    public **`/free-tools`** page — no sign-in, no gated portal.
 

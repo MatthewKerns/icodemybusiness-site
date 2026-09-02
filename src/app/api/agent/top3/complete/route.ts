@@ -58,7 +58,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 
   const resend = new Resend(resendKey);
   const fromAddress =
-    process.env.RESEND_FROM_EMAIL ?? "hello@icodemybusiness.com";
+    process.env.RESEND_FROM_EMAIL ?? "matthew@icodemybusiness.com";
 
   const html = await render(
     Top3IssuesSummaryEmail({

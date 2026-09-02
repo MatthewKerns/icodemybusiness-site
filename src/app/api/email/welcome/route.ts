@@ -36,7 +36,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   }
 
   const resend = new Resend(apiKey);
-  const fromAddress = process.env.RESEND_FROM_EMAIL ?? "hello@icodemybusiness.com";
+  const fromAddress = process.env.RESEND_FROM_EMAIL ?? "matthew@icodemybusiness.com";
 
   const subject = "Welcome to iCodeMyBusiness — Your Free Tools Are Ready";
   const html = await render(WelcomeEmail({ email, name }));

@@ -89,7 +89,7 @@ export function WelcomeEmail({ email, name }: WelcomeEmailProps) {
                 To make sure you receive future emails from us (including any
                 custom roadmaps or resources), please check your spam/junk folder
                 and mark this email as &quot;Not Spam&quot; or add{" "}
-                <strong>hello@icodemybusiness.com</strong> to your contacts.
+                <strong>matthew@icodemybusiness.com</strong> to your contacts.
               </Text>
             </Section>
 

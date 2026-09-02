@@ -18,7 +18,7 @@ export const sendWelcomeEmail = internalAction({
 
     const resend = new Resend(apiKey);
     const fromAddress =
-      process.env.RESEND_FROM_EMAIL ?? "hello@icodemybusiness.com";
+      process.env.RESEND_FROM_EMAIL ?? "matthew@icodemybusiness.com";
 
     const html = await render(WelcomeEmail({ email: args.email, name: args.name }));
 

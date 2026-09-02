@@ -26,7 +26,7 @@ chmod 600). See `.env.example`.
 | Var | Purpose | Failure if missing |
 |-----|---------|--------------------|
 | `RESEND_API_KEY` | Resend auth | Route throws 503 `SERVICE_UNAVAILABLE`; **no email sent** |
-| `RESEND_FROM_EMAIL` | From address (default `hello@icodemybusiness.com`) | Falls back to default |
+| `RESEND_FROM_EMAIL` | From address (default `matthew@icodemybusiness.com`) | Falls back to default |
 | `NEXT_PUBLIC_CONVEX_URL` | Lead create/lookup | Lead never created → welcome-email send has no matching lead, 400 |
 
 `/api/email/welcome` no longer requires a Clerk session — the free-tools
