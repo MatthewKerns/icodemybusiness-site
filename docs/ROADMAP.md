@@ -184,10 +184,19 @@ asset URL **in code/config, not an environment variable** — it isn't a secret,
 new public env var costs a Dockerfile `ARG`+`ENV`, a `--build-arg` in `deploy.sh`, and
 a value on the VPS. Three moving parts for a URL that can live in the repo.
 
-**Slot shipped `69a2ea7`.** `VSL` in [src/content/landing.ts](../src/content/landing.ts)
-takes `src` + `kind` (`youtube` | `vimeo` | `file`). While `src` is null the section
-renders a real poster state with copy pointing the reader onward — not a broken
-embed, and no fake play button. Setting `src` publishes it.
+**Slot shipped `69a2ea7`, restaged `ada7f3b`.** `VSL` in
+[src/content/landing.ts](../src/content/landing.ts) takes `src` + `kind`
+(`youtube` | `vimeo` | `file`). Setting `src` publishes the video.
+
+The video-led design now lives at its own route, **`/vsl`** — same page, same
+copy, `VideoHero` instead of `DiagramHero`. Both routes share
+`src/components/landing/letter/LandingPage.tsx`, so they cannot drift as copy
+changes; the difference between them is one JSX node.
+
+**Promoting it is two lines** in `src/app/page.tsx` (`surface="video"`,
+`hero={<VideoHero />}`), then delete `src/app/vsl/page.tsx`. No content moves.
+The `surface` analytics dimension is named for the hero rather than the route
+precisely so events stay coherent across that promotion.
 
 **Done when:** Matthew supplies the recording and hosting choice; the slot renders
 it with a poster frame and no autoplay.
@@ -413,6 +422,45 @@ the first, every report is the verbatim fallback with `processingError` set.
 **Known gap, deliberate:** an unfinished assessment does not follow the account
 across devices (the session id lives in `sessionStorage`; `agentSessions` has no
 `clerkUserId`). The gate copy was narrowed to match (`1a2e011`).
+
+---
+
+### R-018 · Nothing gates a merge to main
+
+`status: ready` · `owner: matthew` · `evidence: verified`
+
+GitHub Actions is locked on billing, so CI enforces nothing. Every "verified"
+claim made today — including all of mine — is a session's word that it ran lint,
+tsc and tests by hand, not a gate that would have stopped a bad merge.
+
+The clean-export deploy script (`scripts/deploy-staging.sh`, `docs/DEPLOY.md`)
+closed the worst hole: builds now come from a `git archive` of a pushed commit
+rather than the shared working tree, so uncommitted work can't ride along. What
+remains unguarded is the merge itself.
+
+**Verify:** `gh run list --limit 5` — currently returns nothing runnable.
+
+**Done when:** either billing is restored and the workflow gates merges to main,
+or the team accepts hand-verification explicitly and writes that down, so nobody
+later mistakes an unenforced convention for a passing pipeline.
+
+---
+
+### R-019 · The homepage headline promises three things; the assessment finds one
+
+`status: blocked` · `owner: matthew` · `evidence: verified`
+
+`VSL.headline` reads *"Most businesses don't need more software. They need the
+right three things fixed."* The discovery assessment traces **one** problem
+through five questions. The gate copy and `PATHS[diagnostic].what` were corrected
+to match the flow (`07cb539`); the headline deliberately was not, because it is
+the letter's positioning rather than a description of the assessment.
+
+They now sit on the same page saying different numbers.
+
+**Done when:** Matthew either moves the headline to single-problem framing or
+confirms it stands as positioning. Not an agent's call — it's the page's central
+promise.
 
 ---
 
