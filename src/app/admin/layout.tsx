@@ -12,6 +12,7 @@ const ADMIN_LINKS = [
   { href: "/admin/assessments", label: "Assessments" },
   { href: "/admin/conversations", label: "Conversations" },
   { href: "/admin/events", label: "Events" },
+  { href: "/admin/x", label: "X Posts" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
