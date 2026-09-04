@@ -104,3 +104,21 @@ push an explicit sha (`git push origin <sha>:refs/heads/main`), not `HEAD:main`.
 `scripts/git-hooks/pre-push` now re-reads the local ref immediately after the gates pass and
 refuses the push (naming both shas) if it moved — turning a silent ungated ride-along into a
 rejected push. (3) This entry.
+
+## 2026-09-04 — the apex cutover stalled ~20 minutes on a step that was implied, not explicit
+
+**What happened.** Matthew said "go ahead" on the production cutover once DNS was clean. The deploy
+session asked him, in the same reply, to make one VPS edit first (`NEXT_PUBLIC_APP_URL` in
+`.env.build`) before the rebuild — but that ask was one sentence inside a longer explanation, not
+its own line. Twenty minutes later the apex was still serving Traefik's self-signed fallback cert
+to any visitor whose resolver had refreshed; a peer session (cmo), independently watching the
+apex, asked whether the cutover was mid-run or stalled. It was neither running nor visibly stalled
+— it simply hadn't started, waiting on an edit whose ask had been easy to miss.
+
+**Why it got through.** No mechanism distinguishes "information for you" from "a step you must
+complete before I continue" in a hand-off message. A sentence carrying both reads as one message,
+not a blocking gate.
+
+**Fix.** `docs/DEPLOY.md`'s cutover section now has the `.env.build` edit as its own **Step 0**,
+labelled as Matthew's and as a hard precondition, with the reason it matters (canonical/OG URLs
+and email links would otherwise advertise staging from the live apex). This entry.

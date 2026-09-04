@@ -117,8 +117,15 @@ Rollback = deploy the previous sha: `scripts/deploy-staging.sh <prev-sha>`
 
 ## Production (later)
 
-Tag the verified staging sha (`git tag -a v… <sha>`), then: Namecheap `@` A →
+**Step 0 (Matthew, before the deploy session can start):** in `/opt/icodemybusiness-site/.env.build`
+on the VPS, set `NEXT_PUBLIC_APP_URL=https://icodemybusiness.com`. That file is edited by Matthew,
+not scripted by the deploy session (secret-guard hook blocks it regardless). This has to land
+*before* step 1 — without it the rebuild bakes the staging URL into canonical/OG tags and every
+email link on the live apex. A hand-off that stalled on this being implied inside the rebuild
+sentence, rather than its own step, is why it now has one (`docs/ENGINEERING_LOG.md` 2026-09-04).
+
+Once that's set: tag the verified staging sha (`git tag -a v… <sha>`); Namecheap `@` A →
 `2.25.207.149`, `www` CNAME → `icodemybusiness.com`; remove `CNAME` and
-`.github/workflows/deploy-apex.yml` in the same change; on the VPS set
-`NEXT_PUBLIC_APP_URL=https://icodemybusiness.com` in `.env.build`, rebuild, and
-`./deploy.sh cutover`. Watch Google Safe Browsing afterwards.
+`.github/workflows/deploy-apex.yml` in the same change; on the VPS rebuild and run
+`./deploy.sh cutover`; confirm the certificate issued for both apex and `www` on first HTTPS hit
+(not still `CN=TRAEFIK DEFAULT CERT`); watch Google Safe Browsing afterwards.
