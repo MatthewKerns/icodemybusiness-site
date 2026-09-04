@@ -33,7 +33,7 @@ cut it differently.
 | Rung | Paper plan | Capacity (paper) | Rate card, March 2026 | Live site, Sept 2026 |
 |---|---|---|---|---|
 | Free | Free training, four pillars | open | discovery call, audits, blueprints | discovery assessment + 15-min Introduction Call |
-| Middle | Paid consulting | 3 slots / week | $50, $100, $200 per hour → **$200–$500 per hour, split-tested by audience segment** (Matthew, 09-04) | **no path** |
+| Middle | Paid consulting | 3 slots / week | **$200–$500 per hour, split-tested by audience segment** (greenlit by Matthew, 09-04) | **no path** |
 | Top | Done for you | 2 slots / month | builds $5k–$50k+, 2–12 wks; packages $3.5k–$5k/mo | three routes: have it built / bring me inside / rebuild how it runs |
 
 The rate card is `offers/consulting.md` and is internal only. **No price appears
@@ -170,12 +170,13 @@ From deals closed or negotiated in the last two weeks, not from site copy.
   it outright. Speed of iteration is the differentiator. *[transcripts 09-02;
   Fathom 08-26]*
 - **Paid consulting rate.** Matthew, 09-04: *"paid consulting we need to split
-  test $200–$500/hr on segments of our audience."* This replaces the March rate
-  card's $50/$100/$200 tiers. The test cannot run as a visible price on the site
-  (standing no-price decision, R-009); it runs where a price is actually quoted —
-  the Introduction Call, proposals, and segmented email — with the segment
-  recorded on the lead. Segment design and the recording mechanism are open
-  (#8 below). *[transcript 09-04]*
+  test $200–$500/hr on segments of our audience."* Greenlit 09-04; the March
+  rate card's hourly tiers are retired. **Costs are never surfaced in digital
+  media** — not the site, not email, not content (R-009 and Matthew, 09-04:
+  *"costs are not surfaced in digital media — only tested / proposed on a
+  call"*). The rate is tested and proposed on the call, with the segment
+  recorded on the lead so the results can be read. Segment design and the
+  recording mechanism are open (#8 below). *[transcript 09-04]*
 - **Matthew's own 90-day picture**, in his words to the assessment: a high-ticket
   program where people pay to be in the community and get trained on running a
   business with clear thinking, software and AI tools. $50k/mo and up.
@@ -193,8 +194,8 @@ From deals closed or negotiated in the last two weeks, not from site copy.
 | 4 | **Three tiers vs four paths.** The site split the single done-for-you rung into build / fractional / program. | **Open.** Decide which is canonical. |
 | 5 | **Prices.** Rate card has them (March); site deliberately doesn't. Fathom deals run 2–8× the rate-card package figures. | Consistent with the no-price decision. Rate card is stale. |
 | 6 | **The follow-up deliverable.** Transcript 09-04, morning: *"an excel workbook … or a slide deck"*. Same day, asked directly: HTML report to the lead + brief to Matthew. | **Resolved 09-04** — the HTML report. A workbook or deck needs dependencies the stack doesn't have. |
-| 7 | **Consulting rate.** Rate card (March): $50 / $100 / $200 per hour. | **Resolved 09-04** — Matthew: $200–$500 per hour, split-tested by audience segment. Rate card is superseded. |
-| 8 | **How the rate test runs.** A split test needs a segment on each lead and a place the price is shown; the site shows none (R-009). | **Open.** Matthew to name the segments (e.g. warm network vs inbound, or by assessment path) and where the price is quoted — call, proposal, or email. `leads` has `source` and `variant` fields today and nothing else. |
+| 7 | **Consulting rate.** The March rate card's hourly tiers vs what Matthew now charges. | **Resolved 09-04** — $200–$500 per hour, split-tested by audience segment, greenlit by Matthew. The rate card's hourly tiers are retired. |
+| 8 | **How the rate test runs.** A split test needs a segment on each lead and a record of what was quoted; the price is only ever spoken on a call (Matthew, 09-04), never in digital media. | **Open.** Matthew to name the segments (e.g. warm network vs inbound, or by assessment path) and how the quoted rate gets recorded after each call. `leads` has `source` and `variant` fields today and nothing else. |
 
 ---
 
