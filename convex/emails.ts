@@ -430,10 +430,18 @@ export const sendDiscoveryReportEmail = internalAction({
     <p style="${emailStyles.label}">Where I'd start</p>
     <p style="${emailStyles.value}"><span style="${emailStyles.badge}">${escapeHtml(args.pathName)}</span></p>
     <p style="${emailStyles.paragraph}">${escapeHtml(args.pathWhat)}</p>
-    <p style="${emailStyles.label}">One thing you can do this week</p>
+    <p style="${emailStyles.label}">The Next Step:</p>
     <p style="${emailStyles.paragraph}">${escapeHtml(s.thisWeekAction)}</p>
+    <p style="${emailStyles.paragraph}">
+      Thank you for taking the time to engage with our assessment. If the time
+      you spent here wasn&rsquo;t valuable in any way, please let us know &mdash;
+      it helps us keep aiming for perfection and landing on excellence.
+    </p>
+    <p style="${emailStyles.paragraph}">
+      Here is the link to your free Introduction Call with me.
+    </p>
     <div style="text-align:center;margin:28px 0;">
-      <a href="${args.bookingUrl}" style="${emailStyles.button}">Book an intro call</a>
+      <a href="${args.bookingUrl}" style="${emailStyles.button}">Book your Introduction Call</a>
     </div>
     <p style="${emailStyles.paragraph}">
       On the call you tell me where the week goes. I'll tell you if I think we
