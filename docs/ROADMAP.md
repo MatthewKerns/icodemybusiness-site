@@ -623,6 +623,40 @@ the placeholder is close enough to stand.
 
 ---
 
+### R-022 · The inbox sequence exists on a branch, not in prod
+
+`status: blocked` · `owner: email-followup` · `evidence: reported`
+
+Matthew, 2026-09-04: *"we need to keep the leads warm!"* — the inbox is now part
+of the offer of record (`docs/OFFER.md` § "Value in your inbox"). Today nothing
+on `main` sends a second email to anyone: every `ctx.scheduler` call is
+`runAfter(0, …)` and `convex/crons.ts` has no email cron (verified). Captures on
+`/academy`, `/mango`, `/services` create a lead and send nothing.
+
+Matthew's decisions (email-followup session, 09-04): engine in Convex; day 0 is the
+existing assessment report, then four daily emails, then weekly; HTML report to
+the lead plus an internal brief to matthew@; assessment submit is the first entry
+point; **consent line + `leads.consentedAt` ship before any sequence sends**, and
+addresses captured before that are held out.
+
+Reported by the email-followup session (not independently verified): branch
+`agent/nurture/email-sequence` off `4210d37`, schema + sweeper + suppression +
+unsubscribe written, not gate-green; ships paused with zero enrollments.
+
+**Blocked on:** (1) Matthew answering `docs/matthew-story-intake.md` on that branch
+— days 1–2 are his backstory and epiphany, which an agent may not write
+(`docs/copy-principles.md` §2); (2) a Convex codegen run, which only the deploy
+session performs; (3) what the weekly email contains after day 5 and who writes it.
+
+**Verify:** `grep -rn "runAt\|crons\." convex/` shows an email schedule;
+`emailSends` shows a `template` other than `welcome` / `discovery-report` for a
+consenting lead.
+
+**Done when:** a consenting assessment lead receives day 1 from prod, audited in
+`emailSends`, with copy Matthew signed off.
+
+---
+
 ## Working an item
 
 1. **Claim it** — set `status: in-progress` in this file and commit that alone, so
