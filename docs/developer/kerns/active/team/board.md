@@ -48,6 +48,7 @@ _Owned this run by `cmo`._
 | D2 | Is `cmo` a permanent role in the `/team` skill (add to `role ∈ …` in `~/.claude/skills/team/SKILL.md`) or a per-repo extension only? | global skill / repo-only | global — the skill's role list is the only place it is not yet named | this board, `roles/cmo.md` | 09-04 | cmo |
 
 ## Digest log
+- 09-04 16:45 — Matthew: the homepage subhead reads out of date on staging. VERIFIED it is not a deploy lag — staging matches `origin/main` exactly; the line is unchanged since `06b95e4` (09-02) and no newer version exists on any branch. The offer moved today, the letter didn't. → M24 to offer.
 - 09-04 13:10 — cmo: gates green at `c7e051f` on the VPS (lint, tsc, 272 tests). Branch `agent/cmo/team-protocol` is ready: team protocol, /consulting 15-min, /admin/funnel map + constraint identifier, generated types. Hand-off sent to `deploy` (blocked on Matthew's merge); PostHog dashboard 933266 is live now.
 - 09-04 12:50 — cmo: M10 committed (`003db8b`, `341b8fa`): the map page shows the constraint identifier at the top (Convex mirror, same rule as PostHog), the vision below, links to dashboard 933266. Gates + codegen running on the VPS.
 - 09-04 12:30 — Matthew (in session): the site admin page shows the funnel VISION and links to PostHog for the REALITY; and he wants a constraint identifier on the site map too. Built: PostHog dashboard 933266 (Key constraint SQL tile, 7-step funnel, views-by-host) + `/admin/funnel` (vision + Convex-mirror constraint identifier, owner-gated). Gates at `14f547e` (consulting 15-min) passed on the VPS.
