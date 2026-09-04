@@ -163,7 +163,9 @@ describe("finalizeAssessment", () => {
     expect(resend.html).toContain("/book?session=da_proc_1&email=v%40example.com&name=Vee");
     expect(resend.html).not.toMatch(/\$\d/);
 
-    const sends = await t.query(api.emailSends.listForEmail, { email: "v@example.com" });
+    const sends = await (await asAdmin(t)).query(api.emailSends.listForEmail, {
+      email: "v@example.com",
+    });
     expect(sends).toHaveLength(1);
     expect(sends[0]).toMatchObject({
       template: "discovery-report",
@@ -217,7 +219,9 @@ describe("finalizeAssessment", () => {
     expect(admin?.status).toBe("ready");
     expect(admin?.emailSent).toBe(false);
     expect(admin?.processingError).toMatch(/Report email failed/);
-    const sends = await t.query(api.emailSends.listForEmail, { email: "v@example.com" });
+    const sends = await (await asAdmin(t)).query(api.emailSends.listForEmail, {
+      email: "v@example.com",
+    });
     expect(sends[0]).toMatchObject({ status: "failed", template: "discovery-report" });
   });
 });

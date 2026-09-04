@@ -62,6 +62,11 @@ function wrapHtml(
 </html>`;
 }
 
+/** Base URL for links we serve ourselves (the unsubscribe and /r redirects). */
+function siteUrl(): string {
+  return (process.env.CONVEX_SITE_URL ?? "").replace(/\/$/, "");
+}
+
 /**
  * CAN-SPAM requires a valid physical postal address in commercial email.
  * MAILING_ADDRESS is Matthew's to supply (docs/matthew-story-intake.md F5) —
@@ -444,8 +449,11 @@ export const sendDiscoveryReportEmail = internalAction({
       <a href="${args.bookingUrl}" style="${emailStyles.button}">Book your Introduction Call</a>
     </div>
     <p style="${emailStyles.paragraph}">
-      On the call you tell me where the week goes. I'll tell you if I think we
-      are not a good fit and why. And if we are a good fit, I'll tell you how I
+      On the call you tell me where your work week goes. If you want to come
+      with real numbers instead of a guess, sign up for
+      <a href="${siteUrl()}/r/clockify" style="color:#D4AF37;">Clockify&rsquo;s free tier</a>
+      beforehand and track as much of your week as you can. I'll tell you if I
+      think we are not a good fit and why. And if we are a good fit, I'll tell you how I
       recommend we get started. The more you tell our assessment tools, the more
       of your context I bring. Reply to this email and I'll get back to you as
       soon as I can.
@@ -532,10 +540,7 @@ export const sendSequenceStep = internalAction({
     }
 
     const token = await createUnsubscribeToken(args.email, secret);
-    const unsubUrl = unsubscribeUrl(
-      process.env.CONVEX_SITE_URL ?? "",
-      token
-    );
+    const unsubUrl = unsubscribeUrl(siteUrl(), token);
 
     // Body copy is authored per step; until the story intake is answered no
     // step is authored, so this action is unreachable in production.

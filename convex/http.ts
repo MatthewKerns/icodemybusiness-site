@@ -179,6 +179,30 @@ http.route({
   }),
 });
 
+// --- Outbound link redirects ---
+//
+// An allowlist, not a parameter. A redirect that forwards to whatever URL the
+// query string names is an open redirect: anyone can send a link that looks
+// like ours and lands on theirs. The slug is the only thing a caller controls,
+// and an unknown slug 404s rather than falling back to anything.
+const OUTBOUND_LINKS: Record<string, string> = {
+  clockify: "https://clockify.me/",
+};
+
+http.route({
+  pathPrefix: "/r/",
+  method: "GET",
+  handler: httpAction(async (ctx, req) => {
+    const slug = new URL(req.url).pathname.slice("/r/".length);
+    const destination = OUTBOUND_LINKS[slug];
+    if (!destination) {
+      return new Response("Unknown link", { status: 404 });
+    }
+    await ctx.runMutation(internal.outboundClicks.record, { slug });
+    return Response.redirect(destination, 302);
+  }),
+});
+
 // --- Retell webhook endpoint ---
 
 http.route({

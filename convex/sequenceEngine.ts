@@ -26,6 +26,7 @@
 import { v } from "convex/values";
 import { internalAction, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
 import { assertSendable } from "./lib/suppression";
 import {
   dedupeKey,
@@ -33,6 +34,41 @@ import {
   isStepAuthored,
   stepAt,
 } from "./lib/sequenceTracks";
+
+/**
+ * Return types are declared explicitly, not inferred, and that is load-bearing.
+ * `sweep` schedules itself and `deliverStep` calls `claimStep`, so inference
+ * cycles through `_generated/api`. TypeScript then cannot resolve
+ * `ApiFromModules`, every `api.*` lookup in the whole app quietly becomes
+ * `any`, and the failure surfaces as implicit-any errors in files nobody
+ * touched. Keep these annotations when adding functions here.
+ */
+export interface StepClaim {
+  sendId: Id<"sequenceStepSends">;
+  dedupeKey: string;
+  email: string;
+  name?: string;
+  track: string;
+  stepKey: string;
+  subject: string;
+  assessmentId?: Id<"assessments">;
+  enrollmentId: Id<"sequenceEnrollments">;
+  stepIndex: number;
+}
+
+export interface CompleteResult {
+  ok: boolean;
+  exited?: boolean;
+}
+
+export interface DeliverResult {
+  sent: boolean;
+  reason?: string;
+}
+
+export interface SweepResult {
+  fannedOut: number;
+}
 
 /** How many due enrollments one sweep tick handles before re-scheduling itself. */
 export const SWEEP_BATCH = 50;
@@ -55,7 +91,7 @@ function backoffMs(failureCount: number): number {
  */
 export const claimStep = internalMutation({
   args: { enrollmentId: v.id("sequenceEnrollments") },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<StepClaim | null> => {
     const now = Date.now();
     const e = await ctx.db.get(args.enrollmentId);
     if (!e) return null;
@@ -178,7 +214,7 @@ export const completeStep = internalMutation({
     /** 4xx from Resend means the address is bad — retrying will never help. */
     permanent: v.optional(v.boolean()),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<CompleteResult | null> => {
     const now = Date.now();
     const send = await ctx.db.get(args.sendId);
     if (!send) return null;
@@ -230,7 +266,7 @@ export const completeStep = internalMutation({
  */
 export const deliverStep = internalAction({
   args: { enrollmentId: v.id("sequenceEnrollments") },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<DeliverResult> => {
     const claim = await ctx.runMutation(internal.sequenceEngine.claimStep, {
       enrollmentId: args.enrollmentId,
     });
@@ -261,7 +297,7 @@ export const deliverStep = internalAction({
  */
 export const sweep = internalMutation({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<SweepResult> => {
     const now = Date.now();
     const due = await ctx.db
       .query("sequenceEnrollments")

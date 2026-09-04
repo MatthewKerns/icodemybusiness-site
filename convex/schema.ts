@@ -106,6 +106,19 @@ export default defineSchema(
       .index("by_email", ["email"])
       .index("by_createdAt", ["createdAt"]),
 
+    // APPEND-ONLY
+    // Clicks on outbound links we recommend in email. We cannot observe a click
+    // on someone else's domain, so those links point at our own /r/<slug>
+    // redirect and land here first. Deliberately counts only — no email, no
+    // session id: the question this answers is "is this link worth setting up
+    // an affiliate for yet", which needs a number, not a person.
+    outboundClicks: defineTable({
+      slug: v.string(),
+      createdAt: v.number(),
+    })
+      .index("by_slug", ["slug"])
+      .index("by_createdAt", ["createdAt"]),
+
     // One row per lead per track: where they are in a sequence and when the
     // next step is due. `nextDueAt` is the only ordering key the sweeper reads.
     sequenceEnrollments: defineTable({
