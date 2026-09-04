@@ -35,7 +35,7 @@ export const VSL: {
   posterEyebrow: "A short message from Matthew",
   headline: "Most businesses don't need more software.",
   subhead:
-    "I'm Matthew Kerns. I build the systems that take the manual and repetitive work off your plate. We start by thoroughly assessing your current situation.",
+    "I'm Matthew Kerns. I help identify the key constraints on business workflows. We analyze what works, including creative, manual and repetitive work, to gain an understanding of your business, and help free your time so you can focus on doing the work that grows the business.",
 };
 
 /** The problem beat — named, specific, recognisable. */
