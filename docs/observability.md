@@ -101,6 +101,8 @@ diagnose Tier 1 movement.
 | `discovery_recap_accepted` | DiscoveryAssessment when "Yes, that's right" is clicked, before the email form opens (client) | `needsEmail` |
 | `discovery_recap_confirmed` | DiscoveryAssessment in `onSubmit`, i.e. when the email is submitted — **not** when "Yes, that's right" is clicked. A guest clicking it only opens the email form, which fires nothing. This event therefore trails `discovery_assessment_completed` by one `await` and can only exceed it if `submit` throws. The click itself is unmeasured. | — |
 | `discovery_account_claimed` | DiscoveryAccountCta after `claim` succeeds (client) | — |
+| `discovery_session_bound` | `useBindDiscoverySession` when a signed-in visitor's in-progress conversation is attached to their account (client). Distinct from `discovery_account_claimed`, which binds the finished report — this fires mid-conversation. | — |
+| `discovery_session_resumed` | /portal/assessments when an unfinished assessment is clicked (client) | `stage` |
 | `book_call_clicked` | result-screen CTA (client) | `placement: "discovery-result"` |
 
 ### Operational — health

@@ -19,10 +19,16 @@ import { useLetterSurface } from "@/components/landing/letter/LetterSurface";
  * and still gets it emailed; they just can't come back to it in the portal.
  *
  * The copy promises exactly what is implemented and no more. A completed report
- * is claimed to the account and readable at /portal/assessments. Resuming an
- * *unfinished* assessment only works in the same browser session — agentSessions
- * carries no Clerk id — so this must not say "pick up where you left off", which
- * it did until the gap was found. Widen the promise only when that is backed.
+ * is claimed to the account and readable at /portal/assessments.
+ *
+ * The constraint that used to sit here — "resuming an *unfinished* assessment
+ * only works in the same browser session, agentSessions carries no Clerk id" —
+ * no longer holds: signing in mid-conversation binds the session
+ * (`agentSessions.bindToAccount`) and unfinished assessments are now listed at
+ * /portal/assessments. The visible copy is still deliberately unchanged, because
+ * widening a promise to the visitor is Matthew's call rather than an agent's
+ * (docs/copy-principles.md §2) — but it is now *backed*, which is the condition
+ * the old note set for widening it.
  */
 
 const ASSESSMENT_ANCHOR = "#top3";

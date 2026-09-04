@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { api } from "../../../../../../convex/_generated/api";
-import { getConvexClient } from "@/lib/convex-client";
+import { getAuthedConvexClient } from "@/lib/convex-client";
 import {
   extractTextFromUpload,
   isTextualMime,
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const convex = getConvexClient();
+  const convex = await getAuthedConvexClient();
 
   const uploadUrl = await convex.mutation(
     api.agentSessions.generateUploadUrl,

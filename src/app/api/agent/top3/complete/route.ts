@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { render } from "@react-email/render";
 import { api } from "../../../../../../convex/_generated/api";
-import { getConvexClient } from "@/lib/convex-client";
+import { getAuthedConvexClient } from "@/lib/convex-client";
 import { Top3IssuesSummaryEmail } from "@/emails/Top3IssuesSummaryEmail";
 import {
   withErrorHandler,
@@ -33,7 +33,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     throw new ValidationError("Missing email");
   }
 
-  const convex = getConvexClient();
+  const convex = await getAuthedConvexClient();
   const session = await convex.query(api.agentSessions.getBySessionId, {
     sessionId: body.sessionId,
   });

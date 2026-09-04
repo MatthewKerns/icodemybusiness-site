@@ -1,4 +1,5 @@
 import { ConvexHttpClient } from "convex/browser";
+import { auth } from "@clerk/nextjs/server";
 
 let _client: ConvexHttpClient | null = null;
 
@@ -35,6 +36,30 @@ export function getConvexClient(): ConvexHttpClient {
     _client = new ConvexHttpClient(getConvexUrl());
   }
   return _client;
+}
+
+/**
+ * A per-request client carrying the caller's Clerk identity, for route handlers
+ * that touch data an owner can hold.
+ *
+ * Deliberately NOT the singleton above. `setAuth` mutates the client, so a
+ * shared instance would carry one visitor's identity into the next request that
+ * landed on the same warm lambda — a cross-user auth leak, and a worse bug than
+ * the missing authorisation this exists to fix.
+ *
+ * An anonymous visitor has no token; the client is then simply unauthenticated,
+ * which is exactly right for a session nobody owns yet.
+ */
+export async function getAuthedConvexClient(): Promise<ConvexHttpClient> {
+  const client = new ConvexHttpClient(getConvexUrl());
+  try {
+    const { getToken } = await auth();
+    const token = await getToken({ template: "convex" });
+    if (token) client.setAuth(token);
+  } catch {
+    // No Clerk context, or no session. Anonymous is a valid caller here.
+  }
+  return client;
 }
 
 /** @deprecated Use getConvexClient() instead — kept for backwards compatibility */
