@@ -95,6 +95,14 @@ export const ANALYTICS_EVENTS = {
   DISCOVERY_RECAP_CONFIRMED: "discovery_recap_confirmed",
   /** Discovery assessment: the report was claimed into a signed-in account. */
   DISCOVERY_ACCOUNT_CLAIMED: "discovery_account_claimed",
+  /**
+   * Discovery assessment: an in-progress conversation was attached to an
+   * account. Distinct from DISCOVERY_ACCOUNT_CLAIMED, which binds the finished
+   * report — this fires mid-conversation, the moment the visitor signs in.
+   */
+  DISCOVERY_SESSION_BOUND: "discovery_session_bound",
+  /** Discovery assessment: an unfinished conversation was resumed from the portal. */
+  DISCOVERY_SESSION_RESUMED: "discovery_session_resumed",
 
   // --- Operational: health signals ------------------------------------
   /** An API route returned an error (captured in errorResponse). */

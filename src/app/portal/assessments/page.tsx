@@ -2,10 +2,15 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
-import { ArrowRight, ClipboardList, Loader2 } from "lucide-react";
+import { ArrowRight, ClipboardList, Loader2, PlayCircle } from "lucide-react";
 import { api } from "../../../../convex/_generated/api";
 import { bookingHref } from "@/lib/agent/discovery-booking";
+import { setDiscoverySessionId } from "@/lib/agent/discovery-session-id";
+import { useTrackEvent } from "@/hooks/useTrackEvent";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
+import { DISCOVERY_STAGE } from "@/content/discovery-questions";
 import { cn } from "@/lib/utils";
 
 // Agent components are reached through a dynamic import, matching the other
@@ -25,6 +30,29 @@ const DiscoverySummaryCard = dynamic(
  */
 export default function PortalAssessmentsPage() {
   const assessments = useQuery(api.discoveryAssessments.portalListForUser, {});
+  const unfinished = useQuery(api.agentSessions.portalListUnfinished, {});
+  const router = useRouter();
+  const track = useTrackEvent();
+
+  /**
+   * Adopt the conversation into THIS tab, then navigate.
+   *
+   * The session id deliberately never goes in the URL: it is a weak bearer
+   * token, and a URL would put it in history, screenshots and proxy logs. It
+   * also has to be written before the push — `/assessment` reads it on mount,
+   * and a route change is what gives us a fresh mount with hydration intact.
+   */
+  const resume = (sessionId: string, stage: number) => {
+    setDiscoverySessionId(sessionId);
+    track(ANALYTICS_EVENTS.DISCOVERY_SESSION_RESUMED, { stage }, "click");
+    router.push("/assessment");
+  };
+
+  const nothingAtAll =
+    assessments &&
+    assessments.length === 0 &&
+    unfinished &&
+    unfinished.length === 0;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 md:px-6 lg:px-8">
@@ -40,7 +68,47 @@ export default function PortalAssessmentsPage() {
         </div>
       )}
 
-      {assessments && assessments.length === 0 && (
+      {unfinished && unfinished.length > 0 && (
+        <section className="mt-8">
+          <h2 className="font-accent text-xs uppercase tracking-wider text-gold">
+            Still in progress
+          </h2>
+          <ul className="mt-3 list-none space-y-3 p-0">
+            {unfinished.map((u) => (
+              <li key={u.sessionId}>
+                <button
+                  type="button"
+                  onClick={() => resume(u.sessionId, u.stage)}
+                  className={cn(
+                    "flex w-full items-start gap-3 rounded-xl border border-border bg-bg-secondary p-5 text-left",
+                    "transition-colors hover:border-gold-dim",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-light"
+                  )}
+                >
+                  <PlayCircle
+                    className="mt-0.5 h-5 w-5 flex-none text-gold"
+                    aria-hidden="true"
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-base leading-relaxed text-text-primary">
+                      {u.problem ?? "You started but haven't answered yet."}
+                    </span>
+                    <span className="mt-1 block text-xs text-text-dim">
+                      {u.stage >= DISCOVERY_STAGE.RECAP
+                        ? "At the recap"
+                        : `Question ${u.stage + 1} of ${u.questionCount}`}
+                      {" · "}
+                      {new Date(u.startedAt).toLocaleDateString()}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {nothingAtAll && (
         <div className="mt-10 rounded-xl border border-border bg-bg-secondary p-8 text-center">
           <ClipboardList
             className="mx-auto h-10 w-10 text-text-dim"

@@ -211,6 +211,13 @@ export default defineSchema(
     agentSessions: defineTable({
       agentKind: v.string(), // "top3-issues" | "ecommerce-intake" | "discovery-assessment"
       sessionId: v.string(), // client-generated, stable across anon visits
+      /**
+       * Set when a signed-in visitor binds the conversation to their account.
+       * Unset means nobody owns it and the sessionId is the capability; set
+       * means every read and write must carry a matching Clerk identity. See
+       * `assertMayUseSession` in convex/agentSessions.ts. One-way.
+       */
+      clerkUserId: v.optional(v.string()),
       leadId: v.optional(v.id("leads")),
       visitorEmail: v.optional(v.string()),
       visitorName: v.optional(v.string()),
@@ -252,6 +259,7 @@ export default defineSchema(
     })
       .index("by_sessionId", ["sessionId"])
       .index("by_leadId", ["leadId"])
+      .index("by_clerkUserId", ["clerkUserId"])
       .index("by_status", ["status"]),
 
     agentSessionMessages: defineTable({

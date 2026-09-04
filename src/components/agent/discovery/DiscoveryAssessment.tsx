@@ -14,6 +14,7 @@ import {
   DISCOVERY_STAGE,
   questionForStage,
 } from "@/content/discovery-questions";
+import { ensureDiscoverySessionId } from "@/lib/agent/discovery-session-id";
 import { useDiscoverySession } from "./useDiscoverySession";
 import { DiscoveryStepper } from "./DiscoveryStepper";
 import { DiscoveryMessageView } from "./DiscoveryMessageView";
@@ -22,21 +23,11 @@ import { DiscoveryResultView, type PublicAssessment } from "./DiscoveryResultVie
 import type { ChatMessage } from "./types";
 
 const AGENT_KIND = "discovery-assessment";
-const STORAGE_KEY = "discovery-session-id";
 
 export type DiscoverySource = "homepage" | "assessment-page";
 
 function makeId() {
   return `m_${Math.random().toString(36).slice(2, 10)}_${Date.now()}`;
-}
-
-function makeSessionId() {
-  if (typeof window === "undefined") return "";
-  const stored = window.sessionStorage.getItem(STORAGE_KEY);
-  if (stored) return stored;
-  const fresh = `da_${Math.random().toString(36).slice(2, 12)}_${Date.now()}`;
-  window.sessionStorage.setItem(STORAGE_KEY, fresh);
-  return fresh;
 }
 
 /**
@@ -75,7 +66,10 @@ export function DiscoveryAssessment({ source }: { source: DiscoverySource }) {
   const returnPath = source === "assessment-page" ? "/assessment" : "/#top3";
 
   useEffect(() => {
-    const id = makeSessionId();
+    // Read-or-create for this tab. A resume from the portal has already written
+    // the adopted id here, so this picks it up without the component ever
+    // needing to swap ids after mount.
+    const id = ensureDiscoverySessionId();
     setSessionId(id);
     sessionIdRef.current = id;
   }, []);
