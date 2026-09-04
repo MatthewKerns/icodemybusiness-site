@@ -22,6 +22,7 @@ import type * as discoveryProcessor from "../discoveryProcessor.js";
 import type * as email from "../email.js";
 import type * as emailSends from "../emailSends.js";
 import type * as emails from "../emails.js";
+import type * as funnelConstraint from "../funnelConstraint.js";
 import type * as http from "../http.js";
 import type * as intakeProcessor from "../intakeProcessor.js";
 import type * as leads from "../leads.js";
@@ -69,6 +70,7 @@ declare const fullApi: ApiFromModules<{
   email: typeof email;
   emailSends: typeof emailSends;
   emails: typeof emails;
+  funnelConstraint: typeof funnelConstraint;
   http: typeof http;
   intakeProcessor: typeof intakeProcessor;
   leads: typeof leads;
