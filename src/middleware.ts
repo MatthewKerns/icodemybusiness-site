@@ -5,6 +5,7 @@ import { isWebhookRateLimited } from "@/lib/webhook-rate-limit";
 import { applyAttribution } from "@/lib/attribution-middleware";
 import { isOwnerEmail, isOwnerUserId } from "@/lib/owner";
 import { isOwnerByApiLookup } from "@/lib/owner-lookup";
+import { publicOrigin, publicUrl } from "@/lib/public-url";
 
 /**
  * A browser navigation gets an HTML page; an API/fetch caller keeps the JSON 403.
@@ -13,7 +14,7 @@ import { isOwnerByApiLookup } from "@/lib/owner-lookup";
 function forbid(request: NextRequest) {
   const accept = request.headers.get("accept") ?? "";
   if (accept.includes("text/html")) {
-    return NextResponse.redirect(new URL("/forbidden", request.url));
+    return NextResponse.redirect(new URL("/forbidden", publicOrigin(request)));
   }
   return NextResponse.json(
     { error: "Forbidden - Admin access required" },
@@ -38,8 +39,10 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
 
     // If not signed in, redirect to sign-in
     if (!userId) {
-      const signInUrl = new URL("/sign-in", request.url);
-      signInUrl.searchParams.set("redirect_url", request.url);
+      // Public URL, not request.url: behind Traefik the latter is the container's
+      // bind address and the visitor would land on https://0.0.0.0:3000 after sign-in.
+      const signInUrl = new URL("/sign-in", publicOrigin(request));
+      signInUrl.searchParams.set("redirect_url", publicUrl(request));
       return NextResponse.redirect(signInUrl);
     }
 
