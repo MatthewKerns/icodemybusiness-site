@@ -103,6 +103,15 @@ export const ANALYTICS_EVENTS = {
   DISCOVERY_SESSION_BOUND: "discovery_session_bound",
   /** Discovery assessment: an unfinished conversation was resumed from the portal. */
   DISCOVERY_SESSION_RESUMED: "discovery_session_resumed",
+  /**
+   * Discovery assessment: the model hit its reply budget, so the extraction JSON
+   * may be cut short and the answer recorded verbatim instead of structured.
+   *
+   * Fired independently of `discovery_stage_advanced` (props: stage, advanced),
+   * because a truncated extraction is precisely the case where the stage does
+   * not advance — as a property of that event it would be invisible.
+   */
+  DISCOVERY_EXTRACTION_TRUNCATED: "discovery_extraction_truncated",
 
   // --- Operational: health signals ------------------------------------
   /** An API route returned an error (captured in errorResponse). */

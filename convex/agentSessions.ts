@@ -41,7 +41,14 @@ async function assertMayUseSession(
 
 const MAX_FILES_PER_SESSION = 5;
 const MAX_TOTAL_BYTES_PER_SESSION = 15 * 1024 * 1024;
-const MAX_TURNS = 30;
+/**
+ * Exchanges per session (the guard compares `turnCount >= MAX_TURNS * 2`, since
+ * a turn is a user message and a reply). Five questions with up to two
+ * drill-downs each is ~15, and a visitor who corrects the recap a few times can
+ * add several more — 30 left less headroom than it looked like once answers got
+ * longer. Still a hard stop, just not one an engaged visitor meets.
+ */
+const MAX_TURNS = 50;
 
 const issueValidator = v.object({
   title: v.string(),

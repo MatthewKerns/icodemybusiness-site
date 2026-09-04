@@ -185,9 +185,21 @@ export function DiscoveryAssessment({ source }: { source: DiscoverySource }) {
                 forced: boolean;
                 anchor: string | null;
                 degraded: boolean;
+                truncated?: boolean;
               };
               dispatch({ type: "state-update", discovery: p.state });
               if (p.degraded) setDegraded(true);
+              if (p.truncated) {
+                // Fired outside the `advanced` branch on purpose: a truncated
+                // reply loses the extraction JSON, so the stage usually does NOT
+                // advance. Hanging this off discovery_stage_advanced would miss
+                // the very turns it exists to catch.
+                track(
+                  ANALYTICS_EVENTS.DISCOVERY_EXTRACTION_TRUNCATED,
+                  { stage: p.state.stage, advanced: p.advanced },
+                  "system"
+                );
+              }
               if (p.advanced) {
                 track(
                   ANALYTICS_EVENTS.DISCOVERY_STAGE_ADVANCED,

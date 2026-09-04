@@ -25,13 +25,32 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_TOKENS = 700;
+/**
+ * The reply budget covers the drill-down question AND the discovery-state JSON
+ * that carries the extracted answer. At 700 a rich answer produced a long
+ * extraction that ran out of room mid-JSON, `parseDiscoveryTurn` returned null,
+ * and the turn fell through to the degraded path — so the most detailed answers
+ * were the most likely to lose their structure, silently. Truncation is now
+ * reported (see `truncated` below) rather than guessed at.
+ */
+const MAX_TOKENS = 2000;
 /** Same id as convex/lib/anthropic.ts, so both halves of this feature agree. */
 const MODEL = "claude-opus-5";
-/** Only the recent transcript is needed; the system prompt carries the state. */
-const HISTORY_WINDOW = 16;
+/**
+ * How much of the transcript the model sees. The system prompt carries the
+ * extracted state, so this is for the visitor's own phrasing — which is the
+ * part worth keeping now that the first question asks for a frustration and
+ * gets a long, unstructured answer.
+ */
+const HISTORY_WINDOW = 24;
 const AGENT_KIND = "discovery-assessment";
-const MAX_MESSAGE_CHARS = 2000;
+/**
+ * What one answer may contain. 2000 characters is roughly 300 words, and the
+ * stage-0 anchor is deliberately written to make people pour out detail — so
+ * the cap was rejecting exactly the answers this assessment exists to collect.
+ * Wide enough that an honest visitor never meets it; still bounded.
+ */
+const MAX_MESSAGE_CHARS = 8000;
 
 interface ChatRequest {
   sessionId: string;
@@ -149,7 +168,15 @@ export async function POST(req: NextRequest) {
         next: DiscoveryState,
         advanced: boolean,
         forced: boolean,
-        degraded: boolean
+        degraded: boolean,
+        /**
+         * The model ran out of reply budget, so the extraction JSON may be cut
+         * short. Reported on the `state` event rather than folded into
+         * `discovery_stage_advanced`, because a truncated extraction is exactly
+         * the case where the stage does NOT advance — a property on that event
+         * would miss every occurrence it exists to catch.
+         */
+        truncated = false
       ) => {
         await convex.mutation(api.agentSessions.appendMessage, {
           sessionId,
@@ -174,7 +201,14 @@ export async function POST(req: NextRequest) {
           sessionId,
           discoveryState: next,
         });
-        send("state", { state: next, advanced, forced, anchor, degraded });
+        send("state", {
+          state: next,
+          advanced,
+          forced,
+          anchor,
+          degraded,
+          truncated,
+        });
         send("done", { visibleText: stripDiscoveryFence(assistantText) });
       };
 
@@ -217,6 +251,12 @@ export async function POST(req: NextRequest) {
         }
 
         const final = await response.finalMessage();
+        // "max_tokens" means the reply was cut off, so the discovery-state JSON
+        // at the end of it is the first casualty. Raising MAX_TOKENS should make
+        // this rare; reporting it is how we find out whether it actually did,
+        // instead of discovering months later that the richest answers were the
+        // ones we failed to extract.
+        const truncated = final.stop_reason === "max_tokens";
         const fullText = final.content
           .filter((b): b is Anthropic.TextBlock => b.type === "text")
           .map((b) => b.text)
@@ -225,10 +265,10 @@ export async function POST(req: NextRequest) {
         if (mode === "answer") {
           const parsed = parseDiscoveryTurn(fullText);
           const { next, advanced, forced } = clampStageTransition(state, parsed);
-          await commit(fullText, next, advanced, forced, false);
+          await commit(fullText, next, advanced, forced, false, truncated);
         } else {
           const next = applyCorrection(state, parseDiscoveryCorrection(fullText));
-          await commit(fullText, next, false, false, false);
+          await commit(fullText, next, false, false, false, truncated);
         }
         controller.close();
       } catch (err) {
