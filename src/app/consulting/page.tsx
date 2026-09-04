@@ -199,7 +199,7 @@ export default function ConsultingPage() {
               Book your free consultation
             </h2>
             <p className="mt-2 text-center text-text-muted">
-              Grab a free 30-minute slot below and tell me about your situation
+              Grab a free 15-minute slot below and tell me about your situation
             </p>
 
             <div className="mt-8">
