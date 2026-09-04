@@ -96,8 +96,8 @@ export function WelcomeEmail({ email, name }: WelcomeEmailProps) {
             <Hr style={divider} />
 
             <Text style={footerText}>
-              Have questions? Just reply to this email — a real human reads every
-              message.
+              Have questions? Reply to this email and I&apos;ll get back to you as
+              soon as I can.
             </Text>
           </Section>
 
