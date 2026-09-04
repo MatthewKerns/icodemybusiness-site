@@ -54,7 +54,8 @@ const RULES = `# Rules
 - Never quote, estimate, or hint at a price, rate, or budget for working with us. If asked, say that's for the call.
 - No reassurance copy. Do not say things like "no pressure", "no obligation", or "don't worry". Answer plainly.
 - Do not upsell. Clarity for them is the goal; it sells itself.
-- Use the visitor's own words wherever you can.`;
+- Use the visitor's own words wherever you can.
+- Write every recorded answer TO the owner as "you", never about them as "he", "she" or "they". The answers are played straight back to them.`;
 
 function priorAnswersBlock(answers: DiscoveryAnswers): string {
   const lines: string[] = [];
@@ -106,8 +107,10 @@ ${RULES}
 End EVERY reply with a JSON code block fenced with ${DISCOVERY_FENCE_OPEN} containing your current best extraction for THIS question, even when you are asking a follow-up:
 
 ${DISCOVERY_FENCE_OPEN}
-{"stageComplete": true, "answer": {"summary": "<one or two sentences in their words>", "quotes": ["<short verbatim phrase>"], "numbers": {"amount": 4000, "unit": "usd_per_month"}}}
+{"stageComplete": true, "answer": {"summary": "You spend about two days a week re-keying orders by hand, and it has to be you who does it.", "quotes": ["re-keying every order"], "numbers": {"amount": 4000, "unit": "usd_per_month"}}}
 ${DISCOVERY_FENCE_CLOSE}
+
+"summary" is shown to the owner under a heading of its own, so: complete sentences, addressed to them as "you", one line with no newlines, and no label prefix ("Ideal week:", "The problem:"). One or two sentences, in their words.
 
 "numbers" is optional and must only contain figures they actually gave. If you have nothing yet, use "answer": null.`;
 }
@@ -136,8 +139,10 @@ ${RULES}
 End your reply with a JSON code block fenced with ${DISCOVERY_FENCE_OPEN} containing ALL FIVE answers (changed and unchanged), keyed problem, cost, history, stakes, outcome:
 
 ${DISCOVERY_FENCE_OPEN}
-{"answers": {"problem": {"summary": "...", "quotes": ["..."]}, "cost": {"summary": "...", "quotes": []}, "history": {"summary": "...", "quotes": []}, "stakes": {"summary": "...", "quotes": []}, "outcome": {"summary": "...", "quotes": []}}}
-${DISCOVERY_FENCE_CLOSE}`;
+{"answers": {"problem": {"summary": "You spend about two days a week re-keying orders by hand, and it has to be you who does it.", "quotes": ["re-keying every order"]}, "cost": {"summary": "...", "quotes": [], "numbers": {"amount": 4000, "unit": "usd_per_month"}}, "history": {"summary": "...", "quotes": []}, "stakes": {"summary": "...", "quotes": []}, "outcome": {"summary": "...", "quotes": []}}}
+${DISCOVERY_FENCE_CLOSE}
+
+Every "summary" follows the same shape as before: complete sentences addressed to them as "you", one line, no label prefix. Repeat "numbers" unchanged for any answer that already had them — omitting it loses the figure they gave us.`;
 }
 
 // --- Parsing ------------------------------------------------------------
@@ -151,10 +156,44 @@ function fenceBody(assistantText: string): string | null {
   return body.slice(0, end).trim();
 }
 
+/**
+ * The only transform a `summary` ever gets, and deliberately a small one.
+ *
+ * This runs inside `coerceDiscoveryState` on every route turn and every client
+ * hydration, so it is applied to its own output over and over: every rule here
+ * has to be idempotent.
+ *
+ * It does NOT rewrite person. "I" -> "you" is not a token swap (my/your,
+ * I've/you've, myself/yourself), most owners say "we", where "you" and "you and
+ * your team" are not recoverable from the text, and a wrong guess reads as if we
+ * misheard them — the exact failure this whole change is fixing. Person is the
+ * model's job (see RULES). The degraded path stores the visitor's own first-person
+ * words on purpose and the report email promises them "exactly as you gave them",
+ * so rewriting here would make that sentence a lie.
+ */
+function normalizeSummary(raw: string): string {
+  // Newlines are the live bug: priorAnswersBlock emits one line per answer, so
+  // a multi-line degraded summary corrupts the list for every later stage.
+  let out = raw.trim().replace(/\s+/g, " ");
+  // A leaked heading, e.g. "Ideal week: early focused hours". Anchored and
+  // matched only against the labels we actually use — a general /^[\w ]+:/
+  // would eat "Mondays: the worst day of the week".
+  const labels = DISCOVERY_QUESTIONS.flatMap((q) => [q.label, q.rowLabel]);
+  for (const label of labels) {
+    const re = new RegExp(`^${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*[:—-]\\s*`, "i");
+    if (re.test(out)) {
+      out = out.replace(re, "");
+      break;
+    }
+  }
+  return out.trim();
+}
+
 function coerceAnswer(raw: unknown): DiscoveryAnswer | null {
   if (!raw || typeof raw !== "object") return null;
   const obj = raw as Record<string, unknown>;
-  const summary = typeof obj.summary === "string" ? obj.summary.trim() : "";
+  const summary =
+    typeof obj.summary === "string" ? normalizeSummary(obj.summary) : "";
   if (!summary) return null;
   const quotes = Array.isArray(obj.quotes)
     ? obj.quotes.filter((q): q is string => typeof q === "string").slice(0, 5)
@@ -274,7 +313,22 @@ export function applyCorrection(
   parsed: ParsedCorrection | null
 ): DiscoveryState {
   if (!parsed) return current;
-  return { ...current, answers: { ...current.answers, ...parsed.answers } };
+  // Per field, not per answer. The model re-emits all five answers and routinely
+  // drops "numbers" from the ones it did not change; a whole-object spread would
+  // throw away the dollar or hours figure the visitor gave us, and with it the
+  // "Figures given" line in the report.
+  const answers: DiscoveryAnswers = { ...current.answers };
+  for (const q of DISCOVERY_QUESTIONS) {
+    const revised = parsed.answers[q.key];
+    if (!revised) continue;
+    const existing = current.answers[q.key];
+    const numbers = revised.numbers ?? existing?.numbers;
+    const quotes = revised.quotes.length ? revised.quotes : (existing?.quotes ?? []);
+    answers[q.key] = numbers
+      ? { summary: revised.summary, quotes, numbers }
+      : { summary: revised.summary, quotes };
+  }
+  return { ...current, answers };
 }
 
 /** Normalise whatever is stored on the session into a DiscoveryState. */
@@ -315,8 +369,14 @@ export function advanceWithoutModel(
   const question = questionForStage(current.stage);
   if (!question) return { next: current, advanced: false };
   const text = userMessage.trim();
+  // Normalised here rather than left to the next turn's rehydration: this
+  // summary can be the last one written before the visitor confirms the recap,
+  // and it is snapshotted to Convex as-is. Person is untouched on purpose —
+  // these are the visitor's own first-person words and the degraded report
+  // email says so.
+  const summary = normalizeSummary(text);
   const answer: DiscoveryAnswer = {
-    summary: text || "Not captured",
+    summary: summary || "Not captured",
     quotes: text ? [text.slice(0, 160)] : [],
   };
   return {

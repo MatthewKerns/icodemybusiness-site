@@ -24,8 +24,14 @@ export type DiscoveryQuestionKey =
 
 export interface DiscoveryQuestion {
   key: DiscoveryQuestionKey;
-  /** Short label for the stepper. */
+  /** Short label for the stepper pills. Kept short: the pill row must fit a phone. */
   label: string;
+  /**
+   * The long visitor-facing label, used wherever an answer is shown under a
+   * heading of its own: the recap rows, the report card, the report email.
+   * Separate from `label` because the stepper cannot afford the extra width.
+   */
+  rowLabel: string;
   /** The one question the UI asks when the stage opens. */
   anchor: string;
   /** Other ways to put it, for the model's drill-down. */
@@ -38,18 +44,21 @@ export const DISCOVERY_QUESTIONS: readonly DiscoveryQuestion[] = [
   {
     key: "problem",
     label: "The problem",
-    anchor: "What's the biggest thing eating your week right now?",
+    rowLabel: "The problem",
+    anchor: "What's your biggest frustration in the business right now?",
     alternates: [
-      "Where does your week actually go?",
+      "What's the biggest thing eating your week right now?",
+      "What do you know could be better in your organization?",
       "What's the one problem that keeps coming back?",
-      "As the business grows, what's the bottleneck slowing you down?",
+      "Where does your week actually go?",
     ],
     listenFor:
-      "A specific, recurring problem in their own words: the manual or repetitive work, the handoff that breaks, the thing they redo. Push past a vague answer once. If they say there are no real problems, ask what they would hand off first if they could.",
+      "A specific, recurring problem in their own words: the manual or repetitive work, the handoff that breaks, the thing they redo. Asking for a frustration rather than a diagnosis gets a long, unstructured answer on purpose — take the recurring workflow out of it rather than recording the mood. Push past a vague answer once. If they are not frustrated, do not accept \"nothing\": ask what they know could be better in the organization, which people name as an improvement when they would never name it as a complaint.",
   },
   {
     key: "cost",
     label: "What it costs",
+    rowLabel: "What it costs",
     anchor:
       "Roughly what is that costing you each month, in dollars or in hours you can put a number on?",
     alternates: [
@@ -63,6 +72,7 @@ export const DISCOVERY_QUESTIONS: readonly DiscoveryQuestion[] = [
   {
     key: "history",
     label: "How long",
+    rowLabel: "How long, and what you've tried",
     anchor: "How long has this been going on, and what have you already tried?",
     alternates: [
       "When did this start, and has anything you've tried actually moved it?",
@@ -75,6 +85,7 @@ export const DISCOVERY_QUESTIONS: readonly DiscoveryQuestion[] = [
   {
     key: "stakes",
     label: "If nothing changes",
+    rowLabel: "If nothing changes",
     anchor:
       "If nothing changes, where does this leave the business in six to twelve months?",
     alternates: [
@@ -88,6 +99,7 @@ export const DISCOVERY_QUESTIONS: readonly DiscoveryQuestion[] = [
   {
     key: "outcome",
     label: "The outcome",
+    rowLabel: "The outcome you want",
     anchor:
       "If this were fully fixed, what would your week look like, and what does \"working\" look like ninety days from now?",
     alternates: [
@@ -110,7 +122,19 @@ export const DISCOVERY_STAGE = {
 export const MAX_FOLLOW_UPS_PER_STAGE = 2;
 
 export interface DiscoveryAnswer {
-  /** The answer in the visitor's own words, one or two sentences. */
+  /**
+   * One or two complete sentences, on a single line, with no label prefix.
+   *
+   * When a model writes it, it addresses the owner as "you". Every consumer
+   * (recap rows, report card, report email, admin view) renders it standalone
+   * under a heading, so a clause fragment reads as broken and a third-person
+   * summary reads as a case file about the visitor rather than a reply to them.
+   *
+   * When the model is unavailable, `advanceWithoutModel` stores the visitor's
+   * own words unedited, so that one is first person by design and must stay
+   * that way: the degraded report email promises "exactly as you gave them".
+   * Normalisation therefore never rewrites person — see `normalizeSummary`.
+   */
   summary: string;
   /** Short verbatim phrases the visitor used. */
   quotes: string[];
@@ -126,19 +150,32 @@ export function questionForStage(stage: number): DiscoveryQuestion | null {
   return DISCOVERY_QUESTIONS[stage] ?? null;
 }
 
+/** Opens the recap. The rows carry the content; this only frames them. */
+export const RECAP_INTRO =
+  "So if I've got this right — here's what I heard, in your words:";
+
+/** Closes the recap, above the confirm and correct buttons. */
+export const RECAP_CONFIRM = "Did I get that right?";
+
 /**
- * The recap, played back in order in the visitor's words. From the framework:
- * "So if I've got this right: [problem] is costing roughly [cost]…"
+ * The recap, played back in order in the visitor's words — rows, not prose.
+ *
+ * Rows deliberately. The prose version spliced each summary into a sentence
+ * template that assumed lowercase clause fragments, while the extractor
+ * produced whole sentences; the two disagreed and the recap rendered as
+ * "…coding work. is costing you roughly At least 40 of their 60+ hours…".
+ * A row never splices, so `text` is the stored summary verbatim and the only
+ * transform a summary ever gets is `normalizeSummary` at extraction time.
+ *
+ * "Not captured" matches convex/discoveryAssessments.ts and discoveryProcessor.ts,
+ * so a missing answer reads the same wherever it surfaces.
  */
-export function recapText(answers: DiscoveryAnswers): string {
-  const a = (key: DiscoveryQuestionKey, fallback: string) =>
-    answers[key]?.summary?.trim() || fallback;
-  return (
-    `So if I've got this right: ${a("problem", "the problem you described")} ` +
-    `is costing you roughly ${a("cost", "an amount we haven't pinned down yet")}. ` +
-    `${a("history", "It has been going on for a while")}. ` +
-    `If nothing changes, ${a("stakes", "it keeps costing you")}. ` +
-    `The outcome you want is ${a("outcome", "a week that runs without you in the middle of it")}. ` +
-    `Did I get that right?`
-  );
+export function recapRows(
+  answers: DiscoveryAnswers
+): { key: DiscoveryQuestionKey; label: string; text: string }[] {
+  return DISCOVERY_QUESTIONS.map((q) => ({
+    key: q.key,
+    label: q.rowLabel,
+    text: answers[q.key]?.summary?.trim() || "Not captured",
+  }));
 }

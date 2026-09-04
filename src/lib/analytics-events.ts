@@ -68,6 +68,15 @@ export const ANALYTICS_EVENTS = {
   ASSESSMENT_ACCOUNT_CHOICE: "assessment_account_choice",
   /** Discovery assessment: a question stage was completed (props: stage, followUpsUsed, forced). */
   DISCOVERY_STAGE_ADVANCED: "discovery_stage_advanced",
+  /**
+   * Discovery assessment: the visitor opened the "Not quite" box. Paired with
+   * DISCOVERY_RECAP_CORRECTED so the drop between opening and submitting is
+   * visible — someone who opens it and gives up is telling us the recap is
+   * wrong just as loudly as someone who types a correction.
+   */
+  DISCOVERY_RECAP_CORRECTION_OPENED: "discovery_recap_correction_opened",
+  /** Discovery assessment: a recap correction was submitted (props: chars, degraded). */
+  DISCOVERY_RECAP_CORRECTED: "discovery_recap_corrected",
   /** Discovery assessment: the visitor confirmed the recap in their own words. */
   DISCOVERY_RECAP_CONFIRMED: "discovery_recap_confirmed",
   /** Discovery assessment: the report was claimed into a signed-in account. */
