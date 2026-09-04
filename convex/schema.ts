@@ -29,6 +29,17 @@ export default defineSchema(
       /** Set when the welcome email was accepted by Resend. */
       welcomeEmailSentAt: v.optional(v.number()),
       welcomeEmailResendId: v.optional(v.string()),
+      /**
+       * Marketing consent. Absent means NO consent, not "unknown" — every
+       * address captured before the consent lines shipped has these unset, and
+       * `emailSequences.enroll` refuses to enroll without them (Matthew's
+       * ruling, 2026-09-04: hold the existing list rather than assume).
+       * Transactional sends (the welcome email, the discovery report) do not
+       * consult this — the visitor asked for those specifically.
+       */
+      consentedAt: v.optional(v.number()),
+      /** Which form the consent came from, e.g. "free-tools" | "academy". */
+      consentSource: v.optional(v.string()),
     })
       .index("by_email", ["email"])
       .index("by_source", ["source"])
@@ -50,6 +61,124 @@ export default defineSchema(
     })
       .index("by_to", ["to"])
       .index("by_createdAt", ["createdAt"]),
+
+    // APPEND-ONLY (except `revokedAt`)
+    // The veto list. Checked inside the send transaction before any sequence
+    // email is claimed, so nothing can route around it. `scope` matters:
+    // "marketing" stops nurture but still lets a visitor receive the report
+    // they explicitly asked for; "all" (a hard bounce or a spam complaint)
+    // stops everything, because continuing to send would damage the domain.
+    emailSuppressions: defineTable({
+      email: v.string(),
+      reason: v.union(
+        v.literal("unsubscribe"),
+        v.literal("hard_bounce"),
+        v.literal("complaint"),
+        v.literal("manual")
+      ),
+      scope: v.union(v.literal("all"), v.literal("marketing")),
+      /** "unsubscribe-link" | "resend-webhook:email.bounced" | "admin" | … */
+      source: v.optional(v.string()),
+      /** Bounce subtype or complaint feedback type, verbatim from Resend. */
+      detail: v.optional(v.string()),
+      resendId: v.optional(v.string()),
+      /** Owner-only re-subscribe. A row with this set no longer suppresses. */
+      revokedAt: v.optional(v.number()),
+      createdAt: v.number(),
+    })
+      .index("by_email", ["email"])
+      .index("by_createdAt", ["createdAt"]),
+
+    // APPEND-ONLY
+    // Delivery/engagement callbacks from Resend. Deliberately NOT folded into
+    // `emailSends`: that table is append-only by contract, and patching a row
+    // by `resendId` on every open would quietly break the invariant.
+    emailEvents: defineTable({
+      resendId: v.string(),
+      type: v.string(), // "email.delivered" | "email.opened" | "email.clicked" | …
+      email: v.string(),
+      /** Click target, when the event carries one. */
+      link: v.optional(v.string()),
+      occurredAt: v.number(),
+      createdAt: v.number(),
+    })
+      .index("by_resendId", ["resendId"])
+      .index("by_email", ["email"])
+      .index("by_createdAt", ["createdAt"]),
+
+    // One row per lead per track: where they are in a sequence and when the
+    // next step is due. `nextDueAt` is the only ordering key the sweeper reads.
+    sequenceEnrollments: defineTable({
+      // Identity key. An address can be enrolled before a `leads` row is
+      // resolved, so `email` — not `leadId` — is what everything joins on.
+      email: v.string(),
+      leadId: v.optional(v.id("leads")),
+      track: v.union(
+        v.literal("assessment"),
+        v.literal("free-tools"),
+        v.literal("academy"),
+        v.literal("post-call")
+      ),
+      status: v.union(
+        v.literal("active"),
+        v.literal("paused"),
+        v.literal("exited")
+      ),
+      /** "daily" for steps 1-5, then "weekly" forever. */
+      phase: v.union(v.literal("daily"), v.literal("weekly")),
+      /** 0 = nothing sent yet. Monotonic; only rolled back by a failed send. */
+      lastStepSent: v.number(),
+      nextStepIndex: v.number(),
+      nextDueAt: v.number(),
+      weeklyIssue: v.number(),
+      /** Personalization source, resolved once at enrollment. */
+      assessmentId: v.optional(v.id("assessments")),
+      sessionId: v.optional(v.string()),
+      name: v.optional(v.string()),
+      /** Consecutive failures; reset to 0 by any successful send. */
+      failureCount: v.number(),
+      lastAttemptAt: v.optional(v.number()),
+      /** "unsubscribed" | "suppressed" | "booked" | "superseded" | … */
+      exitReason: v.optional(v.string()),
+      exitedAt: v.optional(v.number()),
+      enrolledAt: v.number(),
+      updatedAt: v.number(),
+    })
+      // Enrollment idempotency: one row per (email, track).
+      .index("by_email_track", ["email", "track"])
+      // The sweeper's index — a bounded range scan of what is due now.
+      .index("by_status_nextDueAt", ["status", "nextDueAt"])
+      // Exit every track at once on unsubscribe/bounce.
+      .index("by_email", ["email"])
+      .index("by_leadId", ["leadId"]),
+
+    // The idempotency ledger. One row per (enrollment, step), claimed inside
+    // the same transaction that advances the cursor — so a double-schedule
+    // finds a `claimed` row and sends nothing. This, not `emailSends`, answers
+    // "has this lead already had step N of track T": `emailSends.template` is
+    // a free-form string with no uniqueness guarantee.
+    sequenceStepSends: defineTable({
+      enrollmentId: v.id("sequenceEnrollments"),
+      /** `${enrollmentId}:${track}:${stepKey}` — also the Resend idempotency key. */
+      dedupeKey: v.string(),
+      email: v.string(),
+      track: v.string(),
+      /** "d1".."d5" | "w1", "w2", … */
+      stepKey: v.string(),
+      state: v.union(
+        v.literal("claimed"),
+        v.literal("sent"),
+        v.literal("failed")
+      ),
+      subject: v.optional(v.string()),
+      resendId: v.optional(v.string()),
+      error: v.optional(v.string()),
+      attempts: v.number(),
+      claimedAt: v.number(),
+      completedAt: v.optional(v.number()),
+    })
+      .index("by_dedupeKey", ["dedupeKey"])
+      .index("by_enrollmentId", ["enrollmentId"]),
 
     // APPEND-ONLY
     // Visitor events: durable system-of-record log of clicks and decisions made
@@ -354,6 +483,9 @@ export default defineSchema(
       overheadWeeklyBudgetHours: v.number(),
       // Mango focus-project key for iCMB overhead, e.g. "icmb-overhead".
       mangoOverheadKey: v.optional(v.string()),
+      // Global kill switch for email sequences. When true the sweeper claims
+      // nothing, so all sending stops without a deploy. Ships true.
+      sequencesPaused: v.optional(v.boolean()),
       updatedAt: v.number(),
     }).index("by_key", ["key"]),
 

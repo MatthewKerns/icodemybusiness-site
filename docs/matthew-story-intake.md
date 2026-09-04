@@ -88,6 +88,23 @@ That is the form; the loop is what pulls a reader to email #3.
 - **C6.** Is the guarantee at `landing.ts:195` (thirty days, free follow-up
   session) exactly current? It gets quoted **verbatim**, never paraphrased.
 
+- **C7.** `LIVE` — *"I spend 2-3 hours researching your business…"* appears in
+  four places: `src/app/consulting/page.tsx:33`, `:67`, `:68` and
+  `src/components/landing/BonusStack.tsx:16`. Two problems, one ruling needed.
+  It is a **delivery-standard claim** (§2 — do you do this every time, for every
+  engagement, and will you stand behind "2-3 hours"?). It is also close to the
+  literal *"Don't"* example in §1's own table — *"I research your business before
+  the first working session…"* — because the subject is your activity, not the
+  reader's result. Confirm the fact, and say whether you want it reframed as an
+  outcome or removed. Raised by the cmo session's copy audit.
+- **C8.** `LIVE` — *"Direct access to me for 30 days after our session"*
+  (`BonusStack.tsx:34`), *"30 days of direct follow-up access"*
+  (`consulting/page.tsx:83`) and *"30 days of follow-up support included"*
+  (`services/page.tsx:183`). A support-window commitment in three places, in
+  three different wordings. Confirm it, pick one wording, or drop it. Note this
+  is a *different* promise from the thirty-day guarantee at `landing.ts:195` and
+  `consulting/page.tsx:56`, and having both live invites the reader to conflate
+  them. Raised by the cmo session's copy audit.
 ## Group D — post-call and no-show (track 4)
 
 - **D1.** When someone doesn't show, what do you actually do now? One reschedule

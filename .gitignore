@@ -38,6 +38,9 @@ convex/_generated/ai/
 .claude/*
 !.claude/hooks/
 !.claude/settings.json
+# Project skills are shared tooling, same as the hooks: every session working in
+# this repo should get them. Personal/scratch .claude content stays ignored.
+!.claude/skills/
 
 # Testing
 coverage/

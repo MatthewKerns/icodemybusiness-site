@@ -1,6 +1,10 @@
 import { v } from "convex/values";
 import { internalAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
+import {
+  createUnsubscribeToken,
+  unsubscribeUrl,
+} from "./lib/unsubscribeToken";
 
 // Email styles matching WelcomeEmail patterns: black bg, gold accent, Inter font, 580px container
 const emailStyles = {
@@ -20,7 +24,20 @@ const emailStyles = {
   badge: 'display:inline-block;background-color:rgba(212,175,55,0.15);color:#D4AF37;padding:4px 10px;border-radius:4px;font-size:13px;font-weight:600;',
 };
 
-function wrapHtml(subject: string, bodyContent: string): string {
+interface FooterOptions {
+  /**
+   * Present only on marketing sends. Transactional email (the welcome, the
+   * discovery report) is something the visitor asked for and deliberately does
+   * NOT carry List-Unsubscribe — unsubscribing from a receipt is meaningless.
+   */
+  unsubscribeUrl?: string;
+}
+
+function wrapHtml(
+  subject: string,
+  bodyContent: string,
+  footer: FooterOptions = {}
+): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${subject}</title></head>
@@ -32,51 +49,90 @@ function wrapHtml(subject: string, bodyContent: string): string {
   ${bodyContent}
   <div style="${emailStyles.footer}">
     <p style="${emailStyles.footerText}">&copy; ${new Date().getFullYear()} iCodeMyBusiness. All rights reserved.</p>
+    ${mailingAddressHtml()}
     <p style="${emailStyles.footerText}">If this email landed in spam, please mark it as &ldquo;Not Spam&rdquo;.</p>
+    ${
+      footer.unsubscribeUrl
+        ? `<p style="${emailStyles.footerText}"><a href="${footer.unsubscribeUrl}" style="color:#666666;">Unsubscribe</a></p>`
+        : ""
+    }
   </div>
 </div>
 </body>
 </html>`;
 }
 
+/**
+ * CAN-SPAM requires a valid physical postal address in commercial email.
+ * MAILING_ADDRESS is Matthew's to supply (docs/matthew-story-intake.md F5) —
+ * an agent inventing one would be a legal defect, not a copy nit. When it is
+ * absent the footer omits it and `sendSequenceStep` refuses to send at all.
+ */
+function mailingAddressHtml(): string {
+  const address = process.env.MAILING_ADDRESS;
+  if (!address) return "";
+  return `<p style="${emailStyles.footerText}">${escapeHtml(address)}</p>`;
+}
+
 interface SendResult {
   ok: boolean;
   resendId?: string;
   error?: string;
+  /** HTTP status from Resend. 4xx is permanent; 5xx and network errors retry. */
+  status?: number;
 }
 
-async function sendEmail(
-  to: string,
-  subject: string,
-  html: string,
-  fromName: string = "iCodeMyBusiness"
-): Promise<SendResult> {
+interface SendEmailOptions {
+  to: string;
+  subject: string;
+  html: string;
+  fromName?: string;
+  /** Custom headers, e.g. List-Unsubscribe. Resend passes these through. */
+  headers?: Record<string, string>;
+  /** Resend de-duplicates on this for 24h — belt-and-braces over our own ledger. */
+  idempotencyKey?: string;
+  tags?: { name: string; value: string }[];
+}
+
+async function sendEmail(opts: SendEmailOptions): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.error("RESEND_API_KEY not configured — skipping email");
     return { ok: false, error: "RESEND_API_KEY not configured" };
   }
 
-  const fromEmail = process.env.RESEND_FROM_EMAIL ?? "noreply@icodemybusiness.com";
+  const fromEmail = process.env.RESEND_FROM_EMAIL ?? "matthew@icodemybusiness.com";
+  const fromName = opts.fromName ?? "iCodeMyBusiness";
+
+  const requestHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${apiKey}`,
+  };
+  if (opts.idempotencyKey) {
+    requestHeaders["Idempotency-Key"] = opts.idempotencyKey.slice(0, 256);
+  }
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
+    headers: requestHeaders,
     body: JSON.stringify({
       from: `${fromName} <${fromEmail}>`,
-      to,
-      subject,
-      html,
+      to: opts.to,
+      subject: opts.subject,
+      html: opts.html,
+      ...(opts.headers ? { headers: opts.headers } : {}),
+      ...(opts.tags ? { tags: opts.tags } : {}),
     }),
   });
 
   if (!res.ok) {
     const text = await res.text();
     console.error(`Resend API error (${res.status}): ${text}`);
-    return { ok: false, error: `Resend ${res.status}: ${text.slice(0, 200)}` };
+    return {
+      ok: false,
+      status: res.status,
+      error: `Resend ${res.status}: ${text.slice(0, 200)}`,
+    };
   }
   let resendId: string | undefined;
   try {
@@ -85,7 +141,7 @@ async function sendEmail(
   } catch {
     // Body is optional for our purposes.
   }
-  return { ok: true, resendId };
+  return { ok: true, status: res.status, resendId };
 }
 
 function escapeHtml(s: string): string {
@@ -165,7 +221,7 @@ export const sendEcommerceFollowupEmail = internalAction({
     const subject =
       "Your e-commerce automation opportunities — from iCodeMyBusiness";
     const html = wrapHtml(subject, bodyContent);
-    await sendEmail(args.email, subject, html);
+    await sendEmail({ to: args.email, subject, html });
   },
 });
 
@@ -212,7 +268,7 @@ export const sendCalendlyBookingEmail = internalAction({
 
     const subject = "Your Custom Discovery Call — Book Now";
     const html = wrapHtml(subject, bodyContent);
-    await sendEmail(args.email, subject, html);
+    await sendEmail({ to: args.email, subject, html });
   },
 });
 
@@ -278,7 +334,7 @@ export const sendRoadmapNotification = internalAction({
 
     const subject = `New Roadmap Request — ${visitorDisplay}`;
     const html = wrapHtml(subject, bodyContent);
-    await sendEmail(adminEmail, subject, html, "iCodeMyBusiness Alert");
+    await sendEmail({ to: adminEmail, subject, html, fromName: "iCodeMyBusiness Alert" });
   },
 });
 
@@ -304,27 +360,72 @@ export const sendDiscoveryReportEmail = internalAction({
     bookingUrl: v.string(),
     /** True when the model was unavailable and the summary is the raw answers. */
     degraded: v.optional(v.boolean()),
+    /**
+     * The visitor's own verbatim phrases, captured on every assessment turn
+     * and — until now — never shown back to them, even though the drafting
+     * prompt calls this deliverable "a mirror held up to what they said"
+     * (convex/discoveryProcessor.ts). Optional so an in-flight caller that
+     * predates this argument still sends a valid report.
+     */
+    quotes: v.optional(v.array(v.string())),
+    /** e.g. "$4,000 / month" — rendered only when the visitor gave a figure. */
+    costLabel: v.optional(v.string()),
+    /** What they corrected when the recap got something wrong. */
+    correction: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const greeting = args.name ? `Hi ${escapeHtml(args.name)},` : "Hi there,";
     const intro = args.degraded
-      ? "Here are your answers from the assessment, exactly as you gave them. My read on them comes on the call. Keep this whether or not we ever work together."
-      : "Here is the write-up from your assessment, in your own words. Keep it whether or not we ever work together.";
+      ? "Here are your answers from the assessment, exactly as you gave them. My read on them comes on the call."
+      : "Here is the write-up from your assessment.";
     const s = args.summary;
     const row = (label: string, text: string) => `
     <p style="${emailStyles.label}">${label}</p>
     <p style="${emailStyles.value}">${escapeHtml(text)}</p>`;
 
+    // Quotes are stored deliberately un-normalized so they stay verbatim, which
+    // means a quote can contain the newlines the visitor typed into a textarea
+    // (and routinely does on the degraded path). Collapse whitespace for HTML
+    // only — the words themselves are never edited.
+    const quotes = (args.quotes ?? [])
+      .map((q) => q.replace(/\s+/g, " ").trim())
+      .filter((q) => q.length > 0);
+
+    const quotesBlock = quotes.length
+      ? `
+    <div style="border:1px solid #222;border-radius:8px;padding:16px 18px;margin:0 0 20px;">
+      <p style="${emailStyles.label}">In your own words</p>
+      <ul style="margin:0;padding-left:18px;">
+        ${quotes.map((q) => `<li style="${emailStyles.listItem}">&ldquo;${escapeHtml(q)}&rdquo;</li>`).join("")}
+      </ul>
+    </div>`
+      : "";
+
+    const costBlock = args.costLabel
+      ? `
+    <p style="${emailStyles.label}">Current Number Estimate</p>
+    <p style="${emailStyles.value}"><span style="${emailStyles.badge}">${escapeHtml(args.costLabel)}</span></p>`
+      : "";
+
+    const correctionBlock = args.correction
+      ? `
+    <p style="${emailStyles.label}">You told me the recap missed this</p>
+    <p style="${emailStyles.value}">${escapeHtml(args.correction)}</p>`
+      : "";
+
     const bodyContent = `
   <div style="padding:24px 0;">
     <p style="${emailStyles.heading}">${greeting}</p>
     <p style="${emailStyles.paragraph}">${intro}</p>
+    ${quotesBlock}
     <hr style="${emailStyles.hr}">
     ${row("The problem", s.problem)}
     ${row("What it costs", s.impact)}
+    ${costBlock}
     ${row("How long, and what you've tried", s.history)}
     ${row("If nothing changes", s.stakes)}
     ${row("The outcome you want", s.idealOutcome)}
+    ${correctionBlock}
     <hr style="${emailStyles.hr}">
     <p style="${emailStyles.label}">Where I'd start</p>
     <p style="${emailStyles.value}"><span style="${emailStyles.badge}">${escapeHtml(args.pathName)}</span></p>
@@ -335,16 +436,17 @@ export const sendDiscoveryReportEmail = internalAction({
       <a href="${args.bookingUrl}" style="${emailStyles.button}">Book an intro call</a>
     </div>
     <p style="${emailStyles.paragraph}">
-      On the call you tell me where the week goes; I tell you straight what I'd
-      fix first and whether I'm the right person to fix it. The more you told
-      the assessment, the more of your context I bring. Reply to this email any
-      time &mdash; a real person reads every message.
+      On the call you tell me where the week goes. I'll tell you if I think we
+      are not a good fit and why. And if we are a good fit, I'll tell you how I
+      recommend we get started. The more you tell our assessment tools, the more
+      of your context I bring. Reply to this email any time &mdash; I read every
+      reply.
     </p>
   </div>`;
 
     const subject = "Your discovery assessment — the write-up";
     const html = wrapHtml(subject, bodyContent);
-    const result = await sendEmail(args.email, subject, html);
+    const result = await sendEmail({ to: args.email, subject, html });
 
     // Audit row (only annotates addresses already captured as leads).
     await ctx.runMutation(api.emailSends.record, {
@@ -366,5 +468,118 @@ export const sendDiscoveryReportEmail = internalAction({
         error: `Report email failed: ${result.error ?? "unknown"}`,
       });
     }
+  },
+});
+
+
+/**
+ * Send one step of a nurture sequence.
+ *
+ * Only ever called by `sequenceEngine.deliverStep`, which has already claimed
+ * the step inside a transaction that ran the suppression + consent gate. This
+ * action therefore does not re-check eligibility; it renders, sends, and
+ * reports the outcome back so the ledger and the audit row stay honest.
+ *
+ * It refuses to send when a compliance requirement is missing rather than
+ * shipping a non-compliant email: no unsubscribe secret, no postal address, or
+ * no authored copy all fail closed.
+ */
+export const sendSequenceStep = internalAction({
+  args: {
+    sendId: v.id("sequenceStepSends"),
+    dedupeKey: v.string(),
+    email: v.string(),
+    name: v.optional(v.string()),
+    track: v.string(),
+    stepKey: v.string(),
+    subject: v.string(),
+    assessmentId: v.optional(v.id("assessments")),
+  },
+  handler: async (ctx, args): Promise<{ ok: boolean; error?: string }> => {
+    const fail = async (error: string, permanent = true) => {
+      await ctx.runMutation(internal.sequenceEngine.completeStep, {
+        sendId: args.sendId,
+        ok: false,
+        error,
+        permanent,
+      });
+      return { ok: false, error };
+    };
+
+    const secret = process.env.UNSUBSCRIBE_SECRET;
+    if (!secret) {
+      // A marketing email with no working opt-out is not one we may send.
+      return await fail("UNSUBSCRIBE_SECRET not configured");
+    }
+    if (!process.env.MAILING_ADDRESS) {
+      // CAN-SPAM requires a physical postal address. Matthew supplies it
+      // (docs/matthew-story-intake.md F5); we do not invent one.
+      return await fail("MAILING_ADDRESS not configured");
+    }
+    if (!args.subject) {
+      // Unauthored copy. `sequenceTracks.isStepAuthored` should have stopped
+      // this upstream; failing here too means a placeholder can never reach a
+      // visitor even if that check is bypassed.
+      return await fail(`Step ${args.track}:${args.stepKey} has no authored copy`);
+    }
+
+    const token = await createUnsubscribeToken(args.email, secret);
+    const unsubUrl = unsubscribeUrl(
+      process.env.CONVEX_SITE_URL ?? "",
+      token
+    );
+
+    // Body copy is authored per step; until the story intake is answered no
+    // step is authored, so this action is unreachable in production.
+    const bodyContent = `
+  <div style="padding:24px 0;">
+    <p style="${emailStyles.heading}">${args.name ? `Hi ${escapeHtml(args.name)},` : "Hi there,"}</p>
+  </div>`;
+
+    const html = wrapHtml(args.subject, bodyContent, {
+      unsubscribeUrl: unsubUrl,
+    });
+
+    const result = await sendEmail({
+      to: args.email,
+      subject: args.subject,
+      html,
+      fromName: "Matthew Kerns",
+      idempotencyKey: args.dedupeKey,
+      headers: {
+        // Both are required together by Gmail/Yahoo bulk-sender rules.
+        "List-Unsubscribe": `<${unsubUrl}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      },
+      tags: [
+        { name: "track", value: args.track },
+        { name: "step", value: args.stepKey },
+      ],
+    });
+
+    // 4xx means the address or request is bad — retrying will never help.
+    const permanent =
+      result.status !== undefined && result.status >= 400 && result.status < 500;
+
+    await ctx.runMutation(internal.sequenceEngine.completeStep, {
+      sendId: args.sendId,
+      ok: result.ok,
+      resendId: result.resendId,
+      subject: args.subject,
+      error: result.error,
+      permanent: result.ok ? undefined : permanent,
+    });
+
+    // Audit row, same contract every other send in this file follows.
+    await ctx.runMutation(api.emailSends.record, {
+      to: args.email,
+      template: `seq:${args.track}:${args.stepKey}`,
+      subject: args.subject,
+      status: result.ok ? "sent" : "failed",
+      resendId: result.resendId,
+      error: result.error,
+    });
+
+    return { ok: result.ok, error: result.error };
   },
 });
