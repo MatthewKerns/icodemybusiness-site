@@ -5,7 +5,7 @@ export function ConsultingHero() {
     <section className="py-12 md:py-20">
       <div className="mx-auto max-w-4xl text-center">
         <p className="font-accent text-sm uppercase tracking-widest text-gold">
-          Free 30-Minute Consultation
+          Free 15-Minute Intro Call
         </p>
 
         <h1 className="mt-4 text-display font-bold text-text-primary">
@@ -15,7 +15,7 @@ export function ConsultingHero() {
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg text-text-muted">
-          Book a free 30-minute call to talk through your business, your biggest
+          Book a free 15-minute call to talk through your business, your biggest
           time-drains, and where AI can help most. You&apos;ll leave with an
           honest read on what&apos;s worth automating — no pitch, no pressure.
         </p>
@@ -29,7 +29,7 @@ export function ConsultingHero() {
             "animate-pulse-glow"
           )}
         >
-          Book your free 30-minute call
+          Book your free 15-minute call
         </a>
       </div>
     </section>
