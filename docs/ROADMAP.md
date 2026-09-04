@@ -71,11 +71,16 @@ need to hardcode "15 minutes" into the letter to close this item.
 
 ### R-002 · Apex domain still serves the GitHub Pages placeholder
 
-`status: blocked` · `owner: matthew` · `evidence: verified`
+`status: deferred` · `owner: matthew` · `evidence: verified`
 
-**This is the last thing standing between the work and the public.** Everything
-built is live and verified on `staging.icodemybusiness.com`; none of it is
-reachable at the domain anyone would actually type.
+**Deferred on purpose, 2026-09-02 — Matthew's call, not an oversight.** Asked
+directly whether to cut over now, he chose to treat
+`staging.icodemybusiness.com` as production for the time being. The app is
+deployed, working and verified there; the apex keeps the placeholder until he
+decides otherwise.
+
+**Stop re-raising this as a defect.** It is a known, accepted state. What is
+below is the recipe for when he wants it, not a backlog item going stale.
 
 **Re-verified 2026-09-02, first-hand, because "we can't do this" deserves
 checking rather than repeating:**
@@ -326,7 +331,13 @@ The only signal was a data check.
 
 ### R-011 · Almost nothing is instrumented
 
-`status: verify` · `owner: agent` · `evidence: verified`
+`status: done` · `owner: agent` · `evidence: verified`
+
+**Verified end to end on the deployed build 2026-09-02:** Playwright clicked
+"Start Now" on staging at 17:38:38Z and `visitorEvents` shows a `splash_entered`
+row (category `click`, page `/`) at that timestamp. Note `adminListEvents` is
+role-gated, so the read path for checking this is `npx convex data visitorEvents
+--order desc`, not the admin query.
 
 `pageViews` had 315 rows and a working pipeline; `visitorEvents` had **4**,
 because few controls called `useTrackEvent`.
