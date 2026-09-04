@@ -214,8 +214,8 @@ export const sendEcommerceFollowupEmail = internalAction({
     <hr style="${emailStyles.hr}">
     <p style="${emailStyles.paragraph}">
       We&rsquo;re putting together a tailored set of AI tools for your store and
-      will follow up with next steps. Just reply to this email anytime &mdash; a
-      real human reads every message.
+      will follow up with next steps. Reply to this email and I&rsquo;ll get back
+      to you as soon as I can.
     </p>
   </div>`;
     const subject =

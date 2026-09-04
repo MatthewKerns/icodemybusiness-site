@@ -52,9 +52,10 @@ That third row is real: it was a proposed framing sentence, caught in review
 because nothing implements correcting a quote after the email is sent.
 
 **Write in first person.** "A real person reads every message" is a fact about
-someone. "I read every reply" is a promise from Matthew. The whole point of the
-register is that these emails come from a person, so third-person constructions
-about that person read as corporate no matter how warm the words are.
+someone. "Reply to this email and I'll get back to you as soon as I can" is a
+promise from Matthew. The whole point of the register is that these emails come
+from a person, so third-person constructions about that person read as corporate
+no matter how warm the words are.
 
 ### Labels
 
@@ -186,8 +187,9 @@ you:
 Both `List-Unsubscribe` headers are required *together* by Gmail/Yahoo
 bulk-sender rules. Sending one without the other is worse than neither.
 
-**The from-address has to make the copy true.** These emails say "reply to this
-email" and "I read every reply". They must not arrive from `noreply@`. The
+**The from-address has to make the copy true.** These emails say "Reply to this
+email and I'll get back to you as soon as I can." They must not arrive from
+`noreply@`. The
 in-code default is `matthew@icodemybusiness.com` (`convex/emails.ts`), matching
 the Next.js welcome route — but `RESEND_FROM_EMAIL` on the Convex deployment
 overrides it, and only the deploy session can read or set that. If you add a
