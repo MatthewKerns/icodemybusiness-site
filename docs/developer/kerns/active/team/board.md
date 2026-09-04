@@ -12,7 +12,7 @@ _Owned this run by `cmo`._
 ### 0.3 Engagement objectives
 | Objective | Metric | Source | Status this run |
 |---|---|---|---|
-| Visitors reach a booked call | splash → assessment → `/book` funnel completion | PostHog 206048 (EU), dashboard 761841 | not yet measured this run |
+| Visitors reach a booked call | splash → assessment → `/book` funnel completion | PostHog 206048 (EU), dashboard 761841 | measured 09-04: 0 real visitors (prod = placeholder); staging 30d: 65 views / 3 assessments / 1 lead / 1 book click / 0 bookings captured |
 | Copy carries no unsourced business claims | 0 unsourced claims on live surfaces | `docs/copy-principles.md` §2 scan | not yet scanned this run |
 
 ## Roster
@@ -27,7 +27,7 @@ _Owned this run by `cmo`._
 | id | title | serves | owner | tier | worktree / branch | PR | done-predicate | state | last update | next action | human gate? |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | M1 | Land the team protocol + cmo role card | directive | cmo | fable | team-cmo / agent/cmo/team-protocol | — | `.claude/team/{PROTOCOL.md,roles/*.md,board.template.md}` committed on the branch | review | 09-04 10:05 | Matthew reviews the cmo card; push + merge are his | YES (push/merge) |
-| M2 | Baseline the funnel numbers | R-011 | cmo | fable | team-cmo | — | `docs/marketing/funnel-baseline.md` with `{ref, tree, command, result}` per step from PostHog 206048 | queued | 09-04 | run PostHog exec: splash gate + assessment + book events, last 14d | none |
+| M2 | Baseline the funnel numbers | R-011 | cmo | fable | team-cmo | — | `docs/marketing/funnel-baseline.md` with `{ref, tree, command, result}` per step from PostHog 206048 | **done** — 65 pageviews/30d, all staging; 1 lead, 1 book click, recap reached once ever | 09-04 11:05 | re-run after cutover (R-002) and after `ac20cfb` deploys | none |
 | M3 | Claim scan of live surfaces | copy-principles §2 | cmo | fable | team-cmo | — | list of every number/duration/"every"/"guarantee" on `/`, `/consulting`, `/book`, `/free-tools` with source or `[CLAIM NEEDED]` | queued | 09-04 | grep `src/content` + route files; coordinate with `offer` before touching the letter. Known-unverified already with `offer` (do not re-flag): `PATHS.fractional.commitment` "I hold very few of these at once", `PATHS.program.commitment` "a handful a year" — both agent-authored; second contradicts paper (2/month) | none (edits to the letter need `offer`) |
 | M4 | Blog route decision brief | R-013 | cmo | fable | team-cmo | — | one-page brief: what the first 4 posts are (from `content/tracker.md`), what the route needs, sized for `sdm`/`dev-N` | queued | 09-04 | read `content/tracker.md` + `content/calendar.md` | none |
 | M5 | Email follow-up copy review | R-010 / emailSends | cmo | fable | team-cmo | — | every template in `convex/emails.ts` + `/api/email/*` passes copy-principles §1–§3 | blocked | 09-04 10:35 | wait for `email-followup` ping that `convex/emails.ts` has settled (their approved nurture build touches it) | none (sends are Matthew's) |
@@ -43,6 +43,7 @@ _Owned this run by `cmo`._
 | D2 | Is `cmo` a permanent role in the `/team` skill (add to `role ∈ …` in `~/.claude/skills/team/SKILL.md`) or a per-repo extension only? | global skill / repo-only | global — the skill's role list is the only place it is not yet named | this board, `roles/cmo.md` | 09-04 | cmo |
 
 ## Digest log
+- 09-04 11:05 — cmo: M2 done. VERIFIED the 30d numbers business-intake reported (identical). Zero traffic from icodemybusiness.com; prod is still the placeholder (R-002). Their `ac20cfb` (Q1 anchor + recap events) is a pending behaviour change — baseline labelled pre-change.
 - 09-04 10:40 — cmo: opt-in audit written (M6). Four gaps: no capture on `/`,`/consulting`,`/book`; no consent on any form; no unsubscribe anywhere (academy promises one); no blog surface. D3/D4 raised.
 - 09-04 10:30 — email-followup → cmo: `convex/emails.ts` is in their approved nurture build (unsubscribe slot, suppressions, schema, crons); M5 blocked until they ping. Handed over 3 copy defects: booking email (M7), academy "leave any time" (fixed by their Phase 2, not by copy), landing.ts:145 capacity line (offer's, already D-tracked as known-unverified). CORRECTION from them 10:45: the memory file `reference_calendly_booking_links` was already right (15-min `new-meeting-1`); only its MEMORY.md index line said 60 min, and they fixed that line.
 - 09-04 10:20 — offer → cmo: ACK on ownership split. Two capacity lines in landing.ts are agent-authored and with Matthew for real numbers; offer has proposed `docs/OFFER.md` as the single offer source and will notify when it lands.
