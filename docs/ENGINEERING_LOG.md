@@ -80,3 +80,27 @@ the deploy script's own gates stay.
 **Fixes.** (1) `AGENTS.md` Never Do: never run the Convex CLI's env-list/env-get commands directly. (2) `.claude/hooks/convex-secret-guard.sh` blocks them (override `CONVEX_ENV_READ_APPROVED`). (3) `scripts/convex-env-names.sh` is the approved names-only alternative. (4) This entry. (5) The stale local permission grant was removed on the affected machine; it was never a repo file.
 
 **Not fixed by this.** The value already printed is still in that session's transcript. Treat it as exposed — the affected key should be rotated (Matthew's to rotate, per the usual pattern for provider keys).
+
+## 2026-09-04 — three commits landed on `main` while their own push was still gating (d503b12..c2219d7)
+
+**What happened.** A session ran `git push origin HEAD:main` on `agent/offer/landing`. The pre-push
+hook captured `local_sha=494e7fd`, exported that exact commit, and ran the VPS gates against it
+(green — 24 files/294 tests). While those gates were still running (a multi-minute VPS round trip),
+the same session committed three more times on the same branch. Git re-resolves `HEAD` at send
+time, not at hook-invocation time, so when the gated run finished and the push actually
+transmitted, it sent the *current* tip — `c2219d7`, three commits past what had been gated. All
+three were docs-only (`docs/OFFER.md`, `docs/academy-promises.md`) and no code shipped ungated,
+but the mechanism would have carried code just as easily. Found, verified (`gh api …/activity`
+showing exactly one push event `d503b12..c2219d7`, matched against the hook's own gated sha and
+the commit timestamps), and reported by the offer session itself.
+
+**Why it got through.** The pre-push hook gates whatever `$local_sha` was when it started, then
+trusts that the ref still points there when it reports success. Nothing re-checked the ref after
+a multi-minute gate run, and `HEAD:main` as a push refspec always sends the ref's value at
+transmission time, not at hook-start time.
+
+**Fixes.** (1) `AGENTS.md` Never Do: never commit on a branch while a push from it is in flight;
+push an explicit sha (`git push origin <sha>:refs/heads/main`), not `HEAD:main`. (2)
+`scripts/git-hooks/pre-push` now re-reads the local ref immediately after the gates pass and
+refuses the push (naming both shas) if it moved — turning a silent ungated ride-along into a
+rejected push. (3) This entry.

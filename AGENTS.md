@@ -48,6 +48,10 @@ are NOT restated here — consult `~/workspace/software-development-best-practic
   prints VALUES, not just names, and did exactly that with a live `RESEND_API_KEY` on 2026-09-04.
   Use `scripts/convex-env-names.sh [--prod|--dev]` for a names-only listing; enforced by
   `.claude/hooks/convex-secret-guard.sh`.
+- Commit on a branch while a push from it is in flight. The VPS-routed gate run takes minutes;
+  `git push origin HEAD:main` re-resolves `HEAD` at send time, so a commit made mid-gate rides
+  along ungated. Push an explicit sha instead — `git push origin <sha>:refs/heads/main` — or just
+  wait. `scripts/git-hooks/pre-push` refuses the push if the ref moved after the gates finish.
 - **Author a claim about the business.** Capacity, timelines, delivery standards, prices, guarantees, "every time" statements are Matthew's to assert. Nine plausible agent-invented claims reached the live homepage on 2026-09-02. If you need one and don't have it, ask or leave it out (`docs/copy-principles.md` §2).
 
 ## Chosen Tools
