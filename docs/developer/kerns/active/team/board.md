@@ -7,6 +7,7 @@ _Owned this run by `cmo`._
 ### 0.1 Directive
 > **`/team cmo` — seat a marketing lead for this repo; write the cmo role card first, land the team protocol here.** (Matthew, 2026-09-04, via the `/team` skill and its two follow-up answers.)
 > Standing decisions carried in: no visible prices, email capture + booked calls as the conversion (memory `project_offer_model_no_pricing`, 2026-09-02).
+> REPORTED via `offer` 09-04 10:20, from Matthew's paper plan (not seen by cmo): selling "peace of mind" and "show up to work prepared with extra training"; ladder free training → paid consulting → done-for-you; capacity paid consulting 3 slots/week, done-for-you 2 slots/month; lead flow warm network (~20–30 people) + inbound from the four content pillars. Becomes VERIFIED when `docs/OFFER.md` lands.
 
 ### 0.3 Engagement objectives
 | Objective | Metric | Source | Status this run |
@@ -27,7 +28,7 @@ _Owned this run by `cmo`._
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | M1 | Land the team protocol + cmo role card | directive | cmo | fable | team-cmo / agent/cmo/team-protocol | — | `.claude/team/{PROTOCOL.md,roles/*.md,board.template.md}` committed on the branch | review | 09-04 10:05 | Matthew reviews the cmo card; push + merge are his | YES (push/merge) |
 | M2 | Baseline the funnel numbers | R-011 | cmo | fable | team-cmo | — | `docs/marketing/funnel-baseline.md` with `{ref, tree, command, result}` per step from PostHog 206048 | queued | 09-04 | run PostHog exec: splash gate + assessment + book events, last 14d | none |
-| M3 | Claim scan of live surfaces | copy-principles §2 | cmo | fable | team-cmo | — | list of every number/duration/"every"/"guarantee" on `/`, `/consulting`, `/book`, `/free-tools` with source or `[CLAIM NEEDED]` | queued | 09-04 | grep `src/content` + route files; coordinate with `offer` before touching the letter | none (edits to the letter need `offer`) |
+| M3 | Claim scan of live surfaces | copy-principles §2 | cmo | fable | team-cmo | — | list of every number/duration/"every"/"guarantee" on `/`, `/consulting`, `/book`, `/free-tools` with source or `[CLAIM NEEDED]` | queued | 09-04 | grep `src/content` + route files; coordinate with `offer` before touching the letter. Known-unverified already with `offer` (do not re-flag): `PATHS.fractional.commitment` "I hold very few of these at once", `PATHS.program.commitment` "a handful a year" — both agent-authored; second contradicts paper (2/month) | none (edits to the letter need `offer`) |
 | M4 | Blog route decision brief | R-013 | cmo | fable | team-cmo | — | one-page brief: what the first 4 posts are (from `content/tracker.md`), what the route needs, sized for `sdm`/`dev-N` | queued | 09-04 | read `content/tracker.md` + `content/calendar.md` | none |
 | M5 | Email follow-up copy review | R-010 / emailSends | cmo | fable | team-cmo | — | every template in `convex/emails.ts` + `/api/email/*` passes copy-principles §1–§3 | queued | 09-04 | ask `email-followup` what is in flight before reading | none (sends are Matthew's) |
 
@@ -38,5 +39,6 @@ _Owned this run by `cmo`._
 | D2 | Is `cmo` a permanent role in the `/team` skill (add to `role ∈ …` in `~/.claude/skills/team/SKILL.md`) or a per-repo extension only? | global skill / repo-only | global — the skill's role list is the only place it is not yet named | this board, `roles/cmo.md` | 09-04 | cmo |
 
 ## Digest log
+- 09-04 10:20 — offer → cmo: ACK on ownership split. Two capacity lines in landing.ts are agent-authored and with Matthew for real numbers; offer has proposed `docs/OFFER.md` as the single offer source and will notify when it lands.
 - 09-04 10:05 — cmo: protocol, 7 role cards, board template and this board written in `.worktrees/team-cmo`; not pushed (human gate). No `sdm`/`qam`/`cto` live in this project; `offer`, `email-followup`, `business-intake` are live peers outside the protocol.
 - 09-04 09:55 — cmo: searched the whole workspace — no `PROTOCOL.md`, no role cards, no `board.md` exist anywhere on this machine; the only prior definition of the board format is mango's parser + test fixture.
