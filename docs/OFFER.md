@@ -117,7 +117,9 @@ From deals closed or negotiated in the last two weeks, not from site copy.
 
 ## How to change this
 
-Edit this file, then bring `src/content/landing.ts` into line with it. The
+Edit this file, then bring `src/content/landing.ts` into line with it, then
+republish the living view: https://claude.ai/code/artifact/0e0b27a8-5af0-4991-9905-db82a8d21f81
+(same artifact URL every time; it is this file rendered, not a second source). The
 content tests (`src/content/__tests__/landing.test.ts`) enforce the standing
 constraints — no price amounts, no hardcoded call durations, no
 reassurance-shaped copy, every path keeping its commitment line.
