@@ -103,6 +103,7 @@ diagnose Tier 1 movement.
 | `discovery_account_claimed` | DiscoveryAccountCta after `claim` succeeds (client) | — |
 | `discovery_session_bound` | `useBindDiscoverySession` when a signed-in visitor's in-progress conversation is attached to their account (client). Distinct from `discovery_account_claimed`, which binds the finished report — this fires mid-conversation. | — |
 | `discovery_session_resumed` | /portal/assessments when an unfinished assessment is clicked (client) | `stage` |
+| `discovery_model_usage` | DiscoveryAssessment on every model turn (client) | `stage`, `inputTokens`, `outputTokens`, `cacheReadTokens`, `cacheWriteTokens` — **`cacheReadTokens` staying 0 across turns in one session means prompt caching is not working**, whatever the bill looks like |
 | `discovery_extraction_truncated` | DiscoveryAssessment when the route reports `stop_reason: "max_tokens"` (client). Fired outside the `advanced` branch on purpose — a truncated reply loses the extraction JSON, so the stage usually does *not* advance. **If this is non-zero, `MAX_TOKENS` in the chat route is too low and answers are being recorded verbatim instead of structured.** | `stage`, `advanced` |
 | `book_call_clicked` | result-screen CTA (client) | `placement: "discovery-result"` |
 

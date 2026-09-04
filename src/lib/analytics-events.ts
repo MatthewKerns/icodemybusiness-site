@@ -112,6 +112,16 @@ export const ANALYTICS_EVENTS = {
    * not advance — as a property of that event it would be invisible.
    */
   DISCOVERY_EXTRACTION_TRUNCATED: "discovery_extraction_truncated",
+  /**
+   * Discovery assessment: what one model turn cost
+   * (props: stage, inputTokens, outputTokens, cacheReadTokens, cacheWriteTokens).
+   *
+   * Exists because the documented failure mode of prompt caching is that it
+   * silently does nothing. `cacheReadTokens` staying at 0 across turns in one
+   * session means a silent invalidator is at work and the caching is not
+   * working, however plausible the bill looks.
+   */
+  DISCOVERY_MODEL_USAGE: "discovery_model_usage",
 
   // --- Operational: health signals ------------------------------------
   /** An API route returned an error (captured in errorResponse). */

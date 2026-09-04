@@ -6,11 +6,12 @@ import {
   advanceWithoutModel,
   applyCorrection,
   buildCorrectionSystemPrompt,
-  buildDiscoverySystemPrompt,
+  buildDiscoveryTurnPrompt,
   clampStageTransition,
   coerceDiscoveryState,
   DEGRADED_ACK,
   DEGRADED_CORRECTION_ACK,
+  DISCOVERY_SYSTEM_STABLE,
   parseDiscoveryCorrection,
   parseDiscoveryTurn,
   recordCorrectionWithoutModel,
@@ -61,6 +62,14 @@ interface ChatRequest {
 interface StoredMessage {
   role: string;
   content: string;
+}
+
+/** What one model turn cost, so cache behaviour is measurable rather than assumed. */
+interface TurnUsage {
+  input: number;
+  output: number;
+  cacheRead: number;
+  cacheWrite: number;
 }
 
 function json(status: number, body: unknown) {
@@ -131,11 +140,6 @@ export async function POST(req: NextRequest) {
   });
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  const system =
-    mode === "answer"
-      ? buildDiscoverySystemPrompt(state)
-      : buildCorrectionSystemPrompt(state);
-
   const history: Anthropic.MessageParam[] = (
     context.messages as StoredMessage[]
   )
@@ -144,13 +148,45 @@ export async function POST(req: NextRequest) {
       role: m.role === "user" ? "user" : "assistant",
       content: m.content,
     }));
+
+  // Cache breakpoint on the LAST message of the replayed history, not on the
+  // new one. Caching is a prefix match, so everything after the breakpoint is
+  // billed in full, and the new message is the only part that differs between
+  // one turn and the next. By stage four the history is 20+ messages, which is
+  // where nearly all of the input cost sits.
+  const previous = history[history.length - 1];
+  if (previous && typeof previous.content === "string") {
+    history[history.length - 1] = {
+      role: previous.role,
+      content: [
+        {
+          type: "text",
+          text: previous.content,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
+    };
+  }
+
   const messages: Anthropic.MessageParam[] = [
     ...history,
     { role: "user", content: userMessage },
   ];
-  const systemBlocks: Anthropic.TextBlockParam[] = [
-    { type: "text", text: system, cache_control: { type: "ephemeral" } },
-  ];
+
+  // Stable half first with a breakpoint after it, per-stage half after. The
+  // correction prompt embeds the current answers, so it changes on every
+  // correction and is not worth a cache write.
+  const systemBlocks: Anthropic.TextBlockParam[] =
+    mode === "answer"
+      ? [
+          {
+            type: "text",
+            text: DISCOVERY_SYSTEM_STABLE,
+            cache_control: { type: "ephemeral" },
+          },
+          { type: "text", text: buildDiscoveryTurnPrompt(state) },
+        ]
+      : [{ type: "text", text: buildCorrectionSystemPrompt(state) }];
 
   const encoder = new TextEncoder();
 
@@ -176,7 +212,14 @@ export async function POST(req: NextRequest) {
          * the case where the stage does NOT advance — a property on that event
          * would miss every occurrence it exists to catch.
          */
-        truncated = false
+        truncated = false,
+        /**
+         * Token accounting for this turn. Reported because the documented
+         * failure mode of prompt caching is that it silently does nothing —
+         * "the bill looks lower" is not evidence. If `cacheRead` stays 0 across
+         * turns in one session, a silent invalidator is at work.
+         */
+        usage: TurnUsage | null = null
       ) => {
         await convex.mutation(api.agentSessions.appendMessage, {
           sessionId,
@@ -208,6 +251,7 @@ export async function POST(req: NextRequest) {
           anchor,
           degraded,
           truncated,
+          usage,
         });
         send("done", { visibleText: stripDiscoveryFence(assistantText) });
       };
@@ -257,6 +301,12 @@ export async function POST(req: NextRequest) {
         // instead of discovering months later that the richest answers were the
         // ones we failed to extract.
         const truncated = final.stop_reason === "max_tokens";
+        const usage: TurnUsage = {
+          input: final.usage.input_tokens,
+          output: final.usage.output_tokens,
+          cacheRead: final.usage.cache_read_input_tokens ?? 0,
+          cacheWrite: final.usage.cache_creation_input_tokens ?? 0,
+        };
         const fullText = final.content
           .filter((b): b is Anthropic.TextBlock => b.type === "text")
           .map((b) => b.text)
@@ -265,10 +315,10 @@ export async function POST(req: NextRequest) {
         if (mode === "answer") {
           const parsed = parseDiscoveryTurn(fullText);
           const { next, advanced, forced } = clampStageTransition(state, parsed);
-          await commit(fullText, next, advanced, forced, false, truncated);
+          await commit(fullText, next, advanced, forced, false, truncated, usage);
         } else {
           const next = applyCorrection(state, parseDiscoveryCorrection(fullText));
-          await commit(fullText, next, false, false, false, truncated);
+          await commit(fullText, next, false, false, false, truncated, usage);
         }
         controller.close();
       } catch (err) {
