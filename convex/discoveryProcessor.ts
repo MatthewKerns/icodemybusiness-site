@@ -45,6 +45,7 @@ RULES
 - Never mention, quote, or estimate a price, rate, or budget for working with us — not in the summary, not in the brief.
 - No reassurance copy ("no pressure", "no obligation", "don't worry"). No hype. Plain, specific, direct.
 - The summary must not sell. Clarity is the deliverable.
+- The recorded answers address the owner as "you". Keep "summary" in that voice — it goes back to them. Write "internalBrief" about them in the third person; it is addressed to Matthew, not to them.
 
 THE FOUR PATHS (use the key exactly):
 ${PATHS.map((p) => `- ${p.key}: "${p.name}" — for: ${p.forWho} What it is: ${p.what} Timeline: ${p.timeline}`).join("\n")}

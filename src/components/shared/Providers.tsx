@@ -20,7 +20,21 @@ function getConvexClient(): ConvexReactClient {
         "NEXT_PUBLIC_CONVEX_URL is not set. Add it to .env.local — see .env.example."
       );
     }
-    _convex = new ConvexReactClient(convexUrl);
+    // unsavedChangesWarning off, deliberately. Convex registers a beforeunload
+    // handler by default that fires whenever ANY mutation is still in flight,
+    // and useTrackEvent sends a fire-and-forget visitorEvents.track mutation on
+    // every tracked click. So a click that both tracks and navigates raced its
+    // own analytics write and Chrome asked "Leave site? Changes you made may
+    // not be saved." The worst case was the assessment gate's "Create a free
+    // account" (AssessmentGate.tsx:77), i.e. the highest-intent click on the
+    // site: choosing Cancel there never reaches /sign-up at all.
+    //
+    // Nothing this warning protects is real. Discovery state is persisted
+    // server-side every turn, and the one mutation whose loss would matter,
+    // discoveryAssessments.submit, is a single call the visitor waits on.
+    _convex = new ConvexReactClient(convexUrl, {
+      unsavedChangesWarning: false,
+    });
   }
   return _convex;
 }

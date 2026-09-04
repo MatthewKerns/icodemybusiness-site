@@ -14,9 +14,10 @@ import {
   type DiscoveryState,
 } from "../discovery-prompt";
 import {
+  DISCOVERY_QUESTIONS,
   DISCOVERY_STAGE,
   MAX_FOLLOW_UPS_PER_STAGE,
-  recapText,
+  recapRows,
 } from "@/content/discovery-questions";
 
 const fence = (json: string) =>
@@ -199,6 +200,36 @@ describe("corrections", () => {
     expect(next.answers.problem?.summary).toBe("p");
   });
 
+  it("keeps figures the correction turn forgot to repeat", () => {
+    // The model re-emits all five answers and routinely drops "numbers" from
+    // the ones it did not change. Losing the figure loses the whole cost leg.
+    const before: DiscoveryState = {
+      ...atRecap(),
+      answers: {
+        ...atRecap().answers,
+        cost: {
+          summary: "one day",
+          quotes: ["a day"],
+          numbers: { amount: 4000, unit: "usd_per_month" },
+        },
+      },
+    };
+    const parsed = parseDiscoveryCorrection(
+      fence(
+        JSON.stringify({
+          answers: { cost: { summary: "two days a week", quotes: [] } },
+        })
+      )
+    );
+    const next = applyCorrection(before, parsed);
+    expect(next.answers.cost?.summary).toBe("two days a week");
+    expect(next.answers.cost?.numbers).toEqual({
+      amount: 4000,
+      unit: "usd_per_month",
+    });
+    expect(next.answers.cost?.quotes).toEqual(["a day"]);
+  });
+
   it("keeps a verbatim note when the model is unavailable", () => {
     const next = recordCorrectionWithoutModel(atRecap(), "It's two days");
     expect(next.correction).toBe("It's two days");
@@ -236,7 +267,7 @@ describe("prompts", () => {
       followUpsUsed: MAX_FOLLOW_UPS_PER_STAGE,
     });
     expect(prompt).toMatch(/Do NOT ask another question/);
-    expect(prompt).toMatch(/What's the biggest thing eating your week/);
+    expect(prompt).toMatch(/What's your biggest frustration in the business/);
   });
 
   it("carries the hard rules into both prompts", () => {
@@ -262,17 +293,105 @@ describe("prompts", () => {
   });
 });
 
-describe("recapText", () => {
-  it("plays the answers back in order", () => {
-    const text = recapText({
-      problem: { summary: "chasing invoices", quotes: [] },
-      cost: { summary: "a day a week", quotes: [] },
-      history: { summary: "It started two years ago", quotes: [] },
-      stakes: { summary: "I can't take on more clients", quotes: [] },
-      outcome: { summary: "invoices go out by themselves", quotes: [] },
-    });
-    expect(text).toBe(
-      "So if I've got this right: chasing invoices is costing you roughly a day a week. It started two years ago. If nothing changes, I can't take on more clients. The outcome you want is invoices go out by themselves. Did I get that right?"
+describe("recapRows", () => {
+  const answers = {
+    problem: { summary: "You chase invoices by hand every week.", quotes: [] },
+    cost: { summary: "It costs you about a day a week.", quotes: [] },
+    history: { summary: "It started two years ago.", quotes: [] },
+    stakes: { summary: "You cannot take on more clients.", quotes: [] },
+    outcome: { summary: "Invoices go out by themselves.", quotes: [] },
+  };
+
+  it("plays the answers back in order, one row per question", () => {
+    const rows = recapRows(answers);
+    expect(rows.map((r) => r.key)).toEqual(
+      DISCOVERY_QUESTIONS.map((q) => q.key)
     );
+    expect(rows.map((r) => r.label)).toEqual(
+      DISCOVERY_QUESTIONS.map((q) => q.rowLabel)
+    );
+  });
+
+  it("never rewrites a summary — the row text is what was stored", () => {
+    // The whole point of rows over prose: the old template spliced summaries
+    // into a sentence and produced "...coding work. is costing you roughly".
+    for (const row of recapRows(answers)) {
+      expect(row.text).toBe(
+        answers[row.key as keyof typeof answers].summary
+      );
+    }
+  });
+
+  it("does not duplicate a phrase the summary already contains", () => {
+    const rows = recapRows({
+      ...answers,
+      stakes: {
+        summary: "If nothing changes, you stay stuck at the same rate.",
+        quotes: [],
+      },
+    });
+    const stakes = rows.find((r) => r.key === "stakes")!;
+    expect(stakes.text).toBe(
+      "If nothing changes, you stay stuck at the same rate."
+    );
+    expect(stakes.text.match(/If nothing changes/g)).toHaveLength(1);
+  });
+
+  it("says so plainly when an answer is missing", () => {
+    const rows = recapRows({ problem: answers.problem });
+    expect(rows[0].text).toBe(answers.problem.summary);
+    expect(rows[1].text).toBe("Not captured");
+  });
+});
+
+describe("summary normalisation", () => {
+  const summaryOf = (raw: string) =>
+    parseDiscoveryTurn(
+      fence(
+        JSON.stringify({
+          stageComplete: true,
+          answer: { summary: raw, quotes: [] },
+        })
+      )
+    )?.answer?.summary;
+
+  it("folds newlines away so one answer stays one line", () => {
+    // priorAnswersBlock emits "- <label>: <summary>" per answer; a newline in
+    // a degraded summary corrupts that list for every later stage.
+    expect(summaryOf("Two days a week.\nEvery week.")).toBe(
+      "Two days a week. Every week."
+    );
+  });
+
+  it("strips a leaked heading", () => {
+    expect(summaryOf("The outcome you want: invoices send themselves")).toBe(
+      "invoices send themselves"
+    );
+  });
+
+  it("leaves a legitimate colon alone", () => {
+    expect(summaryOf("Mondays: the worst day of the week")).toBe(
+      "Mondays: the worst day of the week"
+    );
+  });
+
+  it("never rewrites person", () => {
+    // Person is the model's job. A regex here cannot tell "we" meaning the
+    // owner from "we" meaning the team, and the degraded path deliberately
+    // stores the visitor's own first-person words.
+    const first = "I spend 40 hours a week coding and we cannot keep up.";
+    expect(summaryOf(first)).toBe(first);
+    expect(advanceWithoutModel(initialDiscoveryState(), first).next.answers
+      .problem?.summary).toBe(first);
+  });
+
+  it("is idempotent across rehydration", () => {
+    const once = coerceDiscoveryState({
+      ...initialDiscoveryState(),
+      answers: { problem: { summary: "The problem:  spaced\n out", quotes: [] } },
+    });
+    const twice = coerceDiscoveryState(JSON.parse(JSON.stringify(once)));
+    expect(once.answers.problem?.summary).toBe("spaced out");
+    expect(twice.answers.problem?.summary).toBe(once.answers.problem?.summary);
   });
 });
