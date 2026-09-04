@@ -44,7 +44,7 @@ sign-in and `/admin/*` run under dev-key caps.
    only. Calendly's dashboard is the truth for now. Board M12 (ask-first: webhook route).
 8. **Voice widget throws on every page (R-004)** — set Retell keys or unmount before launch.
 9. **Unverified sign-in round-trip (R-016)** — five minutes of Matthew's clicking on staging.
-10. **`_legacy/` carries "$50/hr" and dead Calendly handles** — not served; delete or archive so a
+10. **`_legacy/` carries an old hourly price and dead Calendly handles** — not served; delete or archive so a
     future no-price audit doesn't misreport it.
 
 Not risks: `/consulting` "30-minute" (fixed, gated green on the cmo branch); the dead Calendly
