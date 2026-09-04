@@ -100,11 +100,16 @@ visitor surface.
 - The sequence engine lives in Convex.
 - The deliverable is an HTML report to the lead plus an internal brief to
   matthew@ — not the workbook or slide deck floated earlier the same day (#6 below).
-- Cadence: the day-0 report, then daily for four days, then weekly.
+- Cadence shape: the day-0 report, then daily for four days, then weekly. The
+  commitment to *sustain* weekly is open (below) — email #1 sets that expectation,
+  so an unsustained "weekly" is a broken promise (copy-principles §3).
+- Matthew reads and answers every reply himself (his answer to F3).
 - Assessment submit is the first entry point; free-tools, academy and post-call
   come later.
-- A consent line and `leads.consentedAt` ship **before** any sequence sends;
-  addresses captured before that are held out permanently.
+- Consent first, strictly: a consent line on **every** capture form plus
+  `leads.consentedAt` / `consentSource` ship before any sequence sends. Every
+  address captured before that is held out permanently — **nobody on the list
+  today will receive a sequence.**
 
 **Being built** *(email-followup, branch `agent/nurture/email-sequence`; reported,
 not independently verified)*
@@ -115,12 +120,19 @@ not independently verified)*
   visitor's *recorded* words. Never described as "AI-personalised".
 - Schema, sweeper, suppression list and one-click unsubscribe are written but not
   gate-green; it ships paused with zero enrollments. Roadmap R-022.
+- A copy pass by Matthew on the day-0 report (branch, `dfaa57a`): the intro is
+  now just "Here is the write-up from your assessment"; "a real person reads
+  every message" became "I read every reply"; and the close carries his own
+  commitment — *"I'll tell you if I think we are not a good fit and why. And if
+  we are a good fit, I'll tell you how I recommend we get started."* That
+  sentence is Matthew-authored and safe to quote once it is on `main`.
 
 **Open — Matthew's to answer**
 
 - Days 1–2 are his backstory and epiphany; an agent may not write them
   (copy-principles §2). `docs/matthew-story-intake.md` on that branch is unanswered.
-- What the weekly email contains after day 5, and who writes it.
+- Whether he commits to sustaining weekly after day 5, or prefers "when I have
+  something" (email-followup's F1) — and what it contains, and who writes it.
 - Whether `/free-tools` and `/academy` captures enroll, and what their consent
   line says.
 
@@ -132,6 +144,10 @@ not independently verified)*
   deadline in the repo, and *"I hold very few of these at once"* is already
   flagged (#2 below).
 - Do not say "AI". The personalisation is the visitor's own words.
+- Do not state the from-address as matthew@icodemybusiness.com yet. The code
+  default changed on the branch, but `RESEND_FROM_EMAIL` on the Convex deployment
+  overrides it and only the deploy session can read that. Until deploy confirms,
+  "I read every reply" is a promise the envelope may contradict.
 
 ---
 
