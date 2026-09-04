@@ -107,6 +107,8 @@ diagnose Tier 1 movement.
 | `discovery_extraction_truncated` | DiscoveryAssessment when the route reports `stop_reason: "max_tokens"` (client). Fired outside the `advanced` branch on purpose — a truncated reply loses the extraction JSON, so the stage usually does *not* advance. **If this is non-zero, `MAX_TOKENS` in the chat route is too low and answers are being recorded verbatim instead of structured.** | `stage`, `advanced` |
 | `book_call_clicked` | result-screen CTA (client) | `placement: "discovery-result"` |
 
+| `chat_rate_limited` | discovery chat route, **server-side** (`captureServerEvent`) when a session drains its turn bucket | `route`, `stage` — a script never runs our client JS, so this is deliberately not a browser event; non-zero means someone is hammering the assessment |
+
 ### Operational — health
 
 | Metric (event) | Fires from | Key props | Notes |

@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { api } from "../../../../../../convex/_generated/api";
 import { getAuthedConvexClient } from "@/lib/convex-client";
+import { captureServerEvent } from "@/lib/posthog-server";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import {
   advanceWithoutModel,
   applyCorrection,
@@ -52,6 +54,15 @@ const AGENT_KIND = "discovery-assessment";
  * Wide enough that an honest visitor never meets it; still bounded.
  */
 const MAX_MESSAGE_CHARS = 8000;
+/**
+ * How long one model turn may take before we stop waiting and degrade.
+ *
+ * The stream had no deadline, so a hung upstream held the SSE connection open
+ * indefinitely and the visitor watched a cursor blink. A timeout throws, which
+ * the existing catch turns into the degraded path — their answer is recorded
+ * verbatim and the assessment moves on, which is the whole point of that path.
+ */
+const MODEL_TIMEOUT_MS = 90_000;
 
 interface ChatRequest {
   sessionId: string;
@@ -131,6 +142,28 @@ export async function POST(req: NextRequest) {
   }
   if (mode === "correction" && state.stage !== DISCOVERY_STAGE.RECAP) {
     return json(409, { error: "Corrections are only possible at the recap" });
+  }
+
+  // Spend a turn before anything else. Every turn past this point is a model
+  // call we pay for, and nothing bounded them: a script could run turns
+  // indefinitely at our cost. Checked before the message is persisted so a
+  // refused turn leaves no dangling half-exchange in the transcript.
+  const budget = await convex.mutation(api.agentSessions.consumeChatTurn, {
+    sessionId,
+  });
+  if (!budget.ok) {
+    // Server-side on purpose: a script never runs our client JavaScript, so a
+    // browser-fired event would miss precisely the traffic worth seeing.
+    captureServerEvent({
+      distinctId: sessionId,
+      event: ANALYTICS_EVENTS.CHAT_RATE_LIMITED,
+      properties: { route: "agent/discovery/chat", stage: state.stage },
+    });
+    return json(429, {
+      error:
+        "That's a lot of messages in a short time. Give it a minute and send that again.",
+      retryAt: budget.retryAt,
+    });
   }
 
   await convex.mutation(api.agentSessions.appendMessage, {
@@ -278,12 +311,15 @@ export async function POST(req: NextRequest) {
         }
 
         const client = new Anthropic({ apiKey });
-        const response = client.messages.stream({
-          model: MODEL,
-          max_tokens: MAX_TOKENS,
-          system: systemBlocks,
-          messages,
-        });
+        const response = client.messages.stream(
+          {
+            model: MODEL,
+            max_tokens: MAX_TOKENS,
+            system: systemBlocks,
+            messages,
+          },
+          { timeout: MODEL_TIMEOUT_MS }
+        );
 
         for await (const event of response) {
           if (

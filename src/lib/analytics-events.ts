@@ -123,6 +123,16 @@ export const ANALYTICS_EVENTS = {
    */
   DISCOVERY_MODEL_USAGE: "discovery_model_usage",
 
+  /**
+   * A session hit the per-session chat turn ceiling (props: route, stage).
+   *
+   * Captured SERVER-side on purpose. A bot or a script never runs our client
+   * JavaScript, so a browser-fired event would miss exactly the traffic this
+   * exists to reveal — the point is that excessive use is visible, not merely
+   * throttled.
+   */
+  CHAT_RATE_LIMITED: "chat_rate_limited",
+
   // --- Operational: health signals ------------------------------------
   /** An API route returned an error (captured in errorResponse). */
   API_ERROR: "api_error",

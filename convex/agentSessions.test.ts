@@ -146,6 +146,73 @@ describe("bound sessions are identity-protected", () => {
   });
 });
 
+describe("consumeChatTurn", () => {
+  it("allows a real assessment's worth of turns", async () => {
+    // Five questions with up to two drill-downs each is ~15 model turns, plus
+    // recap corrections. An honest visitor must never meet the ceiling — and
+    // refill is ~0.011 turns/second, so within one sitting the bucket's
+    // CAPACITY is the whole budget. This case exists because capacity 10 would
+    // have cut a brisk visitor off at question four.
+    const t = await anonSession();
+    for (let i = 0; i < 18; i++) {
+      const r = await t.mutation(api.agentSessions.consumeChatTurn, {
+        sessionId: SESSION,
+      });
+      expect(r.ok).toBe(true);
+    }
+  });
+
+  it("stops a burst once the bucket drains", async () => {
+    // The reason this is a token bucket and not a fixed window: a fixed window
+    // lets the whole hour's allowance be spent in seconds, which is where the
+    // cost of an attack lands.
+    const t = await anonSession();
+    let refused = 0;
+    for (let i = 0; i < 60; i++) {
+      const r = await t.mutation(api.agentSessions.consumeChatTurn, {
+        sessionId: SESSION,
+      });
+      if (!r.ok) refused++;
+    }
+    expect(refused).toBeGreaterThan(0);
+  });
+
+  it("meters each session separately", async () => {
+    const t = await anonSession();
+    await t.mutation(api.agentSessions.getOrCreate, {
+      sessionId: "da_other",
+      agentKind: AGENT_KIND,
+      source: "homepage",
+    });
+    for (let i = 0; i < 60; i++) {
+      await t.mutation(api.agentSessions.consumeChatTurn, {
+        sessionId: SESSION,
+      });
+    }
+    // One visitor exhausting their budget must not lock anybody else out.
+    const other = await t.mutation(api.agentSessions.consumeChatTurn, {
+      sessionId: "da_other",
+    });
+    expect(other.ok).toBe(true);
+  });
+
+  it("refuses a session owned by someone else", async () => {
+    const t = await boundSession();
+    await expect(
+      t
+        .withIdentity(OTHER)
+        .mutation(api.agentSessions.consumeChatTurn, { sessionId: SESSION })
+    ).rejects.toThrow(/another account/);
+  });
+
+  it("rejects an unknown session", async () => {
+    const t = convexTest(schema, modules);
+    await expect(
+      t.mutation(api.agentSessions.consumeChatTurn, { sessionId: "da_nope" })
+    ).rejects.toThrow(/Session not found/);
+  });
+});
+
 describe("bindToAccount", () => {
   it("rejects a signed-out caller", async () => {
     const t = await anonSession();
