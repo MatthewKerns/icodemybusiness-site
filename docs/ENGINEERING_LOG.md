@@ -70,3 +70,13 @@ the deploy script's own gates stay.
 **What it was.** Measured: TCP connects to the VPS succeeded 7/12 with 0.2–1.5 s handshakes (normally ~0.1 s), a control site 6/6; plain HTTP returned a 301 in 3 s; third-party fetches (r.jina.ai) got the page in 0.35 s throughout; Hostinger metrics were flat (CPU 30 %, RAM 3.8 GB, disk 306.9 GB, no reboot). Multi-packet exchanges (TLS, SSH KEX, rsync) failed while single-packet ones limped through: ~40 % loss on the path (Cox → Cogent → Hostinger DC). Visitors were never affected.
 
 **Rule.** Before acting on the host for a "VPS down" symptom, run the three-step path test (third-party fetch, 12× TCP-connect ratio vs a control, Hostinger metrics). "Connection closed by … port 22" after the banner is not evidence of fail2ban. When the path is lossy, stop all VPS jobs (offload-run, pre-push gates, deploys) — they hang or half-complete, and a half-completed deploy is worse than a delayed one; the gate refusing a push it cannot run is the correct behaviour and was observed.
+
+## 2026-09-04 — a Convex env-list command printed a live secret into a session transcript
+
+**What happened.** Answering a peer session's existence-only question ("does a Convex production deployment exist"), the deploy session ran the Convex CLI's env-listing subcommand with a production flag to check. It succeeded and printed the actual configured values — including a live email-provider API key — to stdout, landing in the session transcript. The repo's secret-guard hook only blocks reading `.env*` files directly (a value-printing command against a matching path); it has no awareness of a CLI subcommand whose entire purpose is to print secret values.
+
+**Why it got through.** No rule or hook distinguished "list what env vars exist" (safe) from "print what they're set to" (not safe to run in an agent session) — the CLI's own `env list` conflates the two. A stale local permission grant (`.claude/settings.local.json`, gitignored, machine-local only) also pre-approved a bare invocation of that command without a prompt.
+
+**Fixes.** (1) `AGENTS.md` Never Do: never run the Convex CLI's env-list/env-get commands directly. (2) `.claude/hooks/convex-secret-guard.sh` blocks them (override `CONVEX_ENV_READ_APPROVED`). (3) `scripts/convex-env-names.sh` is the approved names-only alternative. (4) This entry. (5) The stale local permission grant was removed on the affected machine; it was never a repo file.
+
+**Not fixed by this.** The value already printed is still in that session's transcript. Treat it as exposed — the affected key should be rotated (Matthew's to rotate, per the usual pattern for provider keys).
