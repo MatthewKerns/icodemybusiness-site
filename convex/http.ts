@@ -232,9 +232,14 @@ http.route({
               email: visitorEmail,
               name: visitorName,
               painPoints,
+              // `calendly.com/icodemybusiness/*` does not exist (404) — it was
+              // a dead default that shipped a broken button whenever
+              // CALENDLY_URL was unset on the Convex deployment. The live
+              // event is the 15-minute "Introduction Call" (ROADMAP R-001),
+              // same handle `src/app/book/page.tsx` falls back to.
               calendlyUrl:
                 process.env.CALENDLY_URL ??
-                "https://calendly.com/icodemybusiness/discovery",
+                "https://calendly.com/12kernsmatthew/new-meeting-1",
             }
           );
         }
