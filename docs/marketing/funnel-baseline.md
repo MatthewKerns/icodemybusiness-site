@@ -25,8 +25,12 @@ FROM events WHERE timestamp >= now() - INTERVAL 30 DAY GROUP BY event` and the `
 | book_call_clicked | 1 | 1 | 09-02 | click only; booking completion is not captured |
 | api_error | 1 | 1 | 09-02 | |
 
-`discovery_recap_confirmed`: defined, never received (REPORTED by business-intake; consistent with
-the event list above, which does not contain it).
+`discovery_recap_confirmed`: never received — **but this is partly a wiring artefact, not a behavioural
+finding.** For a guest (the default path) the event fires only when the email is submitted
+(`DiscoveryAssessment.tsx:262` inside `onSubmit`; `DiscoveryRecap.confirm()` for guests just opens the
+email form). The "Yes, that's right" click itself is unmeasured. So the one session that reached stage 5
+may have accepted the recap and left at the email step; nothing would show it. (VERIFIED by
+business-intake by grep, 09-04; `docs/observability.md` corrected in their `5dc2df1`.)
 
 ## Pageviews by path, 30d (VERIFIED)
 | path | host | views | people |
@@ -47,7 +51,8 @@ Zero pageviews from host `icodemybusiness.com`.
 - **n is too small for any drop-off narrative** (business-intake's caution, agreed). 52 "people" over
   30 days on staging, an unknown share of them Matthew and agent sessions.
 - The splash gate has one day of instrumentation; nothing can be said about it yet.
-- The homepage's only conversion path (assessment) has been completed to the recap once, ever.
+- The homepage's only conversion path (assessment) has reached the recap once, ever; whether that
+  visitor accepted the recap is unknowable from the data (see the note above).
 - Booking is measured as a click on the way to Calendly, never as a booked event.
 
 ## Claims
@@ -55,5 +60,5 @@ Zero pageviews from host `icodemybusiness.com`.
 |---|---|---|
 | all event counts / path counts | VERIFIED | the two queries above, run by cmo 09-04 |
 | prod still serves the placeholder | VERIFIED (ROADMAP R-002, re-verified 09-02) + REPORTED (business-intake 09-04) | `docs/ROADMAP.md` R-002 |
-| `discovery_recap_confirmed` never received | REPORTED | business-intake 09-04; absent from the 30d event list |
+| `discovery_recap_confirmed` never received, and fires only on email submit for guests | VERIFIED (event list) + VERIFIED-by-business-intake (grep, 09-04) | 30d event list; `DiscoveryAssessment.tsx:262`, `DiscoveryRecap.tsx` |
 | `ac20cfb` changes Q1 + recap | REPORTED | business-intake 09-04 |

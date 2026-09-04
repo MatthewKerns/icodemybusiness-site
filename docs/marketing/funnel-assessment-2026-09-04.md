@@ -73,7 +73,7 @@ Taxonomy `src/lib/analytics-events.ts`. `$pageview` is manual per route (`captur
 | 1 | Booking completed | `consultation_booked` — `CalendlyEmbed.tsx:91` on `calendly.event_scheduled` | wired, client-only, PostHog-only, **never received in 30d** | The one number the business runs on. Lost to tab-close or blockers; no Calendly webhook, no Convex row. Needs a server-side source of truth (Calendly webhook → Convex + PostHog server capture). Ask-first: new route. |
 | 2 | Real-visitor arrival | `$pageview` by `$host` | works | Today it *is* the cutover detector: first `$pageview` with host `icodemybusiness.com` = cutover happened. Keep a saved insight on it. |
 | 3 | Email given at assessment end | `discovery_assessment_completed` (client) + server `lead_captured` only on the Top-3 route | client-only for the discovery path; `lead_captured` 1 in 30d | The lead is the asset; capture it server-side in the `submit` mutation path so it survives the tab. |
-| 4 | Recap reached / confirmed | `discovery_stage_advanced{stage:5}` / `discovery_recap_confirmed` | confirm never received; entry is inferred from a stage breakdown | business-intake asked to verify wiring and add a distinct recap-shown event (`ac20cfb` in flight). |
+| 4 | Recap accepted | `discovery_recap_confirmed` | **misnamed**: for guests it fires on email submit, not on the "Yes, that's right" click (VERIFIED by business-intake); the click is unmeasured | The real gap is the click. business-intake has put a click-level event to Matthew (their earlier "recap shown" proposal was declined by him as redundant with stage 5, so this is his call, not ours). |
 | 5 | Assessment start + account choice | `assessment_started`, `assessment_account_choice` | fine | Already answers "does the gate cost us people" once n exists. |
 | 6 | Splash → main | `splash_entered` | one day old (`068dc8e`) | Earliest drop-off point; nothing to say until ~100 real arrivals. |
 | 7 | Report email delivered / failed | none (doc fields `emailSent`, `internalSetError`) | missing | At volume this is silent lead loss; pair the error path with an `api_error`-class event. |
@@ -81,12 +81,29 @@ Taxonomy `src/lib/analytics-events.ts`. `$pageview` is manual per route (`captur
 | 9 | `/book`, `/consulting` arrival, Calendly iframe shown | `$pageview` only; `book_call_clicked` is intent | acceptable for now | Add `calendly_embed_viewed` only if #1 shows a click→booked gap worth explaining. |
 
 ## 4. Trust gaps and decision triggers in the copy
-_(filled from the copy audit — see §4 below once landed)_
+Full audit: `copy-trust-gap-audit.md` (per-surface tables, file:line). The five that matter:
+1. `/consulting` promises a 30-minute call four times; the live event is 15 min. The one promise a
+   visitor tests at the moment of booking. **Fixed on this branch** (`ConsultingHero.tsx`,
+   `consulting/page.tsx`) — a verified fact replacing a wrong one, not a new promise; Matthew's merge.
+2. Homepage capacity claims (`landing.ts:145,155`) — still live, with `offer` and story-intake C1/C4.
+3. `/consulting` "2–3 hours research" / "30-day follow-up", said three times; also `/services:183`.
+   [CLAIM NEEDED] — appended to story-intake as C7/C8 via email-followup, not a second list.
+4. The splash has no trigger at all. Every visitor sees it first. One concrete PROBLEM line
+   (`landing.ts:44`) on the splash is the cheapest trigger move on the site — delegated to `offer`.
+5. `/services` is process-as-subject (§1) with proof gated off. Lowest traffic (1 view/30d); park it.
+
+**Decision triggers, where they sit:** the letter's trigger is the free write-up regardless of outcome
+(`PATHS.diagnostic`, mid-page); `/consulting`'s is the Measurable Progress Guarantee (mid-page, under
+the unverified cards); `/book`'s is the assessment cross-link inside the booking section (best
+placement on the site, leave it); the recap's is the visitor's own words (strongest proof we have).
+The lever is *position*, not new copy: move the write-up promise and the guarantee above the fold on
+their pages, and give the splash one specific line. None of that needs a fact from Matthew.
 
 ## 5. What was delegated this pass
 | to | what | state |
 |---|---|---|
 | business-intake | verify `discovery_recap_confirmed` wiring; distinct recap-shown event on `ac20cfb` | sent 09-04 11:05 |
 | email-followup | fix dead Calendly fallback (done, REPORTED); "In your own words" framing line (given); consent gate raised to Matthew as D3 prerequisite | sent 09-04 |
-| offer | (pending copy audit) top trust gaps on the letter + `/consulting` 30-min line | — |
+| offer | splash trigger line + move the write-up promise above the fold (position, no new claims); letter :145 :155 :134 already theirs | sent 09-04 11:40 |
+| cmo (self) | `/consulting` 30→15 min ×4; `/consulting` guarantee one-liner into the hero | on branch |
 | Matthew | R-002 cutover, R-003 Clerk keys, D3 consent, C1–C6 claims (story-intake) | board |
