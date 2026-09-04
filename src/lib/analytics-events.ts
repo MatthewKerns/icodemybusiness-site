@@ -77,7 +77,21 @@ export const ANALYTICS_EVENTS = {
   DISCOVERY_RECAP_CORRECTION_OPENED: "discovery_recap_correction_opened",
   /** Discovery assessment: a recap correction was submitted (props: chars, degraded). */
   DISCOVERY_RECAP_CORRECTED: "discovery_recap_corrected",
-  /** Discovery assessment: the visitor confirmed the recap in their own words. */
+  /**
+   * Discovery assessment: "Yes, that's right" was clicked (props: needsEmail).
+   *
+   * Distinct from DISCOVERY_RECAP_CONFIRMED, which despite its name fires on
+   * email submission. A guest who accepts the recap and then abandons the email
+   * form emits this and nothing after it, which is the only way to see that drop.
+   */
+  DISCOVERY_RECAP_ACCEPTED: "discovery_recap_accepted",
+  /**
+   * Discovery assessment: the email was submitted and the report requested.
+   *
+   * Named for the recap for historical reasons; it fires in onSubmit, one await
+   * before DISCOVERY_ASSESSMENT_COMPLETED. Pair it with DISCOVERY_RECAP_ACCEPTED
+   * to read the accept-to-email drop.
+   */
   DISCOVERY_RECAP_CONFIRMED: "discovery_recap_confirmed",
   /** Discovery assessment: the report was claimed into a signed-in account. */
   DISCOVERY_ACCOUNT_CLAIMED: "discovery_account_claimed",

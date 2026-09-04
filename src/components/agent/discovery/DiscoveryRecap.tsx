@@ -23,6 +23,7 @@ export function DiscoveryRecap({
   correction,
   busy,
   onCorrect,
+  onAccepted,
   onCorrectionOpened,
   onSubmit,
 }: {
@@ -30,6 +31,12 @@ export function DiscoveryRecap({
   correction?: string;
   busy: boolean;
   onCorrect: (text: string) => void;
+  /**
+   * "Yes, that's right" was clicked. `needsEmail` says whether the visitor is
+   * about to meet the email form or goes straight through, which is the whole
+   * point of the event: the drop happens in that form.
+   */
+  onAccepted?: (needsEmail: boolean) => void;
   /**
    * The visitor opened the correction box. Analytics live in the container,
    * not here: useTrackEvent pulls in useAuth, usePathname and useMutation, and
@@ -49,8 +56,10 @@ export function DiscoveryRecap({
   const clerkEmail = user?.primaryEmailAddress?.emailAddress;
 
   const confirm = async () => {
-    if (isLoaded && isSignedIn && clerkEmail) {
-      await submit(clerkEmail, user?.fullName ?? undefined);
+    const straightThrough = Boolean(isLoaded && isSignedIn && clerkEmail);
+    onAccepted?.(!straightThrough);
+    if (straightThrough) {
+      await submit(clerkEmail!, user?.fullName ?? undefined);
       return;
     }
     setPhase("email");

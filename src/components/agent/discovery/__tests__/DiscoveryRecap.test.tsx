@@ -78,6 +78,18 @@ describe("DiscoveryRecap", () => {
     expect(screen.getByLabelText(/what did I get wrong/i)).toBeInTheDocument();
   });
 
+  it("reports the accept the moment it is clicked, before the email form", () => {
+    // discovery_recap_confirmed only fires once an address is in, so without
+    // this the guest who accepts and then abandons the form leaves no trace.
+    const onAccepted = vi.fn();
+    const onSubmit = vi.fn(async () => {});
+    renderRecap({ onAccepted, onSubmit });
+    fireEvent.click(screen.getByRole("button", { name: /yes, that's right/i }));
+    expect(onAccepted).toHaveBeenCalledTimes(1);
+    expect(onAccepted).toHaveBeenCalledWith(true); // signed out: email form next
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   it("hands the correction back trimmed, once", () => {
     const onCorrect = vi.fn();
     renderRecap({ onCorrect });

@@ -236,6 +236,20 @@ export function DiscoveryAssessment({ source }: { source: DiscoverySource }) {
     void streamTurn(content, "answer");
   }, [input, streamTurn]);
 
+  const onAccepted = useCallback(
+    (needsEmail: boolean) => {
+      // The click itself, not the email submission. discovery_recap_confirmed
+      // fires only once an address is in, so without this the visitor who
+      // accepts the recap and then walks away from the form is invisible.
+      track(
+        ANALYTICS_EVENTS.DISCOVERY_RECAP_ACCEPTED,
+        { needsEmail },
+        "decision"
+      );
+    },
+    [track]
+  );
+
   const onCorrectionOpened = useCallback(() => {
     track(ANALYTICS_EVENTS.DISCOVERY_RECAP_CORRECTION_OPENED, {}, "decision");
   }, [track]);
@@ -317,6 +331,7 @@ export function DiscoveryAssessment({ source }: { source: DiscoverySource }) {
                   correction={state.discovery.correction}
                   busy={state.isStreaming}
                   onCorrect={onCorrect}
+                  onAccepted={onAccepted}
                   onCorrectionOpened={onCorrectionOpened}
                   onSubmit={onSubmit}
                 />
