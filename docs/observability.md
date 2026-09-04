@@ -98,7 +98,7 @@ diagnose Tier 1 movement.
 | `discovery_stage_advanced` | DiscoveryAssessment on each server `state` event with `advanced` (client) | `stage`, `followUpsUsed`, `forced`, `degraded` |
 | `discovery_recap_correction_opened` | DiscoveryAssessment when "Not quite" is clicked (client) | — |
 | `discovery_recap_corrected` | DiscoveryAssessment when a correction is submitted (client) | `chars`, `degraded` |
-| `discovery_recap_confirmed` | DiscoveryAssessment on "Yes, that's right" (client) | — |
+| `discovery_recap_confirmed` | DiscoveryAssessment in `onSubmit`, i.e. when the email is submitted — **not** when "Yes, that's right" is clicked. A guest clicking it only opens the email form, which fires nothing. This event therefore trails `discovery_assessment_completed` by one `await` and can only exceed it if `submit` throws. The click itself is unmeasured. | — |
 | `discovery_account_claimed` | DiscoveryAccountCta after `claim` succeeds (client) | — |
 | `book_call_clicked` | result-screen CTA (client) | `placement: "discovery-result"` |
 
