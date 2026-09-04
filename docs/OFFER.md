@@ -33,7 +33,7 @@ cut it differently.
 | Rung | Paper plan | Capacity (paper) | Rate card, March 2026 | Live site, Sept 2026 |
 |---|---|---|---|---|
 | Free | Free training, four pillars | open | discovery call, audits, blueprints | discovery assessment + 15-min Introduction Call |
-| Middle | Paid consulting | 3 slots / week | $50, $100, $200 per hour | **no path** |
+| Middle | Paid consulting | 3 slots / week | $50, $100, $200 per hour → **$200–$500 per hour, split-tested by audience segment** (Matthew, 09-04) | **no path** |
 | Top | Done for you | 2 slots / month | builds $5k–$50k+, 2–12 wks; packages $3.5k–$5k/mo | three routes: have it built / bring me inside / rebuild how it runs |
 
 The rate card is `offers/consulting.md` and is internal only. **No price appears
@@ -60,9 +60,94 @@ on any served page** (standing decision 2026-09-02, roadmap R-009).
    assessment, the more context Matthew brings. By the time the offer lands they
    should already be sold on who he is from how the paths are laid out.
    *[transcripts 09-02, 09-04]*
-5. **Follow-up** is a conversational email nurture built on DotCom Secrets, using
-   the assessment data, plus a free professional-advice deliverable (workbook or
-   slide deck) generated from what they told him. *[transcript 09-04]*
+5. **Follow-up happens in the inbox** — see "Value in your inbox" below. Today
+   that is the write-up email after the assessment; the nurture sequence is
+   decided and being built, not live. *[transcript 09-04]*
+
+---
+
+## Value in your inbox — how a lead stays warm
+
+Most people who finish the assessment are not ready to buy that week. The inbox
+is where the offer is delivered over time, and where the free rung actually
+happens for the majority who never book. Matthew's reason, on the Aaron call:
+*"I personally bought things that are high-ticket items just because someone
+stayed in my inbox and I just kept reading that email."* And on what delivery
+looks like from the client's side: *"next week we roll out updates, and then
+boom — hey guys, we're in your inbox still."* His instruction on 09-04: *"we need
+to keep the leads warm!"* — email sequencing is part of the value delivery
+system, not a marketing add-on. *[Fathom 08-24 at 20:04 and 40:30; transcript 09-04]*
+
+Every line below carries one of four labels. Only **live** may be repeated on a
+visitor surface.
+
+**Live** *(verified in code, 09-04)*
+
+- `/free-tools` capture → welcome email with the download links. Audited in
+  `emailSends` (template `welcome`).
+- Assessment submit → the write-up email: their five answers back in their own
+  words, the recommended path, one thing to do this week, the booking link, and
+  "reply — a real person reads every message". Audited (`discovery-report`). A
+  degraded variant sends the raw answers when the model is down.
+- Calendly booking confirmation, e-commerce intake follow-up, and an internal
+  roadmap alert to Matthew — sent, not audited.
+- Captures on `/academy`, `/mango`, `/services` create a lead and send **nothing**.
+- **Nothing sends a second email to anyone.** Every scheduled call is immediate;
+  there is no email cron.
+
+**Decided by Matthew** *(email-followup session, 09-04)*
+
+- The sequence engine lives in Convex.
+- The deliverable is an HTML report to the lead plus an internal brief to
+  matthew@ — not the workbook or slide deck floated earlier the same day (#6 below).
+- Cadence shape: the day-0 report, then daily for four days, then weekly. The
+  commitment to *sustain* weekly is open (below) — email #1 sets that expectation,
+  so an unsustained "weekly" is a broken promise (copy-principles §3).
+- Matthew reads and answers every reply himself (his answer to F3).
+- Assessment submit is the first entry point; free-tools, academy and post-call
+  come later.
+- Consent first, strictly: a consent line on **every** capture form plus
+  `leads.consentedAt` / `consentSource` ship before any sequence sends. Every
+  address captured before that is held out permanently — **nobody on the list
+  today will receive a sequence.**
+
+**Being built** *(email-followup, branch `agent/nurture/email-sequence`; reported,
+not independently verified)*
+
+- The DotCom Secrets Soap Opera shape: the day-0 report is email #1 (welcome,
+  expectations, first open loop); days 1–4 are backstory → epiphany → hidden
+  benefits → call to action, branching on the recommended path and quoting the
+  visitor's *recorded* words. Never described as "AI-personalised".
+- Schema, sweeper, suppression list and one-click unsubscribe are written but not
+  gate-green; it ships paused with zero enrollments. Roadmap R-022.
+- A copy pass by Matthew on the day-0 report (branch, `dfaa57a`): the intro is
+  now just "Here is the write-up from your assessment"; "a real person reads
+  every message" became "I read every reply"; and the close carries his own
+  commitment — *"I'll tell you if I think we are not a good fit and why. And if
+  we are a good fit, I'll tell you how I recommend we get started."* That
+  sentence is Matthew-authored and safe to quote once it is on `main`.
+
+**Open — Matthew's to answer**
+
+- Days 1–2 are his backstory and epiphany; an agent may not write them
+  (copy-principles §2). `docs/matthew-story-intake.md` on that branch is unanswered.
+- Whether he commits to sustaining weekly after day 5, or prefers "when I have
+  something" (email-followup's F1) — and what it contains, and who writes it.
+- Whether `/free-tools` and `/academy` captures enroll, and what their consent
+  line says.
+
+**Rules for anyone writing about this** (CMO board, letter, promises workbook)
+
+- Do not say the sequence exists, and do not promise a cadence on any visitor
+  surface, until it sends from prod.
+- No urgency, scarcity or capacity language in the sequence — there is no real
+  deadline in the repo, and *"I hold very few of these at once"* is already
+  flagged (#2 below).
+- Do not say "AI". The personalisation is the visitor's own words.
+- Do not state the from-address as matthew@icodemybusiness.com yet. The code
+  default changed on the branch, but `RESEND_FROM_EMAIL` on the Convex deployment
+  overrides it and only the deploy session can read that. Until deploy confirms,
+  "I read every reply" is a promise the envelope may contradict.
 
 ---
 
@@ -84,6 +169,13 @@ From deals closed or negotiated in the last two weeks, not from site copy.
 - **Delivery promise.** Weekly video walkthroughs of what changed; the client owns
   it outright. Speed of iteration is the differentiator. *[transcripts 09-02;
   Fathom 08-26]*
+- **Paid consulting rate.** Matthew, 09-04: *"paid consulting we need to split
+  test $200–$500/hr on segments of our audience."* This replaces the March rate
+  card's $50/$100/$200 tiers. The test cannot run as a visible price on the site
+  (standing no-price decision, R-009); it runs where a price is actually quoted —
+  the Introduction Call, proposals, and segmented email — with the segment
+  recorded on the lead. Segment design and the recording mechanism are open
+  (#8 below). *[transcript 09-04]*
 - **Matthew's own 90-day picture**, in his words to the assessment: a high-ticket
   program where people pay to be in the community and get trained on running a
   business with clear thinking, software and AI tools. $50k/mo and up.
@@ -97,9 +189,12 @@ From deals closed or negotiated in the last two weeks, not from site copy.
 |---|---|---|
 | 1 | **Program capacity.** Site said "a handful a year". | **Resolved 09-04** — Matthew's wording: *"A few slots available per year."* Live in `da28c3c`. |
 | 2 | **Fractional capacity.** Site says *"capacity-limited — I hold very few of these at once."* Paper says done-for-you is 2 slots/month. | **Open.** Agent-authored; needs Matthew's number or wording. |
-| 3 | **The middle rung has no door.** Paid consulting is on paper (3/week) and on the rate card, but the site's four routes are one free diagnosis and three done-for-you shapes. | **Open.** Decide whether consulting gets a path. |
+| 3 | **The middle rung has no door.** Paid consulting is on paper (3/week) and on the rate card, but the site's four routes are one free diagnosis and three done-for-you shapes. | **Open.** Decide whether consulting gets a path. Its price is now decided (#7), which makes the missing door more visible, not less. |
 | 4 | **Three tiers vs four paths.** The site split the single done-for-you rung into build / fractional / program. | **Open.** Decide which is canonical. |
 | 5 | **Prices.** Rate card has them (March); site deliberately doesn't. Fathom deals run 2–8× the rate-card package figures. | Consistent with the no-price decision. Rate card is stale. |
+| 6 | **The follow-up deliverable.** Transcript 09-04, morning: *"an excel workbook … or a slide deck"*. Same day, asked directly: HTML report to the lead + brief to Matthew. | **Resolved 09-04** — the HTML report. A workbook or deck needs dependencies the stack doesn't have. |
+| 7 | **Consulting rate.** Rate card (March): $50 / $100 / $200 per hour. | **Resolved 09-04** — Matthew: $200–$500 per hour, split-tested by audience segment. Rate card is superseded. |
+| 8 | **How the rate test runs.** A split test needs a segment on each lead and a place the price is shown; the site shows none (R-009). | **Open.** Matthew to name the segments (e.g. warm network vs inbound, or by assessment path) and where the price is quoted — call, proposal, or email. `leads` has `source` and `variant` fields today and nothing else. |
 
 ---
 
@@ -111,6 +206,10 @@ From deals closed or negotiated in the last two weeks, not from site copy.
   08-26 Otto Petersen coaching (177211751).
 - **Session transcripts** — `~/.claude/projects/-Users-matthewkerns-workspace-agency-operations-icodemybusiness-site/*.jsonl`,
   Matthew's user messages 2026-09-01 → 09-04.
+- **email-followup session** — Matthew's answers on 09-04 (engine, deliverable,
+  cadence, entry point, consent); build status as that session reported it.
+  Framework: DotCom Secrets §7–8 notes at
+  `~/workspace/ecommerce/ecommerce-tools/fulfillment-logistics/inventoryhero-marketing-frontend/docs/funnel-audit/dotcom-secrets-framework-notes.md`.
 - **Written** — `offers/consulting.md`, `offers/free-offers.md`,
   `offers/info-products.md`, `content/README.md`,
   `skill-packages/ecommerce-brand-automation-audit/ecommerce-intake/references/5-questions-framework.md`.
