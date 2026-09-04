@@ -167,7 +167,13 @@ you:
 3. **`mdToHtml` maps each newline-separated line to its own `<p>`.** That is
    exactly the Soap Opera short-line, heavy-white-space look, for free. Author
    story emails as newline-separated markdown.
-4. **Quotes contain newlines and are deliberately not normalized** — they are
+4. **One `style` attribute per tag.** `emailStyles.*` values are style *bodies*,
+   not attributes, so they concatenate: `style="${emailStyles.paragraph}color:#999;"`.
+   Writing a second `style=` on the same tag is silently ignored — browsers keep
+   the first and drop the rest, so the override never applies. This shipped in
+   the booking confirmation and nobody saw it, because the failure looks exactly
+   like the styling working.
+5. **Quotes contain newlines and are deliberately not normalized** — they are
    raw slices of what someone typed into a textarea. Collapse whitespace at
    render (`.replace(/\s+/g, " ").trim()`). **Never edit the words themselves:**
    no paraphrase, no tidying, no fixing their grammar.

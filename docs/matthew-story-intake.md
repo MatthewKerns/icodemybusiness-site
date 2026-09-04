@@ -105,6 +105,17 @@ That is the form; the loop is what pulls a reader to email #3.
   is a *different* promise from the thirty-day guarantee at `landing.ts:195` and
   `consulting/page.tsx:56`, and having both live invites the reader to conflate
   them. Raised by the cmo session's copy audit.
+- **C9.** `LIVE` — `src/content/landing.ts:204` reads *"One conversation. You
+  describe where the week goes; I tell you what I'd fix first and whether I'm
+  the right person to fix it."* Like C1, it traces to `69a2ea7` — the original
+  agent-authored letter — and was never ratified. **You removed that exact
+  clause from the discovery report today**, replacing it with the good-fit
+  sentence, which is why it surfaced: a copy pass proposed reusing it in the
+  booking confirmation and it was held back rather than spread to a third
+  template. Three ways to go: ratify it as yours, replace it on the homepage
+  with the good-fit sentence you wrote, or delete it. Until then no email uses
+  it.
+
 ## Group D — post-call and no-show (track 4)
 
 - **D1.** When someone doesn't show, what do you actually do now? One reschedule

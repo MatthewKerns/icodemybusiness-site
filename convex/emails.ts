@@ -251,22 +251,22 @@ export const sendCalendlyBookingEmail = internalAction({
     <p style="${emailStyles.heading}">${greeting}</p>
     <p style="${emailStyles.paragraph}">
       Thanks for chatting with Alex, our AI assistant. Based on what you shared,
-      a quick discovery call is the best next step to map out a solution tailored to your business.
+      a short Introduction Call is the next step.
     </p>
     ${painPointsHtml}
     <p style="${emailStyles.paragraph}">
-      In a 30-minute discovery call, we&rsquo;ll dig into the specifics and outline a clear path forward &mdash;
-      no pressure, just clarity.
+      On the call &mdash; 15 minutes &mdash; I&rsquo;ll go through what you
+      shared. I&rsquo;ll tell you if I think we are not a good fit and why.
     </p>
     <div style="text-align:center;margin:28px 0;">
-      <a href="${args.calendlyUrl}" style="${emailStyles.button}">Book Your Discovery Call</a>
+      <a href="${args.calendlyUrl}" style="${emailStyles.button}">Book your Introduction Call</a>
     </div>
-    <p style="${emailStyles.paragraph}" style="color:#999;">
+    <p style="${emailStyles.paragraph}color:#999;">
       This link will take you to our Calendly page where you can pick a time that works for you.
     </p>
   </div>`;
 
-    const subject = "Your Custom Discovery Call — Book Now";
+    const subject = "Book your Introduction Call";
     const html = wrapHtml(subject, bodyContent);
     await sendEmail({ to: args.email, subject, html });
   },
