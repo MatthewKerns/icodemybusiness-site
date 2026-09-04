@@ -18,3 +18,4 @@ status column after verification. Never delete rows.
 | 2026-09-04T10:54Z | d503b12 | Merge branch 'agent/cmo/team-protocol' | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
 | 2026-09-04T12:06Z | 64ef198 | Merge branch 'agent/intake/session-auth' | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
 | 2026-09-04T12:11Z | 320ef5a | docs(release): queue row — 64ef198 staging-verified (session-auth) | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
+| 2026-09-04T12:19Z | c603b5f | Merge remote-tracking branch 'origin/main' into agent/offer/landing | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
