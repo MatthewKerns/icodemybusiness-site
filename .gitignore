@@ -38,6 +38,7 @@ convex/_generated/ai/
 .claude/*
 !.claude/hooks/
 !.claude/settings.json
+!.claude/team/
 
 # Testing
 coverage/
