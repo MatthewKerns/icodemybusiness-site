@@ -7,12 +7,12 @@ describe("discoveryReducer", () => {
     const s = discoveryReducer(initialState("s"), {
       type: "anchor",
       messageId: "a0",
-      text: "What's the biggest thing eating your week right now?",
+      text: "What's your biggest frustration in the business right now?",
     });
     expect(s.messages).toHaveLength(1);
     expect(s.messages[0]).toMatchObject({
       role: "assistant",
-      content: "What's the biggest thing eating your week right now?",
+      content: "What's your biggest frustration in the business right now?",
     });
   });
 

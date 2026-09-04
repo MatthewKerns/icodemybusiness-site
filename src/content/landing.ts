@@ -152,7 +152,7 @@ export const PATHS: Path[] = [
     forWho: "The back office is the bottleneck and you want it structurally different, not patched.",
     what: "A defined outcome with a start and an end: the manual core of your operation replaced by systems that run themselves, with your team trained to keep them running.",
     timeline: "A defined ninety-day program",
-    commitment: "The deepest engagement I offer. A handful a year.",
+    commitment: "The deepest engagement I offer. A few slots available per year.",
     highlight: false,
     plot: { depth: 4, weeks: 13, shortTimeline: "90 days" },
   },

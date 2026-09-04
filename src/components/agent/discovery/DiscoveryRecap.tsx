@@ -4,7 +4,12 @@ import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Check, Loader2, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { recapText, type DiscoveryAnswers } from "@/content/discovery-questions";
+import {
+  RECAP_CONFIRM,
+  RECAP_INTRO,
+  recapRows,
+  type DiscoveryAnswers,
+} from "@/content/discovery-questions";
 
 /**
  * Stage 5: play the five answers back in the visitor's words and ask.
@@ -18,12 +23,26 @@ export function DiscoveryRecap({
   correction,
   busy,
   onCorrect,
+  onAccepted,
+  onCorrectionOpened,
   onSubmit,
 }: {
   answers: DiscoveryAnswers;
   correction?: string;
   busy: boolean;
   onCorrect: (text: string) => void;
+  /**
+   * "Yes, that's right" was clicked. `needsEmail` says whether the visitor is
+   * about to meet the email form or goes straight through, which is the whole
+   * point of the event: the drop happens in that form.
+   */
+  onAccepted?: (needsEmail: boolean) => void;
+  /**
+   * The visitor opened the correction box. Analytics live in the container,
+   * not here: useTrackEvent pulls in useAuth, usePathname and useMutation, and
+   * every render test of this component would then need all three mocked.
+   */
+  onCorrectionOpened?: () => void;
   onSubmit: (email: string, name?: string) => Promise<void>;
 }) {
   const { user, isSignedIn, isLoaded } = useUser();
@@ -37,8 +56,10 @@ export function DiscoveryRecap({
   const clerkEmail = user?.primaryEmailAddress?.emailAddress;
 
   const confirm = async () => {
-    if (isLoaded && isSignedIn && clerkEmail) {
-      await submit(clerkEmail, user?.fullName ?? undefined);
+    const straightThrough = Boolean(isLoaded && isSignedIn && clerkEmail);
+    onAccepted?.(!straightThrough);
+    if (straightThrough) {
+      await submit(clerkEmail!, user?.fullName ?? undefined);
       return;
     }
     setPhase("email");
@@ -65,8 +86,28 @@ export function DiscoveryRecap({
       <p className="font-accent text-xs uppercase tracking-wider text-gold">
         The recap
       </p>
-      <p className="mt-3 text-base leading-relaxed text-text-primary">
-        {recapText(answers)}
+      <p className="mt-3 text-base leading-relaxed text-text-muted">
+        {RECAP_INTRO}
+      </p>
+      {/*
+        One row per question, never a spliced sentence. Same shape as
+        DiscoverySummaryCard, so the recap reads as a draft of the write-up
+        they are about to receive.
+      */}
+      <dl className="mt-5 space-y-5">
+        {recapRows(answers).map((row) => (
+          <div key={row.key}>
+            <dt className="font-accent text-xs uppercase tracking-wider text-text-dim">
+              {row.label}
+            </dt>
+            <dd className="mt-1 text-base leading-relaxed text-text-primary">
+              {row.text}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <p className="mt-5 text-base leading-relaxed text-text-primary">
+        {RECAP_CONFIRM}
       </p>
       {correction && (
         <p className="mt-3 rounded-md border border-border bg-bg-primary px-3 py-2 text-sm text-text-muted">
@@ -95,7 +136,10 @@ export function DiscoveryRecap({
           </button>
           <button
             type="button"
-            onClick={() => setPhase("correct")}
+            onClick={() => {
+              onCorrectionOpened?.();
+              setPhase("correct");
+            }}
             disabled={busy || submitting}
             className={cn(
               "inline-flex items-center gap-2 rounded-md border border-border px-5 py-2.5 text-sm font-medium text-text-primary",

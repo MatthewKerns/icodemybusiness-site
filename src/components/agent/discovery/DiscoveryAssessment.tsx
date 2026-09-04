@@ -120,7 +120,11 @@ export function DiscoveryAssessment({ source }: { source: DiscoverySource }) {
       top: scrollRef.current.scrollHeight,
       behavior: "smooth",
     });
-  }, [state.messages, state.isStreaming]);
+    // state.discovery is in here because the recap card lives inside this
+    // scroller and is five labelled rows tall: after a correction rewrites the
+    // answers, nothing else changes and the confirm buttons would otherwise
+    // stay below the fold.
+  }, [state.messages, state.isStreaming, state.discovery]);
 
   const streamTurn = useCallback(
     async (content: string, mode: "answer" | "correction") => {
@@ -232,11 +236,37 @@ export function DiscoveryAssessment({ source }: { source: DiscoverySource }) {
     void streamTurn(content, "answer");
   }, [input, streamTurn]);
 
+  const onAccepted = useCallback(
+    (needsEmail: boolean) => {
+      // The click itself, not the email submission. discovery_recap_confirmed
+      // fires only once an address is in, so without this the visitor who
+      // accepts the recap and then walks away from the form is invisible.
+      track(
+        ANALYTICS_EVENTS.DISCOVERY_RECAP_ACCEPTED,
+        { needsEmail },
+        "decision"
+      );
+    },
+    [track]
+  );
+
+  const onCorrectionOpened = useCallback(() => {
+    track(ANALYTICS_EVENTS.DISCOVERY_RECAP_CORRECTION_OPENED, {}, "decision");
+  }, [track]);
+
   const onCorrect = useCallback(
     (text: string) => {
+      // Fired here rather than in DiscoveryRecap so that component stays free
+      // of the tracking hook's Clerk/Convex/router dependencies. The drop
+      // between opening the box and submitting is the number worth watching.
+      track(
+        ANALYTICS_EVENTS.DISCOVERY_RECAP_CORRECTED,
+        { chars: text.length, degraded },
+        "decision"
+      );
       void streamTurn(text, "correction");
     },
-    [streamTurn]
+    [streamTurn, track, degraded]
   );
 
   const onSubmit = useCallback(
@@ -301,6 +331,8 @@ export function DiscoveryAssessment({ source }: { source: DiscoverySource }) {
                   correction={state.discovery.correction}
                   busy={state.isStreaming}
                   onCorrect={onCorrect}
+                  onAccepted={onAccepted}
+                  onCorrectionOpened={onCorrectionOpened}
                   onSubmit={onSubmit}
                 />
               </div>
