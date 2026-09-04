@@ -45,7 +45,7 @@ soothing (§5) and saying what the email's own contents already said (§6).
 | "Here is the write-up from your assessment, in your own words. Keep it whether or not we ever work together." | "Here is the write-up from your assessment." | Matthew's edit, 2026-09-04. The quotes block already shows their own words |
 | "…no pressure, just clarity." | "I'll tell you if I think we are not a good fit and why." | §5: answer objections, don't soothe |
 | "If one of these is off, that's the first thing to correct." | "Here is what you told me, in your words." | §3: there is no post-send correction flow. Don't invite an action that doesn't exist |
-| "a real person reads every message" | "I read every reply." | Matthew's edit. First person, shorter, and a promise he confirmed he keeps |
+| "a real person reads every message" | "Reply to this email and I'll get back to you as soon as I can." | Matthew's edit. First person, and it commits to a *response*, not just to reading — with an honest hedge rather than a turnaround time he'd have to meet |
 | "whether I'm the right person to fix it" | "I'll tell you if I think we are not a good fit and why. And if we are a good fit, I'll tell you how I recommend we get started." | His replacement. A commitment is stronger than a hedge — and only he could write it |
 
 That third row is real: it was a proposed framing sentence, caught in review
@@ -89,14 +89,16 @@ don't have it, leave it out and say so — never write something plausible.**
 - **Urgency.** Brunson: *"Fake urgency will backfire on you, and you'll lose all
   credibility."* No real deadline exists in this repo. Close on fit, not time,
   unless Matthew has given you a specific dated reason.
-- **Send cadence.** "Weekly" is a promise about the future. The *shape* (five
-  daily, then weekly) is decided; whether Matthew commits to *sustaining* weekly
+- **Send cadence.** "Weekly" is a promise about the future. The *shape* (day 0,
+  then four daily, then weekly) is decided; whether Matthew commits to *sustaining* weekly
   is question F1 in the story intake and is unanswered. Don't write the promise
   until it is.
 
 **Answered, so no longer blocked:** replies reach Matthew and he answers them
-(F3, 2026-09-04). The reply promise is true and may be written. What makes it
-true in practice is the *from-address* — see §6.
+(F3, 2026-09-04). The reply promise is true and may be written. Two caveats:
+what makes it true in practice is the *from-address* (§6), and the promise is
+to reply "as soon as I can" — **never** attach a turnaround time to it, because
+that is a delivery standard and §2 puts those in Matthew's hands only.
 
 **The one legitimate urgency in the whole system is the reader's own.** Their
 stated cost of inaction is *their* claim, recorded in their assessment. Quoting
@@ -106,9 +108,13 @@ it back is not authoring a claim. Everything else is.
 
 ## 3. The arc
 
-Soap Opera Sequence, five sends over five days, then weekly. Email #1's job —
-welcome, expectations, first open loop — is folded into the day-0 report rather
-than sent twice (§6). Structure lives in `convex/lib/sequenceTracks.ts`; a step
+Soap Opera Sequence: the day-0 report, then **four** daily steps, then weekly —
+five sends across five days. Say it that way rather than "five daily": day 0 is
+triggered by the assessment submission, and only d1–d4 are on the daily cadence
+in `sequenceTracks.ts`.
+
+Email #1's job — welcome, expectations, first open loop — is folded into the
+day-0 report rather than sent twice (§6). Structure lives in `convex/lib/sequenceTracks.ts`; a step
 with `subject: null` is unauthored and the engine refuses to send it.
 
 | Day | Role | Ends on |

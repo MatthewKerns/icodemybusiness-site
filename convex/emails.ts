@@ -439,8 +439,8 @@ export const sendDiscoveryReportEmail = internalAction({
       On the call you tell me where the week goes. I'll tell you if I think we
       are not a good fit and why. And if we are a good fit, I'll tell you how I
       recommend we get started. The more you tell our assessment tools, the more
-      of your context I bring. Reply to this email any time &mdash; I read every
-      reply.
+      of your context I bring. Reply to this email and I'll get back to you as
+      soon as I can.
     </p>
   </div>`;
 
