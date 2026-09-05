@@ -7,8 +7,14 @@ else commits, pushes, and hands off. This page is the whole process.
 
 | Name | URL | What it is | How it gets code |
 |---|---|---|---|
-| Staging | `https://staging.icodemybusiness.com` | The only place the app runs today; **all manual verification happens here** | `scripts/deploy-staging.sh <sha>` |
-| Production | `https://icodemybusiness.com` | Still the old static GitHub Pages placeholder | DNS cutover + `./deploy.sh cutover` on the VPS (not yet done) |
+| Staging | `https://staging.icodemybusiness.com` | Verification happens here first | `scripts/deploy-staging.sh <sha>` |
+| Production | `https://icodemybusiness.com`, `www.icodemybusiness.com` | **Live since the 2026-09-05 cutover** — the same container as staging, same deploy | `scripts/deploy-staging.sh <sha>` — one deploy now updates all three hostnames |
+
+**There is one container.** Since cutover, `staging`, `icodemybusiness.com`, and `www.icodemybusiness.com`
+are the same Docker container with three Traefik routers on it — `scripts/deploy-staging.sh` updates
+all three at once. There is no longer a separate "push to staging, then separately push to prod"
+step; verify on staging, then the identical bits are already live on the apex. Run
+`scripts/verify-apex.sh` after any deploy to confirm the apex router survived it.
 
 `git push` deploys nothing. CI (`.github/workflows/ci.yml`) lints, typechecks,
 tests, and proves the Docker image compiles — it does not deploy.
@@ -115,17 +121,16 @@ Rollback = deploy the previous sha: `scripts/deploy-staging.sh <prev-sha>`
   then POST `/api/agent/top3/chat`).
 - 375 px: no horizontal scroll on `/` and `/vsl`.
 
-## Production (later)
+## Production
 
-**Step 0 (Matthew, before the deploy session can start):** in `/opt/icodemybusiness-site/.env.build`
-on the VPS, set `NEXT_PUBLIC_APP_URL=https://icodemybusiness.com`. That file is edited by Matthew,
-not scripted by the deploy session (secret-guard hook blocks it regardless). This has to land
-*before* step 1 — without it the rebuild bakes the staging URL into canonical/OG tags and every
-email link on the live apex. A hand-off that stalled on this being implied inside the rebuild
-sentence, rather than its own step, is why it now has one (`docs/ENGINEERING_LOG.md` 2026-09-04).
+Cut over 2026-09-05 (tag `v2026.09.04-cutover`, sha `609821c`). `CNAME` and
+`.github/workflows/deploy-apex.yml` are retired; DNS points the apex straight at the VPS. What the
+cutover changed permanently, for reference: `NEXT_PUBLIC_APP_URL=https://icodemybusiness.com` in
+`.env.build`, and the VPS `deploy.sh`'s `staging` target now always includes the apex + `www`
+Traefik routers (see the 2026-09-05 incident below for why).
 
-Once that's set: tag the verified staging sha (`git tag -a v… <sha>`); Namecheap `@` A →
-`2.25.207.149`, `www` CNAME → `icodemybusiness.com`; remove `CNAME` and
-`.github/workflows/deploy-apex.yml` in the same change; on the VPS rebuild and run
-`./deploy.sh cutover`; confirm the certificate issued for both apex and `www` on first HTTPS hit
-(not still `CN=TRAEFIK DEFAULT CERT`); watch Google Safe Browsing afterwards.
+**Every deploy is now a production deploy.** `scripts/deploy-staging.sh <sha>` updates the one
+container that serves all three hostnames — there is no separate production push. Run
+`scripts/verify-apex.sh` after any deploy that touches `deploy.sh` itself or recreates the
+container outside the normal script path; the normal `deploy-staging.sh` path is safe as of the
+2026-09-05 fix.

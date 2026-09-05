@@ -122,3 +122,33 @@ not a blocking gate.
 **Fix.** `docs/DEPLOY.md`'s cutover section now has the `.env.build` edit as its own **Step 0**,
 labelled as Matthew's and as a hard precondition, with the reason it matters (canonical/OG URLs
 and email links would otherwise advertise staging from the live apex). This entry.
+
+## 2026-09-05 — the first routine deploy after cutover silently un-cut-over production
+
+**What happened.** Minutes after the apex cutover, `scripts/deploy-staging.sh` ran a normal
+deploy (`7216322`, a critical white-screen fix). It called the VPS `deploy.sh`'s `staging` target,
+which recreated the container from scratch with only the staging Traefik router label — the same
+thing it had always done, safely, before cutover. Now that the apex and `www` routers lived only on
+the container that `cutover` had created, recreating the container without them dropped apex/`www`
+routing entirely: both returned 404 within a minute of a deploy that itself worked perfectly.
+Caught immediately by checking the apex directly after the deploy (not by an alert), fixed by
+re-running `./deploy.sh cutover` by hand.
+
+**Why it got through.** `deploy.sh`'s `staging` and `cutover` targets were designed for a world
+with two independent hosts — before cutover, staging deploys legitimately never needed to touch
+the apex. Cutover changed the underlying model (one container, three hostnames) without changing
+the script that recreates that container on every deploy. Nothing enforced "the routers this
+container needs" as a single source of truth; `staging()` and `cutover()` each hard-coded a subset.
+
+**Fix.** `deploy.sh` (VPS-only, never committed — `AGENTS.md` § Never Do) — `staging()` now always
+includes the apex + `www` Traefik router labels; `cutover()` is kept as a plain alias for
+compatibility. Verified by actually running `./deploy.sh staging` (the exact path a normal deploy
+takes) and confirming apex/`www`/staging all stayed 200 through a full container recreate.
+`docs/DEPLOY.md`'s Environments table and Production section rewritten to describe the actual
+one-container-three-hostnames model instead of a not-yet-cut-over future. `AGENTS.md` Never Do:
+don't assume `deploy-staging.sh` is staging-only post-cutover. This entry.
+
+**Lesson.** A cutover that changes what a shared resource *is* (one container now serving three
+hostnames, not two independent ones) has to update every script that recreates that resource, not
+just the one script that performed the cutover itself. "It worked before cutover" is not evidence
+it still works after.

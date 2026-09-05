@@ -41,6 +41,8 @@ are NOT restated here — consult `~/workspace/software-development-best-practic
 - **Weaken a test to make anything pass**: delete/rename/empty a `*.test.*` file, `.skip`/`.only`/`xit`/`xdescribe`, `@ts-ignore`/`@ts-expect-error` in tests, exclude test globs from any `tsconfig*.json` or vitest config, `--typecheck disable`, `--no-verify`, `--passWithNoTests`. The `test-guard` hook blocks these; a legitimate exception needs `TEST_CHANGE_APPROVED="<reason>"` on the command, granted by Matthew per case.
 - Deploy, rsync to the VPS, or run `npx convex dev/deploy` from any session but the deploy session. `git push` deploys nothing.
 - Run `./deploy.sh run` on the VPS (legacy host), or rsync the working tree (ships other sessions' work).
+- Treat `scripts/deploy-staging.sh` as staging-only. Since the 2026-09-05 cutover it updates the
+  live apex too — same container, three hostnames. `docs/DEPLOY.md` § Production.
 - `git restore`, `git checkout -- .`, `git stash`, `npm install`, `git pull --rebase` (autostash) in the shared checkout — this has wiped `node_modules` and others' edits before.
 - In the shared checkout: `git commit -a`, `git commit` without `-- <paths>`, `git reset --hard`, or `git update-ref` on a branch. A plain commit takes the whole index, and moving the branch pointer leaves upstream-changed files staged with stale content — that reverted another session's copy on `main` on 2026-09-02 (`4ec89d5`, fixed `1b5ef61`). Enforced by `.claude/hooks/shared-checkout-guard.sh`; override `SHARED_CHECKOUT_APPROVED="<reason>"`. Behind `origin/main`? Do the commit in a temp worktree, not by moving pointers.
 - Commit secrets. `.env*`, `deploy.sh`, `.claude/mcp.json` are never committed.
