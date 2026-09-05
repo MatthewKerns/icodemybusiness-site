@@ -168,24 +168,24 @@ export const PATHS: Path[] = [
  */
 export const OBJECTIONS = [
   {
-    q: "What if AI genuinely doesn't fit my business?",
-    a: "Then I'll say so. Every business has manual, repetitive work worth removing, but not every business needs AI to remove it — sometimes the answer is a process change and a spreadsheet. If I can't find something worth doing, you'll hear that from me directly rather than after you've paid to find out.",
+    q: "What if there's nothing in my business worth fixing?",
+    a: "Then you'll hear it from me before you've spent anything. The assessment exists to find the one thing costing you the most potential output each week. We generally love working with businesses where things are working smoothly and now are ready for optimization and automation.",
   },
   {
     q: "I'm not technical. Will I be able to run this?",
-    a: "Most of the people I work with are business owners, not developers. I translate the technical side into plain language and build systems you can operate yourself. You get tools that work, not homework you can't finish.",
+    a: "You don't need to be. You keep running the business; the system takes the repetitive part off your plate. What gets built is yours outright, and you watch it working every week in a short video walkthrough, so nothing lands on you unexplained at the end.",
   },
   {
     q: "How is this different from the last consultant who disappointed me?",
-    a: "You'll know inside the first week whether this is working, because you'll be looking at working software rather than a progress report. If it isn't going where you want, you find that out early enough to change it — not at the end, when the budget is gone.",
+    a: "You see working software every week, not a progress report. If it's heading somewhere you don't want, you say so in week one, not after the budget is gone. And what's built is yours outright, so nothing is held hostage to the next invoice.",
   },
   {
     q: "What does this actually cost?",
-    a: "It depends entirely on which path fits, and I'd rather scope it honestly than quote a number at someone I haven't listened to yet. What I will say plainly: this is a senior engineering engagement, priced like one, and it's the wrong fit if you're looking for the cheapest option. The intro call is where we find out whether it's worth either of our time.",
+    a: "Start with what the problem costs you now: the hours, the missed work, the growth that isn't happening. The assessment asks you that directly, and it's the number any fix has to be measured against. I don't put prices on the site on purpose; I'd rather scope it on the call than quote a number at someone I haven't listened to yet. What I will say plainly: this is a senior engineering engagement, priced like one, and it's the wrong fit if you're looking for the cheapest option. If I don't think it's worth your money, I'll tell you why.",
   },
   {
     q: "What happens on the call?",
-    a: "You tell me where your week disappears. I tell you straight whether I can help, and what I'd do first. If there's a fit, we talk about which path makes sense. If there isn't, you'll leave with at least one thing you can act on yourself.",
+    a: "You tell me where your week disappears and what it's costing you. I tell you whether I can help and what I'd fix first. If we're a good fit, I'll tell you how I recommend we get started; if we're not, I'll tell you why, and you leave with at least one thing you can act on yourself.",
   },
 ];
 

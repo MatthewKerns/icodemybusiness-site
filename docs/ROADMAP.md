@@ -274,6 +274,14 @@ request (2026-09-02) — it reads as reassurance that undercuts premium position
 Don't reintroduce that register when writing objection copy. The `/book` gold pill
 still reads "Free · 15 minutes · No obligation" — same family, awaiting Matthew's call.
 
+**Rewritten 2026-09-05** to the outcome-first shape from Hormozi's "sell the problem
+AI solves, not AI" (transcript supplied by Matthew): no vehicle words, the cost
+question anchored to what the problem costs them (the assessment's own question
+two), the close on his fit/not-fit line. Answer 1 is Matthew's wording; the tier
+sentence in answer 4 kept verbatim by his ruling. Agent-authored claims removed:
+"most of the people I work with are business owners", "you'll know inside the
+first week whether this is working".
+
 ---
 
 ### R-009 · Signal the price tier without printing a price
