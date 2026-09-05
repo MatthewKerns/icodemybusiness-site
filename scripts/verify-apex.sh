@@ -72,7 +72,13 @@ esac
 
 head_ "5. Google Safe Browsing"
 if [ -x "$(dirname "$0")/safe-browsing-check.sh" ]; then
-  "$(dirname "$0")/safe-browsing-check.sh" "$HOST" "www.${HOST}" | sed 's/^/     /' && ok "clean" || bad "not clean — open the Transparency Report link above"
+  sb_out=$("$(dirname "$0")/safe-browsing-check.sh" "$HOST" "www.${HOST}"); sb_rc=$?
+  printf '%s\n' "$sb_out" | sed 's/^/     /'
+  case "$sb_rc" in
+    0) ok "clean" ;;
+    3) printf '  NOTE Google rate-limited the check — not a flag; retry in a few minutes\n' ;;
+    *) bad "not clean — open the Transparency Report link above" ;;
+  esac
 else
   bad "safe-browsing-check.sh not found beside this script"
 fi
