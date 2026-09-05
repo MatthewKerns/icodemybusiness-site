@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { api } from "../../../../../../convex/_generated/api";
-import { getConvexClient } from "@/lib/convex-client";
+import { getAuthedConvexClient } from "@/lib/convex-client";
 import {
   advanceWithoutModel,
   applyCorrection,
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const convex = getConvexClient();
+  const convex = await getAuthedConvexClient();
   const context = await convex.query(api.agentSessions.getForServer, {
     sessionId,
   });

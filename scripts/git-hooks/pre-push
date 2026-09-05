@@ -8,11 +8,23 @@
 # WARN or CRIT — the point is that the gate runs, not where. A gate that could not run
 # is not a passed gate: any failure to run refuses the push.
 set -euo pipefail
-to_main=0; push_sha=""
+to_main=0; push_sha=""; push_ref=""
 while read -r local_ref local_sha remote_ref remote_sha; do
-  case "$remote_ref" in refs/heads/main) to_main=1; push_sha="$local_sha" ;; esac
+  case "$remote_ref" in refs/heads/main) to_main=1; push_sha="$local_sha"; push_ref="$local_ref" ;; esac
 done
 [ "$to_main" = 1 ] || exit 0
+
+# Gates run against $push_sha, which was resolved when the push started. If a commit lands on
+# this branch while the (multi-minute, VPS-routed) gates are running, git re-resolves the ref at
+# send time and the new commit rides along ungated (docs/ENGINEERING_LOG.md 2026-09-04). Refuse
+# if the ref moved after the gates finish, below.
+check_ref_unmoved() {
+  local current; current=$(git rev-parse "$push_ref" 2>/dev/null || echo "")
+  if [ "$current" != "$push_sha" ]; then
+    echo "pre-push: $push_ref moved from ${push_sha:0:7} to ${current:0:7} while the gates were running — push refused. A commit landed mid-gate, so what was gated is not what would land. Push the exact sha instead: git push origin ${push_sha}:refs/heads/main" >&2
+    exit 1
+  fi
+}
 
 # Install only when the lockfile changed: `npm ci` wipes node_modules and races with any other
 # run in the same directory (seen as ENOTEMPTY on the VPS lane).
@@ -36,6 +48,7 @@ if [ "$level" = "WARN" ] || [ "$level" = "CRIT" ]; then
   trap 'rm -rf "$export_dir"' EXIT
   git archive "$push_sha" | tar -x -C "$export_dir"
   if "$OFFLOAD" --dir "$export_dir" --slug "icmb-prepush-$$" --lane node-full --no-mark -- "npm ci --ignore-scripts >/dev/null && $GATES" > "$log" 2>&1 && grep -q '■ exit=0' "$log"; then
+    check_ref_unmoved
     grep -E "Tests |Test Files" "$log" || true
     echo "pre-push: gates green (VPS, clean export of ${push_sha:0:7})"; rm -f "$log"; exit 0
   fi
@@ -51,4 +64,5 @@ if [ ! -d node_modules ]; then
 fi
 npx tsc --noEmit || { echo "pre-push: typecheck failed — fix the implementation (or the test, with a reason)" >&2; exit 1; }
 npx vitest run --reporter=dot || { echo "pre-push: tests failed — push refused" >&2; exit 1; }
+check_ref_unmoved
 echo "pre-push: gates green"

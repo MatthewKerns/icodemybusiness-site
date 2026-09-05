@@ -8,6 +8,7 @@ import { useAuth } from "@clerk/nextjs";
 import { PostHogProvider } from "@/components/shared/PostHogProvider";
 import { PageViewTracker } from "@/components/shared/PageViewTracker";
 import { useEnsureUser } from "@/hooks/useEnsureUser";
+import { useBindDiscoverySession } from "@/hooks/useBindDiscoverySession";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
@@ -47,8 +48,17 @@ function ConvexClerkProvider({ children }: { children: ReactNode }) {
   );
 }
 
-function EnsureUser({ children }: { children: ReactNode }) {
+/**
+ * Everything that has to happen when an identity appears, in one place inside
+ * the Convex+Clerk provider so both hooks' calls carry the token.
+ *
+ * It sits above the router outlet and never remounts, which is the point: a
+ * visitor who signs in from the portal never mounts the assessment component,
+ * so the binding could not live there.
+ */
+function SessionBridge({ children }: { children: ReactNode }) {
   useEnsureUser();
+  useBindDiscoverySession();
   return <>{children}</>;
 }
 
@@ -56,10 +66,10 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <ClerkProvider>
       <ConvexClerkProvider>
-        <EnsureUser>
+        <SessionBridge>
           <PageViewTracker />
           <PostHogProvider>{children}</PostHogProvider>
-        </EnsureUser>
+        </SessionBridge>
       </ConvexClerkProvider>
     </ClerkProvider>
   );

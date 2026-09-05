@@ -44,6 +44,14 @@ are NOT restated here — consult `~/workspace/software-development-best-practic
 - `git restore`, `git checkout -- .`, `git stash`, `npm install`, `git pull --rebase` (autostash) in the shared checkout — this has wiped `node_modules` and others' edits before.
 - In the shared checkout: `git commit -a`, `git commit` without `-- <paths>`, `git reset --hard`, or `git update-ref` on a branch. A plain commit takes the whole index, and moving the branch pointer leaves upstream-changed files staged with stale content — that reverted another session's copy on `main` on 2026-09-02 (`4ec89d5`, fixed `1b5ef61`). Enforced by `.claude/hooks/shared-checkout-guard.sh`; override `SHARED_CHECKOUT_APPROVED="<reason>"`. Behind `origin/main`? Do the commit in a temp worktree, not by moving pointers.
 - Commit secrets. `.env*`, `deploy.sh`, `.claude/mcp.json` are never committed.
+- Print a Convex env listing with real values (`npx convex env list`/`env get`, any flags). It
+  prints VALUES, not just names, and did exactly that with a live `RESEND_API_KEY` on 2026-09-04.
+  Use `scripts/convex-env-names.sh [--prod|--dev]` for a names-only listing; enforced by
+  `.claude/hooks/convex-secret-guard.sh`.
+- Commit on a branch while a push from it is in flight. The VPS-routed gate run takes minutes;
+  `git push origin HEAD:main` re-resolves `HEAD` at send time, so a commit made mid-gate rides
+  along ungated. Push an explicit sha instead — `git push origin <sha>:refs/heads/main` — or just
+  wait. `scripts/git-hooks/pre-push` refuses the push if the ref moved after the gates finish.
 - **Author a claim about the business.** Capacity, timelines, delivery standards, prices, guarantees, "every time" statements are Matthew's to assert. Nine plausible agent-invented claims reached the live homepage on 2026-09-02. If you need one and don't have it, ask or leave it out (`docs/copy-principles.md` §2).
 
 ## Chosen Tools

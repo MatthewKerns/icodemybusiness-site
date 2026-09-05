@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import {
   mutation,
   query,
@@ -7,6 +7,37 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { requireRole } from "./lib/auth";
+import {
+  DISCOVERY_QUESTIONS,
+  DISCOVERY_STAGE,
+} from "../src/content/discovery-questions";
+
+/**
+ * Ownership. A session is capability-protected until someone claims it, and
+ * identity-protected afterwards.
+ *
+ * Anonymous visitors have no identity, so an unclaimed session has to stay
+ * reachable by whoever holds its id — that is the existing behaviour and the
+ * only way the assessment works signed-out. The moment a signed-in visitor
+ * binds it, possession of the id stops being enough: the transcript carries
+ * their revenue, their hours and what they are worried about, and the id is
+ * `Math.random()`-derived, not a secret.
+ *
+ * Binding is therefore one-way, and this guard is the whole of the model.
+ *
+ * NOT applied to `internalGetSession` / `internalStorePreDraft`: those run from
+ * the scheduler and actions, which carry no user identity by construction.
+ */
+async function assertMayUseSession(
+  ctx: { auth: { getUserIdentity: () => Promise<{ subject: string } | null> } },
+  session: { clerkUserId?: string }
+): Promise<void> {
+  if (!session.clerkUserId) return;
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity || identity.subject !== session.clerkUserId) {
+    throw new ConvexError("This assessment belongs to another account");
+  }
+}
 
 const MAX_FILES_PER_SESSION = 5;
 const MAX_TOTAL_BYTES_PER_SESSION = 15 * 1024 * 1024;
@@ -34,6 +65,7 @@ export const generateUploadUrl = mutation({
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
     if (!session) throw new Error("Session not found");
+    await assertMayUseSession(ctx, session);
     if (session.fileIds.length >= MAX_FILES_PER_SESSION) {
       throw new Error(`Too many files (max ${MAX_FILES_PER_SESSION})`);
     }
@@ -52,7 +84,10 @@ export const getOrCreate = mutation({
       .query("agentSessions")
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
-    if (existing) return existing;
+    if (existing) {
+      await assertMayUseSession(ctx, existing);
+      return existing;
+    }
 
     const id = await ctx.db.insert("agentSessions", {
       agentKind: args.agentKind,
@@ -72,10 +107,13 @@ export const getOrCreate = mutation({
 export const getBySessionId = query({
   args: { sessionId: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const session = await ctx.db
       .query("agentSessions")
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
+    if (!session) return null;
+    await assertMayUseSession(ctx, session);
+    return session;
   },
 });
 
@@ -87,6 +125,7 @@ export const listMessages = query({
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
     if (!session) return [];
+    await assertMayUseSession(ctx, session);
     return await ctx.db
       .query("agentSessionMessages")
       .withIndex("by_sessionId_timestamp", (q) =>
@@ -109,6 +148,7 @@ export const appendMessage = mutation({
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
     if (!session) throw new Error("Session not found");
+    await assertMayUseSession(ctx, session);
     if (session.turnCount >= MAX_TURNS * 2) {
       throw new Error("Session turn limit exceeded");
     }
@@ -134,6 +174,7 @@ export const updateTop3 = mutation({
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
     if (!session) return;
+    await assertMayUseSession(ctx, session);
     await ctx.db.patch(session._id, { top3Issues: args.top3Issues });
   },
 });
@@ -149,6 +190,7 @@ export const attachFile = mutation({
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
     if (!session) throw new Error("Session not found");
+    await assertMayUseSession(ctx, session);
     if (session.fileIds.length >= MAX_FILES_PER_SESSION) {
       throw new Error(
         `Too many files attached (max ${MAX_FILES_PER_SESSION})`
@@ -180,6 +222,7 @@ export const completeSession = mutation({
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
     if (!session) throw new Error("Session not found");
+    await assertMayUseSession(ctx, session);
 
     await ctx.db.patch(session._id, {
       status: "completed",
@@ -201,6 +244,7 @@ export const getForServer = query({
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
     if (!session) return null;
+    await assertMayUseSession(ctx, session);
     const messages = await ctx.db
       .query("agentSessionMessages")
       .withIndex("by_sessionId_timestamp", (q) =>
@@ -226,6 +270,7 @@ export const updateIntakeProfile = mutation({
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
     if (!session) return;
+    await assertMayUseSession(ctx, session);
     await ctx.db.patch(session._id, {
       intakeProfile: args.intakeProfile,
       intakeReady: args.ready ?? session.intakeReady,
@@ -249,9 +294,127 @@ export const updateDiscoveryState = mutation({
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
     if (!session) return;
+    await assertMayUseSession(ctx, session);
     await ctx.db.patch(session._id, { discoveryState: args.discoveryState });
   },
 });
+
+/**
+ * Bind an in-progress conversation to the signed-in account.
+ *
+ * Distinct from `discoveryAssessments.claim`, which binds the finished *report*
+ * and only exists once `submit` has written an `assessments` row. This one runs
+ * mid-conversation, so the visitor who signs up at question three keeps their
+ * answers instead of leaving them attached to a browser tab.
+ *
+ * The identity comes from `ctx.auth`, never from an argument: a client that
+ * could name the owner could hand someone else's conversation to itself.
+ */
+export const bindToAccount = mutation({
+  args: { sessionId: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new ConvexError("Unauthorized");
+
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
+      .first();
+    if (!session) throw new ConvexError("Session not found");
+
+    if (session.clerkUserId && session.clerkUserId !== identity.subject) {
+      throw new ConvexError("This assessment belongs to another account");
+    }
+    if (!session.clerkUserId) {
+      await ctx.db.patch(session._id, { clerkUserId: identity.subject });
+    }
+    return { bound: true as const };
+  },
+});
+
+/**
+ * Whether the caller may bind this session — and nothing else.
+ *
+ * Returns no session content, so the binding hook can run on every page for
+ * every signed-in visitor without becoming another way to read a transcript.
+ * `exists` is the signal the hook waits on: it flips false to true when the
+ * assessment component inserts the row, which removes the ordering race
+ * without a retry loop.
+ */
+export const bindStatus = query({
+  args: { sessionId: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
+      .first();
+    if (!session) {
+      return { exists: false, boundToMe: false, boundToOther: false };
+    }
+    return {
+      exists: true,
+      boundToMe: session.clerkUserId === identity.subject,
+      boundToOther:
+        Boolean(session.clerkUserId) && session.clerkUserId !== identity.subject,
+    };
+  },
+});
+
+/**
+ * The signed-in visitor's unfinished discovery assessments, for the portal.
+ *
+ * Reads the index seeded from `identity.subject`, so there is no argument to
+ * tamper with and it cannot return another account's rows by construction.
+ *
+ * `turnCount >= 2` is load-bearing: `getOrCreate` fires on every homepage mount,
+ * so a signed-in visitor who merely scrolls past the assessment gets a row. The
+ * opening anchor question is itself persisted as one message, so 2 is the first
+ * count that means the visitor actually answered something.
+ */
+export const portalListUnfinished = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const rows = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_clerkUserId", (q) => q.eq("clerkUserId", identity.subject))
+      .order("desc")
+      .take(50);
+
+    return rows
+      .filter(
+        (r) =>
+          r.agentKind === "discovery-assessment" &&
+          r.status === "active" &&
+          r.turnCount >= 2 &&
+          discoveryStage(r.discoveryState) < DISCOVERY_STAGE.SUBMITTED
+      )
+      .slice(0, 10)
+      .map((r) => {
+        const state = r.discoveryState as
+          | { answers?: { problem?: { summary?: string } } }
+          | undefined;
+        const problem = state?.answers?.problem?.summary?.trim();
+        return {
+          sessionId: r.sessionId,
+          stage: discoveryStage(r.discoveryState),
+          questionCount: DISCOVERY_QUESTIONS.length,
+          problem: problem ? problem.slice(0, 240) : null,
+          startedAt: r.startedAt,
+        };
+      });
+  },
+});
+
+/** `discoveryState` is stored as `v.any()`, so never trust its shape. */
+function discoveryStage(raw: unknown): number {
+  const stage = (raw as { stage?: unknown } | undefined)?.stage;
+  if (typeof stage !== "number" || !Number.isFinite(stage)) return 0;
+  return Math.max(0, Math.min(DISCOVERY_STAGE.SUBMITTED, Math.floor(stage)));
+}
 
 // Start the background "pre-draft" once context is rich enough — runs while the
 // user is still chatting, without blocking their input. Idempotent.
@@ -262,7 +425,9 @@ export const kickoffPreDraft = mutation({
       .query("agentSessions")
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
-    if (!session || session.preDraftStarted || !session.intakeReady) return;
+    if (!session) return;
+    await assertMayUseSession(ctx, session);
+    if (session.preDraftStarted || !session.intakeReady) return;
     await ctx.db.patch(session._id, { preDraftStarted: true });
     await ctx.scheduler.runAfter(0, internal.intakeProcessor.preDraft, {
       sessionId: args.sessionId,
