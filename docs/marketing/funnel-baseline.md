@@ -1,8 +1,16 @@
 # Funnel baseline — pre-cutover, pre-recap-change — 2026-09-04 (cmo)
 
-**Read this first:** every number below is staging / localhost / VPS-hostname traffic. Production
-(`icodemybusiness.com`) still serves the GitHub Pages placeholder (ROADMAP R-002). There is no
-real-visitor funnel yet. This is a *pre-change* baseline: `business-intake`'s commit `ac20cfb`
+**CORRECTION 2026-09-05 — read this before the numbers.** R-002 is closed: the apex was cut over
+and now serves the real site. And the cutover pointed `icodemybusiness.com` at the SAME container
+that serves staging — one container, one Convex deployment, one dataset (VERIFIED by
+`business-intake` 09-05; the VPS has exactly one `icodemybusiness-site` container). So the
+staging/prod distinction below is not a distinction at all: what this file called "staging
+traffic" is the same property now answering on the apex. Read every number as "the site's
+traffic before the apex had a public address", not as "a different environment".
+
+**Original note, kept for the record:** every number below is staging / localhost / VPS-hostname
+traffic. Production (`icodemybusiness.com`) still serves the GitHub Pages placeholder
+(ROADMAP R-002). There is no real-visitor funnel yet. This is a *pre-change* baseline: `business-intake`'s commit `ac20cfb`
 (not on main) changes the Q1 anchor and the recap screen; when it deploys, treat any shift as the
 change, not behaviour.
 

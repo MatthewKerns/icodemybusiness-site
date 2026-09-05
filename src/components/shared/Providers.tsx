@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ConvexReactClient } from "convex/react";
 import { useAuth } from "@clerk/nextjs";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { PostHogProvider } from "@/components/shared/PostHogProvider";
 import { PageViewTracker } from "@/components/shared/PageViewTracker";
 import { useEnsureUser } from "@/hooks/useEnsureUser";
@@ -56,10 +57,37 @@ function ConvexClerkProvider({ children }: { children: ReactNode }) {
  * visitor who signs in from the portal never mounts the assessment component,
  * so the binding could not live there.
  */
-function SessionBridge({ children }: { children: ReactNode }) {
+function SessionHooks() {
   useEnsureUser();
   useBindDiscoverySession();
-  return <>{children}</>;
+  return null;
+}
+
+/**
+ * The hooks run in a SIBLING of `children`, behind a boundary that renders
+ * nothing when it trips.
+ *
+ * Both hooks call Convex `useQuery`, and a failing `useQuery` THROWS during
+ * render. Sitting in the root layout, that throw had nothing between it and
+ * `app/global-error.tsx`, so one Convex problem replaced the entire site with
+ * "A critical error occurred" — seen on the apex on 2026-09-05 minutes after the
+ * cutover, splash rendering first and the page dying after hydration.
+ *
+ * The asymmetry is deliberate. What these hooks do — recording a user row,
+ * attaching a conversation to an account — is invisible to the visitor when it
+ * fails. The page is the funnel. So the hooks are the part allowed to break.
+ * Sentry still receives the error through ErrorBoundary's componentDidCatch, so
+ * this is silent to the visitor, not to us.
+ */
+function SessionBridge({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <ErrorBoundary fallback={null}>
+        <SessionHooks />
+      </ErrorBoundary>
+      {children}
+    </>
+  );
 }
 
 export function Providers({ children }: { children: ReactNode }) {
