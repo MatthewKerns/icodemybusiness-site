@@ -287,3 +287,37 @@ confirming build.log directly is a fast enough manual recovery that hardening th
 judged worth doing under this ticket. Worth doing if it recurs a third time: on a reported build
 failure, `deploy-staging.sh` could check the remote image's creation timestamp against the deploy
 start time before concluding the build itself failed.
+
+**Follow-up incident (same deploy).** The manual recovery above ran `./deploy.sh staging` directly
+over ssh instead of through `deploy-staging.sh`, which skipped that script's own
+`DEPLOYED_SHA`/`DEPLOY_LOG` write. `DEPLOYED_SHA` kept reading the *previous* deployed commit while
+the container actually running was the new one — caught by a peer session comparing the marker
+against the container's creation timestamp. Corrected by hand. Not yet fixed: a manual recovery path
+that bypasses the normal script should still write the marker; that's a follow-up, not done here.
+
+## 2026-09-06 — a test-expectation change had Matthew's OK, but only inside one session's transcript
+
+**What happened.** The homepage-crash fix (926d293) changed three assertions in
+`convex/agentSessions.test.ts` from `rejects.toThrow(/another account/)` to asserting `null`/`[]` —
+a genuine AGENTS.md "ask first" case, and the commit body said so explicitly. The deploy session
+did get Matthew's explicit approval before merging — asked directly, in-session, before the
+independent gate check and the merge. But that approval lived only in that one session's dialogue
+with him: never relayed to the team channel, never in the commit trailer, never on the shared board.
+A peer session, working from what business-intake could see (they'd asked Matthew twice with no
+reply) and what the board showed (nothing), correctly concluded no approval existed and raised it as
+a process incident.
+
+**Why it got through.** AGENTS.md said to "get Matthew's OK" but not *where that OK has to live* to
+count. A verbal approval inside one session's private conversation satisfies the letter of the rule
+for that one session, but is indistinguishable from silence to every other session, to the git
+history, and to anyone reading the board later. The rule was carried as prose ("get his OK"), and
+prose alone didn't produce a durable, checkable record.
+
+**Fix.** `AGENTS.md`: the OK has to be recorded in the commit itself — a `Test-Change-Approved:
+<who, date>` trailer — not just held in a conversation. `scripts/git-hooks/pre-push` now refuses a
+push to `main` whose `*.test.*` diff removes a `toThrow`/`.rejects` assertion unless that trailer
+is present in a commit message in the range being pushed. This entry.
+
+**Lesson.** "Get approval" is not yet a complete rule — a rule needs to say where the approval has
+to be recorded to count as satisfied, or different sessions with different visibility into the same
+approval will correctly reach different conclusions about whether it happened at all.

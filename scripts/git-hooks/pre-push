@@ -8,11 +8,29 @@
 # WARN or CRIT — the point is that the gate runs, not where. A gate that could not run
 # is not a passed gate: any failure to run refuses the push.
 set -euo pipefail
-to_main=0; push_sha=""; push_ref=""
+to_main=0; push_sha=""; push_ref=""; base_sha=""
 while read -r local_ref local_sha remote_ref remote_sha; do
-  case "$remote_ref" in refs/heads/main) to_main=1; push_sha="$local_sha"; push_ref="$local_ref" ;; esac
+  case "$remote_ref" in refs/heads/main) to_main=1; push_sha="$local_sha"; push_ref="$local_ref"; base_sha="$remote_sha" ;; esac
 done
 [ "$to_main" = 1 ] || exit 0
+
+# A test file changing what it expects needs Matthew's OK recorded where everyone can see it, not
+# just given verbally in whichever session happened to ask (docs/ENGINEERING_LOG.md 2026-09-06: an
+# approval that lived only in one session's transcript was functionally invisible to two other
+# sessions and looked, from outside, exactly like no approval at all). A *.test.* diff that removes
+# a toThrow/rejects assertion needs `Test-Change-Approved: <who, date>` in a commit message in the
+# range being pushed.
+check_test_assertion_approval() {
+  case "$base_sha" in ''|0000000000000000000000000000000000000000) return 0 ;; esac
+  local removed
+  removed=$(git diff "$base_sha" "$push_sha" -- '*.test.*' 2>/dev/null | grep -E '^-[^-].*(toThrow|\.rejects\b)' || true)
+  [ -z "$removed" ] && return 0
+  if ! git log "$base_sha..$push_sha" --format=%B 2>/dev/null | grep -q 'Test-Change-Approved:'; then
+    echo "pre-push: a *.test.* diff removes a toThrow/rejects assertion (a test's expectation changed) with no 'Test-Change-Approved: <who, date>' line in any commit message being pushed — refused. AGENTS.md requires Matthew's explicit OK on a test-expectation change, recorded where the team can see it, not just given verbally. See docs/ENGINEERING_LOG.md 2026-09-06." >&2
+    exit 1
+  fi
+}
+check_test_assertion_approval
 
 # Gates run against $push_sha, which was resolved when the push started. If a commit lands on
 # this branch while the (multi-minute, VPS-routed) gates are running, git re-resolves the ref at

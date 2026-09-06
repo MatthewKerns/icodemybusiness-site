@@ -34,7 +34,12 @@ are NOT restated here — consult `~/workspace/software-development-best-practic
 
 ### Ask First (Matthew)
 - New dependencies; new/changed API routes, auth, middleware; Convex schema changes; new env vars (VPS `.env.build` or Convex env).
-- **Changing what a test expects.** If a red test is wrong, say why in the commit body and get Matthew's OK; the default is that the implementation is wrong.
+- **Changing what a test expects.** If a red test is wrong, say why in the commit body and get Matthew's OK; the default is that the implementation is wrong. Record the OK in the commit itself — a
+  `Test-Change-Approved: <who, date>` trailer — not just in a session's conversation with him. An
+  approval that lives only in one session's transcript is invisible to every other session and to
+  the git history, and looks exactly like no approval was ever given (`docs/ENGINEERING_LOG.md`
+  2026-09-06). `scripts/git-hooks/pre-push` refuses a push whose `*.test.*` diff removes a
+  `toThrow`/`.rejects` assertion unless that trailer is present in the range being pushed.
 - Any copy that makes a promise (durations, guarantees, deliverables, "coming soon"): it goes in the promises workbook.
 
 ### Never Do
