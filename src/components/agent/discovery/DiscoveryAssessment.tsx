@@ -14,7 +14,10 @@ import {
   DISCOVERY_STAGE,
   questionForStage,
 } from "@/content/discovery-questions";
-import { ensureDiscoverySessionId } from "@/lib/agent/discovery-session-id";
+import {
+  ensureDiscoverySessionId,
+  rotateDiscoverySessionId,
+} from "@/lib/agent/discovery-session-id";
 import { useDiscoverySession } from "./useDiscoverySession";
 import { DiscoveryStepper } from "./DiscoveryStepper";
 import { DiscoveryMessageView } from "./DiscoveryMessageView";
@@ -76,7 +79,26 @@ export function DiscoveryAssessment({ source }: { source: DiscoverySource }) {
 
   useEffect(() => {
     if (!sessionId) return;
-    void ensureSession({ sessionId, agentKind: AGENT_KIND, source });
+    let cancelled = false;
+    void ensureSession({ sessionId, agentKind: AGENT_KIND, source }).then(
+      (row) => {
+        if (cancelled || row) return;
+        // Null means this tab is holding a session id that belongs to another
+        // account. Start a fresh conversation rather than showing a dead one.
+        //
+        // This used to be a thrown ConvexError from the ownership guard, which
+        // reached `useQuery` and threw during render — taking the whole
+        // homepage down for anyone who signed in as a different user than the
+        // one a session was bound to. The refusal is right; the exception was
+        // not.
+        const fresh = rotateDiscoverySessionId();
+        sessionIdRef.current = fresh;
+        setSessionId(fresh);
+      }
+    );
+    return () => {
+      cancelled = true;
+    };
   }, [sessionId, ensureSession, source]);
 
   // Replay the persisted transcript once (survives the sign-up redirect), and

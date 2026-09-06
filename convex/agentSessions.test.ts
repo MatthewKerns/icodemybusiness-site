@@ -91,19 +91,36 @@ describe("unclaimed sessions stay open", () => {
 });
 
 describe("bound sessions are identity-protected", () => {
-  it("refuses an anonymous caller holding the session id", async () => {
+  // Reads REFUSE BY VALUE, writes throw. The first version of this guard made
+  // reads throw too, and that took the live homepage down: DiscoveryAssessment
+  // reads the session through `useQuery`, a throwing `useQuery` throws during
+  // render, and the homepage mounts that component. Any visitor signed in as a
+  // different account than the one a session was bound to got a dead front
+  // door. Returning null is also marginally less leaky — a throw says "this
+  // exists and is not yours"; null says nothing at all.
+  it("gives an anonymous caller holding the session id nothing to read", async () => {
     const t = await boundSession();
-    await expect(
-      t.query(api.agentSessions.getForServer, { sessionId: SESSION })
-    ).rejects.toThrow(/another account/);
+    expect(
+      await t.query(api.agentSessions.getForServer, { sessionId: SESSION })
+    ).toBeNull();
   });
 
-  it("refuses a different signed-in account", async () => {
+  it("gives a different signed-in account nothing to read, and refuses writes", async () => {
     const t = await boundSession();
     const other = t.withIdentity(OTHER);
-    await expect(
-      other.query(api.agentSessions.getForServer, { sessionId: SESSION })
-    ).rejects.toThrow(/another account/);
+
+    expect(
+      await other.query(api.agentSessions.getForServer, { sessionId: SESSION })
+    ).toBeNull();
+    expect(
+      await other.query(api.agentSessions.getBySessionId, { sessionId: SESSION })
+    ).toBeNull();
+    expect(
+      await other.query(api.agentSessions.listMessages, { sessionId: SESSION })
+    ).toEqual([]);
+
+    // A write to someone else's conversation still fails loudly. Nothing
+    // renders off a write, so an exception here costs nobody a page.
     await expect(
       other.mutation(api.agentSessions.appendMessage, {
         sessionId: SESSION,
@@ -112,10 +129,10 @@ describe("bound sessions are identity-protected", () => {
       })
     ).rejects.toThrow(/another account/);
     await expect(
-      other.query(api.agentSessions.getBySessionId, { sessionId: SESSION })
-    ).rejects.toThrow(/another account/);
-    await expect(
-      other.query(api.agentSessions.listMessages, { sessionId: SESSION })
+      other.mutation(api.agentSessions.updateDiscoveryState, {
+        sessionId: SESSION,
+        discoveryState: { stage: 3, followUpsUsed: 0, answers: {} },
+      })
     ).rejects.toThrow(/another account/);
   });
 
@@ -134,15 +151,35 @@ describe("bound sessions are identity-protected", () => {
     ).resolves.not.toThrow();
   });
 
-  it("does not hand a bound session back through getOrCreate", async () => {
+  it("hands back null from getOrCreate so the client can start over", async () => {
+    // Null is the signal DiscoveryAssessment acts on: it mints a fresh session
+    // id and begins a new conversation. Throwing here left an unhandled
+    // rejection in the mount effect and no way to recover.
     const t = await boundSession();
-    await expect(
-      t.mutation(api.agentSessions.getOrCreate, {
+    expect(
+      await t.mutation(api.agentSessions.getOrCreate, {
         sessionId: SESSION,
         agentKind: AGENT_KIND,
         source: "homepage",
       })
-    ).rejects.toThrow(/another account/);
+    ).toBeNull();
+  });
+
+  it("still serves a fresh id to the same browser after a mismatch", async () => {
+    // The live case end to end: subject B cannot read A's session, but a new
+    // id gets a working one, which is what the client rotates to.
+    const t = await boundSession();
+    const other = t.withIdentity(OTHER);
+    expect(
+      await other.query(api.agentSessions.getForServer, { sessionId: SESSION })
+    ).toBeNull();
+    const fresh = await other.mutation(api.agentSessions.getOrCreate, {
+      sessionId: "da_rotated_1",
+      agentKind: AGENT_KIND,
+      source: "homepage",
+    });
+    expect(fresh?.sessionId).toBe("da_rotated_1");
+    expect(fresh?.clerkUserId).toBeUndefined();
   });
 });
 

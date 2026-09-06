@@ -28,6 +28,15 @@ import {
  * NOT applied to `internalGetSession` / `internalStorePreDraft`: those run from
  * the scheduler and actions, which carry no user identity by construction.
  */
+async function mayUseSession(
+  ctx: { auth: { getUserIdentity: () => Promise<{ subject: string } | null> } },
+  session: { clerkUserId?: string }
+): Promise<boolean> {
+  if (!session.clerkUserId) return true;
+  const identity = await ctx.auth.getUserIdentity();
+  return Boolean(identity && identity.subject === session.clerkUserId);
+}
+
 async function assertMayUseSession(
   ctx: { auth: { getUserIdentity: () => Promise<{ subject: string } | null> } },
   session: { clerkUserId?: string }
@@ -85,7 +94,10 @@ export const getOrCreate = mutation({
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
     if (existing) {
-      await assertMayUseSession(ctx, existing);
+      // Null rather than a throw: the caller is a browser holding a stale
+      // session id, and the useful answer is "not yours, start a new one".
+      // Throwing here left an unhandled rejection in the mount effect.
+      if (!(await mayUseSession(ctx, existing))) return null;
       return existing;
     }
 
@@ -112,7 +124,7 @@ export const getBySessionId = query({
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
     if (!session) return null;
-    await assertMayUseSession(ctx, session);
+    if (!(await mayUseSession(ctx, session))) return null;
     return session;
   },
 });
@@ -125,7 +137,7 @@ export const listMessages = query({
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
     if (!session) return [];
-    await assertMayUseSession(ctx, session);
+    if (!(await mayUseSession(ctx, session))) return [];
     return await ctx.db
       .query("agentSessionMessages")
       .withIndex("by_sessionId_timestamp", (q) =>
@@ -244,7 +256,7 @@ export const getForServer = query({
       .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .first();
     if (!session) return null;
-    await assertMayUseSession(ctx, session);
+    if (!(await mayUseSession(ctx, session))) return null;
     const messages = await ctx.db
       .query("agentSessionMessages")
       .withIndex("by_sessionId_timestamp", (q) =>
