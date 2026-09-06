@@ -99,7 +99,44 @@ transcript that way on 2026-09-04).
 needs a matching `--build-arg` line. Restarting the container keeps the old key baked in and
 looks like the change did nothing.
 
-### 5. Remember there is only one container
+### 5. The sign-in you do next decides whether you can reach `/admin`
+
+This is the step most likely to look like the whole change failed, because the symptom is
+identical to the problem being fixed: "you are not allowed in".
+
+The owner gate resolves through **three** environment variables, any one of which is sufficient
+(`src/lib/owner.ts:21-40`):
+
+| Variable | Matches on |
+|---|---|
+| `OWNER_EMAILS` | exact address |
+| `OWNER_EMAIL_DOMAINS` | the domain of the identity's email |
+| `OWNER_CLERK_USER_IDS` | exact Clerk subject |
+
+Two things the instance swap does to that:
+
+- **Any subject in `OWNER_CLERK_USER_IDS` goes stale.** It was issued by the old instance and
+  does not exist in the new one. Worse, `requireRole` only returns the helpful "no owner
+  allowlist is configured" message when **all three** are empty (`convex/lib/auth.ts:105-113`);
+  a stale-but-populated list produces a bare `Forbidden`, which reads as a permissions bug
+  rather than a config one. Clear it in the same push that sets the issuer domain.
+- **`OWNER_EMAIL_DOMAINS` only helps if the account you create matches it.** As of 2026-09-05
+  the VPS `.env.build` carries no `OWNER_*` key at all, so the Convex-side domain rule is the
+  only thing standing between Matthew and `/admin`.
+
+**So: create the account on the new instance as `matthew@icodemybusiness.com`.** The real
+account on the old instance was a personal gmail address; signing up with a personal address
+again against `OWNER_EMAIL_DOMAINS=icodemybusiness.com` locks you out of `/admin/*` on the live
+site, and middleware redirects to `/forbidden`.
+
+This also explains why the `convex` JWT template must carry the **`email`** claim, not just
+`sub`: `isOwnerEmail` reads the identity's email, so without it the domain rule cannot match
+even when the variable is set correctly.
+
+Once signed in, add the new subject to `OWNER_CLERK_USER_IDS` so admin access no longer depends
+on the email claim alone.
+
+### 6. Remember there is only one container
 The VPS runs a single `icodemybusiness-site`; the apex and `staging.` both route to it through
 Traefik. **There is no separate staging to rehearse on.** This change goes straight to
 production, which is the strongest argument for doing it at a quiet hour and having the rollback
@@ -118,7 +155,9 @@ Ordered so the cheapest disproof comes first.
 3. **Convex trusts the new issuer** — sign in, then confirm a `users` row appears for the new
    subject: `npx convex data users --limit 5`. A null identity produces no row and no error,
    so absence here is the signal.
-4. **Admin reachable** — `/admin/funnel` loads for an owner account instead of bouncing.
+4. **Admin reachable** — `/admin/funnel` loads for an owner account instead of bouncing. A bare
+   `Forbidden` here means the allowlist is populated but stale; `/forbidden` means the identity
+   resolved and simply is not an owner (wrong email domain — see step 5).
 5. **Ownership guards still work** — start an assessment signed out, sign in mid-conversation,
    confirm the session binds (`discovery_session_bound` in PostHog 206048) and that
    `/portal/assessments` lists it. This exercises `assertMayUseSession` end to end and is the
