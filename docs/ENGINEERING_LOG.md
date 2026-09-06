@@ -225,6 +225,7 @@ than one distinct cause in a multi-service auth chain (issuer domain, JWT templa
 JWKS propagation, owner-domain matching) — confirm the specific claim in the actual token (browser
 console, Clerk's JWT debugger) before acting on a plausible mechanism. And: `npx convex deploy`
 without `--prod`/`--once`/an explicit target is not neutral on a project that has two real
+deployments — it silently picks prod, which was not the one this migration was working on.
 
 ## 2026-09-06 — the shared VPS filled to 100% and silently failed a gate mid-incident
 
@@ -257,4 +258,32 @@ per `docker-resource-manager`'s classification rules.
 **Verification.** `df -h /` confirmed 0GB → 15GB free after cleanup; the crash-fix gate re-run
 (which had failed with ENOSPC) was retried immediately after and is the direct evidence the fix
 worked, not an assumption.
-deployments — it silently picks prod, which was not the one this migration was working on.
+
+## 2026-09-06 — a second ssh-session hang, not the 2026-09-02 packet-loss pattern this time
+
+**What happened.** `scripts/deploy-staging.sh` reported "VPS build failed" for the homepage-crash
+fix (9d15b03) even though `/opt/icodemybusiness-site/build.log` on the VPS showed the Docker build
+completed cleanly, image tagged and present. The local `ssh … "./deploy.sh build"` process never
+returned after the remote command finished — same *shape* as the 2026-09-02 "evening VPS stalls"
+incident, but the documented three-step path test (third-party fetch, 6/6 TCP connects to the VPS,
+control site 3/3) showed a healthy path this time, ruling out that entry's root cause. What actually
+hung the ssh session is not identified.
+
+**Recovery.** Killed the one hung local ssh process (not the deploy-staging.sh process, not
+anything on the VPS); confirmed the built image's tag and timestamp matched build.log's completion;
+ran `./deploy.sh staging` directly against the already-built image (this now includes the apex+www
+routers, so it doubles as the cutover per the 2026-09-05 fix); `scripts/verify-apex.sh` all 5 green
+afterward. `deploy-staging.sh`'s own lock file cleaned itself up on the script's exit — no stale
+lock to remove by hand this time.
+
+**Why it got through.** `deploy-staging.sh` cannot currently distinguish "the remote command failed"
+from "the remote command finished but the ssh session carrying its exit status never returned" — it
+treats both as a build failure. The distinguishing signal (image present, build.log complete) exists
+on the VPS and was checked manually here, but the script itself doesn't check it before reporting
+failure.
+
+**Not fixed.** No script change made — recognizing this shape from the documented precedent and
+confirming build.log directly is a fast enough manual recovery that hardening the script wasn't
+judged worth doing under this ticket. Worth doing if it recurs a third time: on a reported build
+failure, `deploy-staging.sh` could check the remote image's creation timestamp against the deploy
+start time before concluding the build itself failed.
