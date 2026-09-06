@@ -134,3 +134,13 @@ container that serves all three hostnames — there is no separate production pu
 `scripts/verify-apex.sh` after any deploy that touches `deploy.sh` itself or recreates the
 container outside the normal script path; the normal `deploy-staging.sh` path is safe as of the
 2026-09-05 fix.
+
+**Clerk production instance (2026-09-06):** `icodemybusiness.com` runs on its own production Clerk
+instance (`clerk.icodemybusiness.com`), not the dev instance the app used before — see
+`docs/ENGINEERING_LOG.md` for how that mistake happened and was found. A new Clerk instance does
+**not** carry its JWT templates over automatically. The app's Convex functions call
+`ctx.auth.getUserIdentity()` against a `convex` JWT template (Clerk dashboard → JWT Templates);
+without it on the instance the app actually points at, every identity call returns `null` and every
+`requireOwner`/ownership check fails closed — no error, just everyone treated as signed-out. Check
+the template exists on whichever Clerk instance is live before assuming an owner-gate bug is in the
+app code.

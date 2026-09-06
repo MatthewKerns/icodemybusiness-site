@@ -152,3 +152,45 @@ don't assume `deploy-staging.sh` is staging-only post-cutover. This entry.
 hostnames, not two independent ones) has to update every script that recreates that resource, not
 just the one script that performed the cutover itself. "It worked before cutover" is not evidence
 it still works after.
+
+## 2026-09-06 — production ran on IDEA Brand Coach's dev Clerk instance; migration had two more traps
+
+**What happened.** The apex had been serving `pk_test_…` since before cutover, decoded and traced
+(cmo session) to `stunning-skunk-51.clerk.accounts.dev` — the *dev* instance of an unrelated
+product, "IDEA Brand Coach." Nothing in this codebase referenced that instance by name; it was
+purely an env value nobody had checked existed on the wrong app. Migrating to a real production
+instance surfaced two more traps on the way, both silent-failure shaped:
+
+1. **Wrong app, twice.** The new production instance was first created on yet another unrelated
+   app ("MCF TikTok Connector Dev") before being recreated on the correct one — caught before DNS
+   was pointed at it, removed via the API with a dry run first.
+2. **Missing JWT template.** The `convex` JWT template (which Convex's `ctx.auth.getUserIdentity()`
+   depends on) existed only on the old dev instance, not on the new production one. Without it,
+   every identity call would have returned `null` post-cutover — indistinguishable from "nobody is
+   signed in," so `requireOwner` would have failed closed with no error to chase. Found and created
+   before the rebuild, not after.
+3. **A Convex CLI access break, twice, on two independent sessions.** Mid-migration, `npx convex
+   deployments` started returning 404/401/"no access to the selected project" errors — first for
+   the deploy session, independently confirmed by the cmo session hitting the identical error. A
+   plain `npx convex login` (device already authorized) did not immediately fix it; it resolved on
+   its own shortly after Matthew took an account-level action, suggesting a team/project access
+   change on Convex's side rather than a local token issue. Not root-caused with certainty; noted
+   here because two independent CLIs failing identically rules out a single corrupted local
+   token as the sole explanation.
+
+**Sequencing that mattered.** Convex's `CLERK_JWT_ISSUER_DOMAIN` had to be pushed and verified
+*before* the VPS rebuild — Convex fetches the new issuer's JWKS over HTTPS at request time, so
+pushing the app's `pk_live`/`sk_live` first (issuer not yet trusted) would have produced the same
+silent `getUserIdentity() → null` failure as the missing JWT template. The Clerk domain's own
+"ssl: pending" status page lagged the actual certificate by several minutes; the real signal was
+querying `https://clerk.<domain>/.well-known/jwks.json` directly (200 with a matching `kid` prefix)
+rather than trusting the dashboard.
+
+**Fix.** `docs/DEPLOY.md` § Production: the JWT template requirement, called out as an easy thing
+to miss because a new Clerk instance doesn't carry it over. This entry, for the wrong-app and CLI
+patterns even though neither has a mechanical fix — they're process notes for the next migration.
+
+**Verification.** Independently confirmed (not taken on a peer's word) at each step: the served
+bundle's `pk_live` value, the Clerk environment endpoint identifying the correct app/instance,
+`scripts/verify-apex.sh` all green, and the owner gate redirecting on the public host. Still open:
+a human sign-in on the new instance to confirm `/admin/funnel` actually renders for an owner.
