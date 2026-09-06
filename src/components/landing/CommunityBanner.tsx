@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { SKOOL_COMMUNITY_URL } from "@/lib/constants";
 
 interface CommunityBannerProps {
   className?: string;
@@ -16,7 +17,7 @@ export function CommunityBanner({ className }: CommunityBannerProps) {
           get feedback, and access exclusive content.
         </p>
         <a
-          href="https://www.skool.com/icodemybusiness"
+          href={SKOOL_COMMUNITY_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-5 inline-flex h-12 items-center gap-2 rounded-lg bg-gold px-6 font-medium text-black transition-shadow hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
