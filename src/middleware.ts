@@ -6,14 +6,19 @@ import { applyAttribution } from "@/lib/attribution-middleware";
 import { isOwnerEmail, isOwnerUserId } from "@/lib/owner";
 import { isOwnerByApiLookup } from "@/lib/owner-lookup";
 import { publicOrigin, publicUrl } from "@/lib/public-url";
+import { isNavigationRequest } from "@/lib/navigation-kind";
 
 /**
- * A browser navigation gets an HTML page; an API/fetch caller keeps the JSON 403.
- * /forbidden deliberately lives OUTSIDE /admin so this redirect cannot loop.
+ * A browser navigation gets the /forbidden page; an API/fetch caller keeps the
+ * JSON 403. "Navigation" includes the App Router's client-side RSC fetch — the
+ * request that follows a Clerk sign-in — not only full document loads. Before
+ * 2026-09-06 only document loads were redirected, so a refused owner mid-session
+ * got a JSON 403 that the router rendered as an opaque error boundary (see
+ * src/lib/navigation-kind.ts). /forbidden deliberately lives OUTSIDE /admin so
+ * this redirect cannot loop.
  */
 function forbid(request: NextRequest) {
-  const accept = request.headers.get("accept") ?? "";
-  if (accept.includes("text/html")) {
+  if (isNavigationRequest(request.headers)) {
     return NextResponse.redirect(new URL("/forbidden", publicOrigin(request)));
   }
   return NextResponse.json(
