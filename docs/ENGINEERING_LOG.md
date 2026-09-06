@@ -225,4 +225,36 @@ than one distinct cause in a multi-service auth chain (issuer domain, JWT templa
 JWKS propagation, owner-domain matching) — confirm the specific claim in the actual token (browser
 console, Clerk's JWT debugger) before acting on a plausible mechanism. And: `npx convex deploy`
 without `--prod`/`--once`/an explicit target is not neutral on a project that has two real
+
+## 2026-09-06 — the shared VPS filled to 100% and silently failed a gate mid-incident
+
+**What happened.** Mid-way through gate-checking the homepage-crash fix, `offload-run` failed with
+`ENOSPC: no space left on device`. `df -h /` showed `/dev/sda1` at 387G/387G — 0 bytes free. This
+VPS runs the deploy lane for this project alongside 30+ unrelated containers for other projects
+(six independent `ui-*` docker-compose test stacks, a scheduler/orchestrator stack, an Ollama
+instance, a code-server) — nobody owns watching its aggregate disk, and nothing alerted before a
+gate check happened to hit it.
+
+**What was removed (per-tier confirmed, not a blind prune).** `docker builder prune -af` (14.37GB
+— intermediate build-cache layers, none referenced by a running container or an in-progress build)
+and one unreferenced image, `mcr.microsoft.com/playwright:v1.47.0-jammy` (2.81GB, 2 years old,
+superseded by v1.56.1-jammy which is what's actually in use). Confirmed before removal: zero of the
+41 running containers referenced either. No volume was touched — volumes hold the actual state
+(Postgres/Redis data for every stack on the box) and were explicitly out of scope. Result: 0 → 15GB
+free.
+
+**Why it got through.** No process watches this box's aggregate disk across projects; each
+project's own health checks only see their own containers, not shared host resources. A build-cache
+accumulation from routine `docker build`s across many unrelated projects is exactly the kind of slow
+leak that has no single owner.
+
+**Fix.** None shipped yet — this entry plus a board item (D12) for Matthew: alert-on-threshold vs.
+a scheduled capped prune vs. more disk is his call, not a decision to make unilaterally on shared
+infrastructure other sessions depend on. If a scheduled prune is chosen, it should stay to Tier
+0a/0b (build cache, dangling images) — the tiers that are recoverable by rebuilding, never volumes,
+per `docker-resource-manager`'s classification rules.
+
+**Verification.** `df -h /` confirmed 0GB → 15GB free after cleanup; the crash-fix gate re-run
+(which had failed with ENOSPC) was retried immediately after and is the direct evidence the fix
+worked, not an assumption.
 deployments — it silently picks prod, which was not the one this migration was working on.
