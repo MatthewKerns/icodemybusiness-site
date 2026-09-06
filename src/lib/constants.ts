@@ -12,3 +12,9 @@ export const WEBHOOK_MAP_MAX_SIZE = 10_000;
 export const LEAD_SCORE_REFERRAL = 15;
 export const LEAD_SCORE_YOUTUBE = 10;
 export const LEAD_SCORE_DEFAULT = 5;
+
+// Community. One constant, because two surfaces (CommunityBanner, Footer) link to it and
+// they drifted once: both carried a guessed slug that 404'd on the live site until
+// 2026-09-06. Matthew's community is unlisted, so the slug is not discoverable — it
+// comes from him.
+export const SKOOL_COMMUNITY_URL = "https://www.skool.com/icodemybusiness-9679";

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SKOOL_COMMUNITY_URL } from "@/lib/constants";
 
 const FOOTER_LINKS = [
   { href: "/", label: "Home" },
@@ -97,7 +98,7 @@ export function Footer() {
               ))}
             </div>
             <a
-              href="https://www.skool.com/icodemybusiness"
+              href={SKOOL_COMMUNITY_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-gold-dim px-4 py-2 text-sm font-medium text-gold transition-all hover:border-gold hover:shadow-[0_0_20px_rgba(212,175,55,0.15)]"
