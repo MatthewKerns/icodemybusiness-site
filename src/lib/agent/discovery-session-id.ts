@@ -44,11 +44,30 @@ export function setDiscoverySessionId(id: string): void {
 }
 
 /** Read the id for this tab, creating one on first use. */
+/** The one place the id format lives, so minting and rotating cannot drift. */
+function mintId(): string {
+  return `da_${Math.random().toString(36).slice(2, 12)}_${Date.now()}`;
+}
+
 export function ensureDiscoverySessionId(): string {
   if (typeof window === "undefined") return "";
   const stored = readDiscoverySessionId();
   if (stored) return stored;
-  const fresh = `da_${Math.random().toString(36).slice(2, 12)}_${Date.now()}`;
+  const fresh = mintId();
+  setDiscoverySessionId(fresh);
+  return fresh;
+}
+
+/**
+ * Abandon this tab's session id and mint a new one.
+ *
+ * For the case where the stored id belongs to a different account — someone
+ * else signed in on this browser, or the same person signed in as a different
+ * user. The conversation behind that id is not ours to read, so the only useful
+ * move is to start a fresh one.
+ */
+export function rotateDiscoverySessionId(): string {
+  const fresh = mintId();
   setDiscoverySessionId(fresh);
   return fresh;
 }

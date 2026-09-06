@@ -10,6 +10,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   DISCOVERY_SESSION_STORAGE_KEY,
   ensureDiscoverySessionId,
+  rotateDiscoverySessionId,
   readDiscoverySessionId,
   setDiscoverySessionId,
   subscribeDiscoverySessionId,
@@ -35,6 +36,28 @@ describe("ensureDiscoverySessionId", () => {
     // the assessment must pick it up rather than starting a new conversation.
     setDiscoverySessionId("da_adopted_1");
     expect(ensureDiscoverySessionId()).toBe("da_adopted_1");
+  });
+});
+
+describe("rotateDiscoverySessionId", () => {
+  it("abandons a session that belongs to someone else and mints a new one", () => {
+    // The live recovery path: this tab holds an id bound to another account, so
+    // the conversation behind it is unreadable. Starting fresh is the only move
+    // that leaves the visitor with a working assessment.
+    setDiscoverySessionId("da_someone_elses");
+    const fresh = rotateDiscoverySessionId();
+    expect(fresh).not.toBe("da_someone_elses");
+    expect(fresh).toMatch(/^da_/);
+    expect(readDiscoverySessionId()).toBe(fresh);
+    expect(ensureDiscoverySessionId()).toBe(fresh);
+  });
+
+  it("notifies subscribers, so the binding hook sees the new id", () => {
+    const seen = vi.fn();
+    const unsubscribe = subscribeDiscoverySessionId(seen);
+    rotateDiscoverySessionId();
+    expect(seen).toHaveBeenCalledTimes(1);
+    unsubscribe();
   });
 });
 
