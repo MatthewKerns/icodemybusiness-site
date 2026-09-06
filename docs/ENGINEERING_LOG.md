@@ -194,3 +194,35 @@ patterns even though neither has a mechanical fix — they're process notes for 
 bundle's `pk_live` value, the Clerk environment endpoint identifying the correct app/instance,
 `scripts/verify-apex.sh` all green, and the owner gate redirecting on the public host. Still open:
 a human sign-in on the new instance to confirm `/admin/funnel` actually renders for an owner.
+
+## 2026-09-06 (follow-up) — the /admin/funnel post-migration failure wasn't the issuer
+
+**Correction to the entry above.** After the Clerk production cutover, `/admin/funnel` still threw
+("Something went wrong"). The leading hypothesis — `convex/auth.config.js` reads
+`CLERK_JWT_ISSUER_DOMAIN` at function-deploy time, and setting the env var alone doesn't repush it
+— was plausible and matched a real Convex behavior, but was wrong here: Matthew's browser console
+showed the OIDC provider was already correctly configured. Acted on anyway (`npx convex dev --once`
+against `neat-hamster-414`): harmless and idempotent, but not the fix.
+
+**Actual root cause.** The `convex` JWT template on the new production Clerk instance (created via
+the API during the migration, not the dashboard) was missing the `aud: "convex"` claim — Clerk's
+dashboard preset includes it automatically; a template created through the API does not unless
+asked for. Convex validates the token audience against `applicationID: "convex"` in
+`auth.config.js`; without a matching `aud` claim, every token was rejected before identity
+resolution ran, indistinguishable from the issuer being wrong.
+
+**Side effect while chasing the wrong hypothesis.** `npx convex deploy` (no flags) targets this
+project's *prod*-named deployment, `silent-jellyfish-951` — not `neat-hamster-414`, which is the
+deployment `.env.local`/the VPS actually point at for all live traffic (R-012: the site has only
+ever run on the dev-named deployment). That command pushed the current `schema.ts` there, creating
+~57 table indexes that didn't previously exist. No data was written or read — `silent-jellyfish-951`
+holds no rows and only 3 env vars, so nothing else depends on it — but it means the schema now sits
+out of sync with a deployment nobody uses on purpose. Matthew's call whether that deployment should
+be deleted or is worth keeping in sync going forward; nothing time-sensitive either way.
+
+**Lesson.** A same-shaped symptom ("owner check fails silently, no error surfaces") can have more
+than one distinct cause in a multi-service auth chain (issuer domain, JWT template contents, Clerk
+JWKS propagation, owner-domain matching) — confirm the specific claim in the actual token (browser
+console, Clerk's JWT debugger) before acting on a plausible mechanism. And: `npx convex deploy`
+without `--prod`/`--once`/an explicit target is not neutral on a project that has two real
+deployments — it silently picks prod, which was not the one this migration was working on.
