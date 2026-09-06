@@ -20,8 +20,22 @@ export interface HeaderReader {
 }
 
 export function isNavigationRequest(headers: HeaderReader): boolean {
+  // A prefetch (hovering a link) also carries `RSC: 1`. It is not a navigation:
+  // answering it with a redirect would be harmless but muddles intent, and a
+  // plain 403 simply makes the router drop the prefetch. The real click that
+  // follows is a navigation and gets the redirect.
+  if (headers.get("next-router-prefetch") === "1") return false;
   const accept = (headers.get("accept") ?? "").toLowerCase();
   if (accept.includes("text/html")) return true;
   if (accept.includes("text/x-component")) return true;
   return headers.get("rsc") === "1";
+}
+
+/** Short label of the request shape, for the refusal log line. */
+export function describeRequestKind(headers: HeaderReader): string {
+  if (headers.get("next-router-prefetch") === "1") return "prefetch";
+  const accept = (headers.get("accept") ?? "").toLowerCase();
+  if (accept.includes("text/html")) return "document";
+  if (headers.get("rsc") === "1" || accept.includes("text/x-component")) return "rsc-navigation";
+  return `fetch(accept=${accept || "-"})`;
 }

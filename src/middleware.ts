@@ -6,7 +6,7 @@ import { applyAttribution } from "@/lib/attribution-middleware";
 import { isOwnerEmail, isOwnerUserId } from "@/lib/owner";
 import { isOwnerByApiLookup } from "@/lib/owner-lookup";
 import { publicOrigin, publicUrl } from "@/lib/public-url";
-import { isNavigationRequest } from "@/lib/navigation-kind";
+import { isNavigationRequest, describeRequestKind } from "@/lib/navigation-kind";
 
 /**
  * A browser navigation gets the /forbidden page; an API/fetch caller keeps the
@@ -18,6 +18,13 @@ import { isNavigationRequest } from "@/lib/navigation-kind";
  * this redirect cannot loop.
  */
 function forbid(request: NextRequest) {
+  // Leave a trace. On 2026-09-06 a correct refusal left none, and the symptom
+  // (an error boundary) was investigated as a data-layer failure for a full lap.
+  const kind = describeRequestKind(request.headers);
+  console.warn(
+    `[owner-gate] refused ${request.nextUrl.pathname} — request kind: ${kind}; ` +
+      `response: ${isNavigationRequest(request.headers) ? "redirect /forbidden" : "403 json"}`
+  );
   if (isNavigationRequest(request.headers)) {
     return NextResponse.redirect(new URL("/forbidden", publicOrigin(request)));
   }
