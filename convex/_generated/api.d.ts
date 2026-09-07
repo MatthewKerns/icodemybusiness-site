@@ -42,6 +42,7 @@ import type * as objectives from "../objectives.js";
 import type * as objectivesIntake from "../objectivesIntake.js";
 import type * as pageViews from "../pageViews.js";
 import type * as projects from "../projects.js";
+import type * as storyFragments from "../storyFragments.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as users from "../users.js";
 import type * as visitorEvents from "../visitorEvents.js";
@@ -90,6 +91,7 @@ declare const fullApi: ApiFromModules<{
   objectivesIntake: typeof objectivesIntake;
   pageViews: typeof pageViews;
   projects: typeof projects;
+  storyFragments: typeof storyFragments;
   subscriptions: typeof subscriptions;
   users: typeof users;
   visitorEvents: typeof visitorEvents;
