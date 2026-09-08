@@ -129,7 +129,7 @@ export function worksheetScaffold(row: WorksheetRow): string {
     "",
     `Module ${m.n} · ${m.name} · tactic ${row.tacticId}`,
     "",
-    "**What you will finish:** [Matthew: the artifact the member leaves with]",
+    "**Expected Lesson Outcome:** [Matthew: the artifact the member leaves with]",
     "",
     "## What this is",
     "",
