@@ -1,5 +1,7 @@
 import { defineRateLimits } from "convex-helpers/server/rateLimit";
 import {
+  CHAT_TURN_CAPACITY,
+  CHAT_TURN_RATE,
   EMAIL_CAPTURE_RATE,
   EVENT_CAPTURE_CAPACITY,
   EVENT_CAPTURE_RATE,
@@ -20,6 +22,12 @@ export const { checkRateLimit, rateLimit, resetRateLimit } = defineRateLimits({
     rate: EVENT_CAPTURE_RATE,
     period: MINUTE,
     capacity: EVENT_CAPTURE_CAPACITY,
+  },
+  chatTurn: {
+    kind: "token bucket",
+    rate: CHAT_TURN_RATE,
+    period: HOUR,
+    capacity: CHAT_TURN_CAPACITY,
   },
   reorgIntake: {
     kind: "token bucket",

@@ -2,15 +2,18 @@ import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { api } from "../../../../../../convex/_generated/api";
 import { getAuthedConvexClient } from "@/lib/convex-client";
+import { captureServerEvent } from "@/lib/posthog-server";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import {
   advanceWithoutModel,
   applyCorrection,
   buildCorrectionSystemPrompt,
-  buildDiscoverySystemPrompt,
+  buildDiscoveryTurnPrompt,
   clampStageTransition,
   coerceDiscoveryState,
   DEGRADED_ACK,
   DEGRADED_CORRECTION_ACK,
+  DISCOVERY_SYSTEM_STABLE,
   parseDiscoveryCorrection,
   parseDiscoveryTurn,
   recordCorrectionWithoutModel,
@@ -25,13 +28,41 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_TOKENS = 700;
+/**
+ * The reply budget covers the drill-down question AND the discovery-state JSON
+ * that carries the extracted answer. At 700 a rich answer produced a long
+ * extraction that ran out of room mid-JSON, `parseDiscoveryTurn` returned null,
+ * and the turn fell through to the degraded path — so the most detailed answers
+ * were the most likely to lose their structure, silently. Truncation is now
+ * reported (see `truncated` below) rather than guessed at.
+ */
+const MAX_TOKENS = 2000;
 /** Same id as convex/lib/anthropic.ts, so both halves of this feature agree. */
 const MODEL = "claude-opus-5";
-/** Only the recent transcript is needed; the system prompt carries the state. */
-const HISTORY_WINDOW = 16;
+/**
+ * How much of the transcript the model sees. The system prompt carries the
+ * extracted state, so this is for the visitor's own phrasing — which is the
+ * part worth keeping now that the first question asks for a frustration and
+ * gets a long, unstructured answer.
+ */
+const HISTORY_WINDOW = 24;
 const AGENT_KIND = "discovery-assessment";
-const MAX_MESSAGE_CHARS = 2000;
+/**
+ * What one answer may contain. 2000 characters is roughly 300 words, and the
+ * stage-0 anchor is deliberately written to make people pour out detail — so
+ * the cap was rejecting exactly the answers this assessment exists to collect.
+ * Wide enough that an honest visitor never meets it; still bounded.
+ */
+const MAX_MESSAGE_CHARS = 8000;
+/**
+ * How long one model turn may take before we stop waiting and degrade.
+ *
+ * The stream had no deadline, so a hung upstream held the SSE connection open
+ * indefinitely and the visitor watched a cursor blink. A timeout throws, which
+ * the existing catch turns into the degraded path — their answer is recorded
+ * verbatim and the assessment moves on, which is the whole point of that path.
+ */
+const MODEL_TIMEOUT_MS = 90_000;
 
 interface ChatRequest {
   sessionId: string;
@@ -42,6 +73,14 @@ interface ChatRequest {
 interface StoredMessage {
   role: string;
   content: string;
+}
+
+/** What one model turn cost, so cache behaviour is measurable rather than assumed. */
+interface TurnUsage {
+  input: number;
+  output: number;
+  cacheRead: number;
+  cacheWrite: number;
 }
 
 function json(status: number, body: unknown) {
@@ -105,6 +144,28 @@ export async function POST(req: NextRequest) {
     return json(409, { error: "Corrections are only possible at the recap" });
   }
 
+  // Spend a turn before anything else. Every turn past this point is a model
+  // call we pay for, and nothing bounded them: a script could run turns
+  // indefinitely at our cost. Checked before the message is persisted so a
+  // refused turn leaves no dangling half-exchange in the transcript.
+  const budget = await convex.mutation(api.agentSessions.consumeChatTurn, {
+    sessionId,
+  });
+  if (!budget.ok) {
+    // Server-side on purpose: a script never runs our client JavaScript, so a
+    // browser-fired event would miss precisely the traffic worth seeing.
+    captureServerEvent({
+      distinctId: sessionId,
+      event: ANALYTICS_EVENTS.CHAT_RATE_LIMITED,
+      properties: { route: "agent/discovery/chat", stage: state.stage },
+    });
+    return json(429, {
+      error:
+        "That's a lot of messages in a short time. Give it a minute and send that again.",
+      retryAt: budget.retryAt,
+    });
+  }
+
   await convex.mutation(api.agentSessions.appendMessage, {
     sessionId,
     role: "user",
@@ -112,11 +173,6 @@ export async function POST(req: NextRequest) {
   });
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  const system =
-    mode === "answer"
-      ? buildDiscoverySystemPrompt(state)
-      : buildCorrectionSystemPrompt(state);
-
   const history: Anthropic.MessageParam[] = (
     context.messages as StoredMessage[]
   )
@@ -125,13 +181,45 @@ export async function POST(req: NextRequest) {
       role: m.role === "user" ? "user" : "assistant",
       content: m.content,
     }));
+
+  // Cache breakpoint on the LAST message of the replayed history, not on the
+  // new one. Caching is a prefix match, so everything after the breakpoint is
+  // billed in full, and the new message is the only part that differs between
+  // one turn and the next. By stage four the history is 20+ messages, which is
+  // where nearly all of the input cost sits.
+  const previous = history[history.length - 1];
+  if (previous && typeof previous.content === "string") {
+    history[history.length - 1] = {
+      role: previous.role,
+      content: [
+        {
+          type: "text",
+          text: previous.content,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
+    };
+  }
+
   const messages: Anthropic.MessageParam[] = [
     ...history,
     { role: "user", content: userMessage },
   ];
-  const systemBlocks: Anthropic.TextBlockParam[] = [
-    { type: "text", text: system, cache_control: { type: "ephemeral" } },
-  ];
+
+  // Stable half first with a breakpoint after it, per-stage half after. The
+  // correction prompt embeds the current answers, so it changes on every
+  // correction and is not worth a cache write.
+  const systemBlocks: Anthropic.TextBlockParam[] =
+    mode === "answer"
+      ? [
+          {
+            type: "text",
+            text: DISCOVERY_SYSTEM_STABLE,
+            cache_control: { type: "ephemeral" },
+          },
+          { type: "text", text: buildDiscoveryTurnPrompt(state) },
+        ]
+      : [{ type: "text", text: buildCorrectionSystemPrompt(state) }];
 
   const encoder = new TextEncoder();
 
@@ -149,7 +237,22 @@ export async function POST(req: NextRequest) {
         next: DiscoveryState,
         advanced: boolean,
         forced: boolean,
-        degraded: boolean
+        degraded: boolean,
+        /**
+         * The model ran out of reply budget, so the extraction JSON may be cut
+         * short. Reported on the `state` event rather than folded into
+         * `discovery_stage_advanced`, because a truncated extraction is exactly
+         * the case where the stage does NOT advance — a property on that event
+         * would miss every occurrence it exists to catch.
+         */
+        truncated = false,
+        /**
+         * Token accounting for this turn. Reported because the documented
+         * failure mode of prompt caching is that it silently does nothing —
+         * "the bill looks lower" is not evidence. If `cacheRead` stays 0 across
+         * turns in one session, a silent invalidator is at work.
+         */
+        usage: TurnUsage | null = null
       ) => {
         await convex.mutation(api.agentSessions.appendMessage, {
           sessionId,
@@ -174,7 +277,15 @@ export async function POST(req: NextRequest) {
           sessionId,
           discoveryState: next,
         });
-        send("state", { state: next, advanced, forced, anchor, degraded });
+        send("state", {
+          state: next,
+          advanced,
+          forced,
+          anchor,
+          degraded,
+          truncated,
+          usage,
+        });
         send("done", { visibleText: stripDiscoveryFence(assistantText) });
       };
 
@@ -200,12 +311,15 @@ export async function POST(req: NextRequest) {
         }
 
         const client = new Anthropic({ apiKey });
-        const response = client.messages.stream({
-          model: MODEL,
-          max_tokens: MAX_TOKENS,
-          system: systemBlocks,
-          messages,
-        });
+        const response = client.messages.stream(
+          {
+            model: MODEL,
+            max_tokens: MAX_TOKENS,
+            system: systemBlocks,
+            messages,
+          },
+          { timeout: MODEL_TIMEOUT_MS }
+        );
 
         for await (const event of response) {
           if (
@@ -217,6 +331,18 @@ export async function POST(req: NextRequest) {
         }
 
         const final = await response.finalMessage();
+        // "max_tokens" means the reply was cut off, so the discovery-state JSON
+        // at the end of it is the first casualty. Raising MAX_TOKENS should make
+        // this rare; reporting it is how we find out whether it actually did,
+        // instead of discovering months later that the richest answers were the
+        // ones we failed to extract.
+        const truncated = final.stop_reason === "max_tokens";
+        const usage: TurnUsage = {
+          input: final.usage.input_tokens,
+          output: final.usage.output_tokens,
+          cacheRead: final.usage.cache_read_input_tokens ?? 0,
+          cacheWrite: final.usage.cache_creation_input_tokens ?? 0,
+        };
         const fullText = final.content
           .filter((b): b is Anthropic.TextBlock => b.type === "text")
           .map((b) => b.text)
@@ -225,10 +351,10 @@ export async function POST(req: NextRequest) {
         if (mode === "answer") {
           const parsed = parseDiscoveryTurn(fullText);
           const { next, advanced, forced } = clampStageTransition(state, parsed);
-          await commit(fullText, next, advanced, forced, false);
+          await commit(fullText, next, advanced, forced, false, truncated, usage);
         } else {
           const next = applyCorrection(state, parseDiscoveryCorrection(fullText));
-          await commit(fullText, next, false, false, false);
+          await commit(fullText, next, false, false, false, truncated, usage);
         }
         controller.close();
       } catch (err) {

@@ -4,6 +4,8 @@ import {
   applyCorrection,
   buildCorrectionSystemPrompt,
   buildDiscoverySystemPrompt,
+  buildDiscoveryTurnPrompt,
+  DISCOVERY_SYSTEM_STABLE,
   clampStageTransition,
   coerceDiscoveryState,
   initialDiscoveryState,
@@ -290,6 +292,53 @@ describe("prompts", () => {
         stage: DISCOVERY_STAGE.RECAP,
       })
     ).toThrow();
+  });
+});
+
+describe("cacheable prompt split", () => {
+  const atStage = (stage: number): DiscoveryState => ({
+    ...initialDiscoveryState(),
+    stage,
+    answers: {
+      problem: { summary: "You lose Mondays to re-keying orders.", quotes: [] },
+    },
+  });
+
+  it("keeps the stable half byte-identical across stages and follow-ups", () => {
+    // This is the whole point: prompt caching is a prefix match, so a single
+    // byte of per-stage content leaking into this block silently stops the
+    // cache from ever being read.
+    const a = DISCOVERY_SYSTEM_STABLE;
+    expect(buildDiscoverySystemPrompt(atStage(0))).toContain(a);
+    expect(buildDiscoverySystemPrompt(atStage(3))).toContain(a);
+    expect(
+      buildDiscoverySystemPrompt({
+        ...atStage(3),
+        followUpsUsed: MAX_FOLLOW_UPS_PER_STAGE,
+      })
+    ).toContain(a);
+  });
+
+  it("keeps every varying part out of the stable half", () => {
+    for (const q of DISCOVERY_QUESTIONS) {
+      expect(DISCOVERY_SYSTEM_STABLE).not.toContain(q.anchor);
+    }
+    expect(DISCOVERY_SYSTEM_STABLE).not.toContain("You lose Mondays");
+    expect(DISCOVERY_SYSTEM_STABLE).not.toContain("What to do on this turn");
+  });
+
+  it("carries the question and the prior answers in the per-turn half", () => {
+    const turn = buildDiscoveryTurnPrompt(atStage(1));
+    expect(turn).toContain(DISCOVERY_QUESTIONS[1].anchor);
+    expect(turn).toContain("You lose Mondays to re-keying orders.");
+    expect(turn).toContain("What to do on this turn");
+  });
+
+  it("still composes into the same whole prompt", () => {
+    const state = atStage(2);
+    expect(buildDiscoverySystemPrompt(state)).toBe(
+      `${DISCOVERY_SYSTEM_STABLE}\n\n${buildDiscoveryTurnPrompt(state)}`
+    );
   });
 });
 
