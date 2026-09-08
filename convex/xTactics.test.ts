@@ -216,3 +216,26 @@ describe("xTactics.setWorksheet", () => {
     ).rejects.toThrow(/Google Doc/);
   });
 });
+
+describe("xTactics.setWorksheetDraft", () => {
+  it("stores and clears a skill-drafted worksheet body", async () => {
+    const t = convexTest(schema, modules);
+    const owner = t.withIdentity(OWNER);
+    const { id } = await owner.mutation(api.xTactics.add, {
+      pillar: "claude",
+      text: "Diagnose the problem before you build anything",
+      source: "test",
+    });
+    await expect(
+      t.withIdentity(OUTSIDER).mutation(api.xTactics.setWorksheetDraft, { id, draft: "# x" })
+    ).rejects.toThrow(/Forbidden/);
+
+    await owner.mutation(api.xTactics.setWorksheetDraft, { id, draft: "# Diagnose first\n\n1. What is the problem?" });
+    let rows = await owner.query(api.xTactics.listByPillar, { pillar: "claude" });
+    expect(rows[0].worksheetDraft).toContain("What is the problem?");
+
+    await owner.mutation(api.xTactics.setWorksheetDraft, { id, draft: "   " });
+    rows = await owner.query(api.xTactics.listByPillar, { pillar: "claude" });
+    expect(rows[0].worksheetDraft).toBeUndefined();
+  });
+});

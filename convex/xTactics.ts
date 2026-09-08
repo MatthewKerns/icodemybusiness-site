@@ -1,4 +1,7 @@
-import { mutation, query, MutationCtx } from "./_generated/server";
+import { mutation, query, action, internalQuery, MutationCtx } from "./_generated/server";
+import { api, internal } from "./_generated/api";
+import { createGoogleDoc, driveEnvFromProcess } from "./lib/googleDrive";
+import { documentHtml, worksheetHtml, worksheetTitle } from "./lib/worksheet";
 import { v, ConvexError } from "convex/values";
 import { requireOwner } from "./lib/auth";
 
@@ -161,5 +164,74 @@ export const setWorksheet = mutation({
     }
     await ctx.db.patch(args.id, { worksheetUrl: url });
     return null;
+  },
+});
+
+/** A skill's drafted worksheet body (Markdown) — what `createWorksheetDoc` uploads. */
+export const setWorksheetDraft = mutation({
+  args: { id: v.id("xTactics"), draft: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    await requireOwner(ctx);
+    const row = await ctx.db.get(args.id);
+    if (!row) throw new ConvexError("Tactic not found");
+    const draft = args.draft?.trim();
+    await ctx.db.patch(args.id, { worksheetDraft: draft ? draft : undefined });
+    return null;
+  },
+});
+
+export const getForWorksheet = internalQuery({
+  args: { id: v.id("xTactics") },
+  handler: async (ctx, args) => ctx.db.get(args.id),
+});
+
+/**
+ * The admin "Create worksheet" button. Creates the Google Doc for a tactic in
+ * the designated Drive folder (`SKOOL_WORKSHEETS_FOLDER_ID`) through the Drive
+ * API with Matthew's stored OAuth refresh token, then links it to the tactic.
+ * Body = the skill-drafted `worksheetDraft` when there is one, otherwise the
+ * built-in scaffold around the tactic's own text. Setup: `docs/skool-worksheets.md`.
+ */
+export const createWorksheetDoc = action({
+  args: { id: v.id("xTactics") },
+  handler: async (ctx, args): Promise<{ worksheetUrl: string }> => {
+    await requireOwner(ctx);
+    const row = await ctx.runQuery(internal.xTactics.getForWorksheet, { id: args.id });
+    if (!row) throw new ConvexError("Tactic not found");
+    if (row.worksheetUrl) return { worksheetUrl: row.worksheetUrl };
+    if (row.status === "retired") throw new ConvexError("Retired tactics don't get worksheets");
+
+    const env = driveEnvFromProcess();
+    const doc = await createGoogleDoc(
+      {
+        title: worksheetTitle(row),
+        html: worksheetHtml(row),
+        folderId: env.folderId,
+      },
+      env
+    );
+    await ctx.runMutation(api.xTactics.setWorksheet, { id: args.id, worksheetUrl: doc.url });
+    return { worksheetUrl: doc.url };
+  },
+});
+
+/**
+ * Create a native Google Doc from Markdown in the designated worksheets folder
+ * with no tactic attached — module "Start here" docs, worksheets without a
+ * tactic, and the one-time import of drafted files. Owner-only.
+ */
+export const createDocFromMarkdown = action({
+  args: { title: v.string(), markdown: v.string() },
+  handler: async (ctx, args): Promise<{ url: string }> => {
+    await requireOwner(ctx);
+    const title = args.title.trim();
+    if (!title) throw new ConvexError("Title is required");
+    if (!args.markdown.trim()) throw new ConvexError("Document body is required");
+    const env = driveEnvFromProcess();
+    const doc = await createGoogleDoc(
+      { title, html: documentHtml(args.markdown), folderId: env.folderId },
+      env
+    );
+    return { url: doc.url };
   },
 });
