@@ -137,3 +137,29 @@ export const listByStatus = query({
       .take(1000);
   },
 });
+
+const GOOGLE_DOC_URL = /^https:\/\/docs\.google\.com\/document\/d\/[\w-]{10,}(\/.*)?$/;
+
+/**
+ * Attach (or clear) the Google Doc worksheet for a tactic. The admin "Open
+ * worksheet" button and the skool-worksheet skill both go through here, so the
+ * URL shape is checked once: only a docs.google.com document link is accepted.
+ */
+export const setWorksheet = mutation({
+  args: { id: v.id("xTactics"), worksheetUrl: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    await requireOwner(ctx);
+    const row = await ctx.db.get(args.id);
+    if (!row) throw new ConvexError("Tactic not found");
+    const url = args.worksheetUrl?.trim();
+    if (!url) {
+      await ctx.db.patch(args.id, { worksheetUrl: undefined });
+      return null;
+    }
+    if (!GOOGLE_DOC_URL.test(url)) {
+      throw new ConvexError("Worksheet must be a Google Doc link (docs.google.com/document/d/…)");
+    }
+    await ctx.db.patch(args.id, { worksheetUrl: url });
+    return null;
+  },
+});
