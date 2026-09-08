@@ -72,12 +72,22 @@ export function SplashScreen() {
           variants={lineVariants}
           className="text-sm font-medium uppercase tracking-[0.2em] text-text-muted sm:text-base"
         >
-          Save time. Make money.
+          Improve Operations
+        </motion.p>
+
+        <motion.p
+          custom={1}
+          initial="hidden"
+          animate="visible"
+          variants={lineVariants}
+          className="mt-3 text-sm font-medium uppercase tracking-[0.2em] text-text-muted sm:text-base"
+        >
+          Save time. Make more money.
         </motion.p>
 
         {/* The payoff carries the page. */}
         <motion.h1
-          custom={1}
+          custom={2}
           initial="hidden"
           animate="visible"
           variants={lineVariants}
@@ -88,7 +98,7 @@ export function SplashScreen() {
       </div>
 
       <motion.button
-        custom={2}
+        custom={3}
         initial="hidden"
         animate="visible"
         variants={lineVariants}

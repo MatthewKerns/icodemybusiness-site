@@ -29,11 +29,11 @@ const ebGaramond = EB_Garamond({
 export const metadata: Metadata = {
   title: "iCodeMyBusiness",
   description:
-    "Save time. Make money. AI-powered consulting and automation tools for business owners.",
+    "Save time. Make more money. AI-powered consulting and automation tools for business owners.",
   openGraph: {
     title: "iCodeMyBusiness",
     description:
-      "Save time. Make money. AI-powered consulting and automation tools for business owners.",
+      "Save time. Make more money. AI-powered consulting and automation tools for business owners.",
     type: "website",
   },
 };
