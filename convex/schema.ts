@@ -516,6 +516,8 @@ export default defineSchema(
       ),
       createdAt: v.number(),
       approvedAt: v.optional(v.number()),
+      /** Google Doc worksheet Matthew works on for this tactic (Skool Academy). */
+      worksheetUrl: v.optional(v.string()),
     })
       .index("by_pillar", ["pillar"])
       .index("by_status", ["status"])

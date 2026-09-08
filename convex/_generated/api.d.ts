@@ -30,6 +30,7 @@ import type * as lib_anthropic from "../lib/anthropic.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_constants from "../lib/constants.js";
 import type * as lib_dateFilter from "../lib/dateFilter.js";
+import type * as lib_funnelConstraint from "../lib/funnelConstraint.js";
 import type * as lib_leadScoring from "../lib/leadScoring.js";
 import type * as lib_mangoClient from "../lib/mangoClient.js";
 import type * as lib_objectiveOps from "../lib/objectiveOps.js";
@@ -78,6 +79,7 @@ declare const fullApi: ApiFromModules<{
   "lib/auth": typeof lib_auth;
   "lib/constants": typeof lib_constants;
   "lib/dateFilter": typeof lib_dateFilter;
+  "lib/funnelConstraint": typeof lib_funnelConstraint;
   "lib/leadScoring": typeof lib_leadScoring;
   "lib/mangoClient": typeof lib_mangoClient;
   "lib/objectiveOps": typeof lib_objectiveOps;

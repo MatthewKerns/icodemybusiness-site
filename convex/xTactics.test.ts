@@ -173,3 +173,46 @@ describe("xAssets", () => {
     expect(rows[0].sourceAssetIds).toEqual([assetId]);
   });
 });
+
+describe("xTactics.setWorksheet", () => {
+  const DOC = "https://docs.google.com/document/d/1AbCdEfGhIjKlMnOp/edit";
+
+  async function seed() {
+    const t = convexTest(schema, modules);
+    const owner = t.withIdentity(OWNER);
+    const { id } = await owner.mutation(api.xTactics.add, {
+      pillar: "paper",
+      text: "Plan tomorrow on paper before closing the laptop",
+      source: "test",
+    });
+    return { t, owner, id };
+  }
+
+  it("rejects non-owner callers", async () => {
+    const { t, id } = await seed();
+    await expect(
+      t.withIdentity(OUTSIDER).mutation(api.xTactics.setWorksheet, { id, worksheetUrl: DOC })
+    ).rejects.toThrow(/Forbidden/);
+  });
+
+  it("stores a Google Doc link and clears it again", async () => {
+    const { owner, id } = await seed();
+    await owner.mutation(api.xTactics.setWorksheet, { id, worksheetUrl: DOC });
+    let rows = await owner.query(api.xTactics.listByPillar, { pillar: "paper" });
+    expect(rows[0].worksheetUrl).toBe(DOC);
+
+    await owner.mutation(api.xTactics.setWorksheet, { id, worksheetUrl: "" });
+    rows = await owner.query(api.xTactics.listByPillar, { pillar: "paper" });
+    expect(rows[0].worksheetUrl).toBeUndefined();
+  });
+
+  it("rejects anything that is not a Google Doc link", async () => {
+    const { owner, id } = await seed();
+    await expect(
+      owner.mutation(api.xTactics.setWorksheet, {
+        id,
+        worksheetUrl: "https://drive.google.com/file/d/1AbCdEfGhIjKlMnOp/view",
+      })
+    ).rejects.toThrow(/Google Doc/);
+  });
+});

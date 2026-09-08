@@ -198,6 +198,16 @@ function TacticBank() {
   const unprocessed = useQuery(api.xAssets.listUnprocessed, {});
   const approve = useMutation(api.xTactics.approve);
   const retire = useMutation(api.xTactics.retire);
+  const setWorksheet = useMutation(api.xTactics.setWorksheet);
+
+  const [linking, setLinking] = useState<Doc<"xTactics"> | null>(null);
+  const [worksheetDraft, setWorksheetDraft] = useState("");
+  const [linkError, setLinkError] = useState<string | null>(null);
+  const openLinkDialog = (t: Doc<"xTactics">) => {
+    setLinking(t);
+    setWorksheetDraft(t.worksheetUrl ?? "");
+    setLinkError(null);
+  };
 
   return (
     <section className="rounded-lg border border-border bg-bg-secondary/40 p-5">
@@ -228,7 +238,7 @@ function TacticBank() {
             <TableHead>Tactic</TableHead>
             <TableHead className="w-44">Source</TableHead>
             <TableHead className="w-28">Status</TableHead>
-            <TableHead className="w-40">Actions</TableHead>
+            <TableHead className="w-72">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -253,6 +263,22 @@ function TacticBank() {
                     Retire
                   </Button>
                 )}
+                {t.worksheetUrl ? (
+                  <>
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={t.worksheetUrl} target="_blank" rel="noopener noreferrer">
+                        Open worksheet
+                      </a>
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => openLinkDialog(t)}>
+                      Change
+                    </Button>
+                  </>
+                ) : (
+                  <Button size="sm" variant="ghost" onClick={() => openLinkDialog(t)}>
+                    Link worksheet
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}
@@ -265,6 +291,37 @@ function TacticBank() {
           )}
         </TableBody>
       </Table>
+
+      <Dialog open={linking !== null} onOpenChange={(open) => !open && setLinking(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Worksheet for {linking?.tacticId}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-text-muted">
+            Paste the Google Doc this tactic&apos;s Skool worksheet lives in. Leave it empty
+            to unlink.
+          </p>
+          <Input
+            value={worksheetDraft}
+            onChange={(e) => setWorksheetDraft(e.target.value)}
+            placeholder="https://docs.google.com/document/d/…"
+          />
+          {linkError && <p className="text-sm text-red-400">{linkError}</p>}
+          <Button
+            onClick={() => {
+              if (!linking) return;
+              setLinkError(null);
+              void setWorksheet({ id: linking._id, worksheetUrl: worksheetDraft.trim() })
+                .then(() => setLinking(null))
+                .catch((err) =>
+                  setLinkError(err instanceof Error ? err.message : "Failed to link worksheet")
+                );
+            }}
+          >
+            Save
+          </Button>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
