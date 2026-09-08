@@ -105,6 +105,9 @@ Rollback = deploy the previous sha: `scripts/deploy-staging.sh <prev-sha>`
   (`/opt/icodemybusiness-site/.env.build`, edited by Matthew) — new keys must
   exist before the code that reads them ships. `NEXT_PUBLIC_*` values are baked
   at build time and also need a `--build-arg` line in the VPS `deploy.sh`.
+  Convex-only keys so far: the Skool-worksheet Drive connection (`GOOGLE_OAUTH_CLIENT_ID`,
+  `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_DRIVE_REFRESH_TOKEN`, `SKOOL_WORKSHEETS_FOLDER_ID`) —
+  set with `npx convex env set … --prod`; setup in `docs/skool-worksheets.md`.
 - **Anything only a browser can check** (a Clerk round-trip, a Calendly embed,
   375 px layout) — name it so the deploy session screenshots it.
 

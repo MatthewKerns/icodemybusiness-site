@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id, Doc } from "../../../../convex/_generated/dataModel";
 import { Badge } from "@/components/ui/badge";
@@ -199,6 +199,23 @@ function TacticBank() {
   const approve = useMutation(api.xTactics.approve);
   const retire = useMutation(api.xTactics.retire);
   const setWorksheet = useMutation(api.xTactics.setWorksheet);
+  const createWorksheet = useAction(api.xTactics.createWorksheetDoc);
+
+  const [creating, setCreating] = useState<Id<"xTactics"> | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const create = async (t: Doc<"xTactics">) => {
+    setCreating(t._id);
+    setCreateError(null);
+    try {
+      await createWorksheet({ id: t._id });
+    } catch (err) {
+      setCreateError(
+        `${t.tacticId}: ${err instanceof Error ? err.message : "Failed to create the worksheet"}`
+      );
+    } finally {
+      setCreating(null);
+    }
+  };
 
   const [linking, setLinking] = useState<Doc<"xTactics"> | null>(null);
   const [worksheetDraft, setWorksheetDraft] = useState("");
@@ -231,6 +248,7 @@ function TacticBank() {
           </Button>
         ))}
       </div>
+      {createError && <p className="mt-3 text-sm text-red-400">{createError}</p>}
       <Table className="mt-4">
         <TableHeader>
           <TableRow>
@@ -238,7 +256,7 @@ function TacticBank() {
             <TableHead>Tactic</TableHead>
             <TableHead className="w-44">Source</TableHead>
             <TableHead className="w-28">Status</TableHead>
-            <TableHead className="w-72">Actions</TableHead>
+            <TableHead className="w-80">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -275,9 +293,26 @@ function TacticBank() {
                     </Button>
                   </>
                 ) : (
-                  <Button size="sm" variant="ghost" onClick={() => openLinkDialog(t)}>
-                    Link worksheet
-                  </Button>
+                  <>
+                    {t.status !== "retired" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={creating === t._id}
+                        onClick={() => void create(t)}
+                      >
+                        {creating === t._id ? "Creating…" : "Create worksheet"}
+                      </Button>
+                    )}
+                    {t.worksheetDraft && (
+                      <Badge variant="outline" className="border-blue/40 text-blue">
+                        draft ready
+                      </Badge>
+                    )}
+                    <Button size="sm" variant="ghost" onClick={() => openLinkDialog(t)}>
+                      Link worksheet
+                    </Button>
+                  </>
                 )}
               </TableCell>
             </TableRow>

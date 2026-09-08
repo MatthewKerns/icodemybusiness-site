@@ -518,6 +518,8 @@ export default defineSchema(
       approvedAt: v.optional(v.number()),
       /** Google Doc worksheet Matthew works on for this tactic (Skool Academy). */
       worksheetUrl: v.optional(v.string()),
+      /** Markdown a skill drafted for this tactic's worksheet; the admin "Create worksheet" button turns it into the Google Doc. */
+      worksheetDraft: v.optional(v.string()),
     })
       .index("by_pillar", ["pillar"])
       .index("by_status", ["status"])
