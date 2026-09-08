@@ -4,4 +4,4 @@ Extracted from the live page 2026-09-08, document order (1 lines incl. shared he
 
 | # | Line | Verdict | Why | Matthew |
 |---|---|---|---|---|
-| 001 | iCodeMyBusiness | | | |
+| 001 | iCodeMyBusiness | keep | noindex draft (R-014); not public until testimonials are real. | |

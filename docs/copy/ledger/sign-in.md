@@ -4,17 +4,17 @@ Extracted from the live page 2026-09-08, document order (14 lines incl. shared h
 
 | # | Line | Verdict | Why | Matthew |
 |---|---|---|---|---|
-| 001 | iCodeMyBusiness | | | |
-| 002 | Academy | | | |
-| 003 | Free Intro Call | | | |
-| 004 | Consulting | | | |
-| 005 | Free Tools | | | |
-| 006 | Connect | | | |
-| 007 | Mango | | | |
-| 008 | Services | | | |
-| 009 | Book a Call | | | |
-| 010 | Save time. Make money. Make a difference. | | | |
-| 011 | matthew@icodemybusiness.com | | | |
-| 012 | Pages | | | |
-| 013 | Join the Inner Circle | | | |
-| 014 | → © 2026 iCodeMyBusiness. All rights reserved. | | | |
+| 001 | iCodeMyBusiness | shared | Header/footer/banner/form — ruled once in shared.md. | |
+| 002 | Academy | shared | Header/footer/banner/form — ruled once in shared.md. | |
+| 003 | Free Intro Call | shared | Header/footer/banner/form — ruled once in shared.md. | |
+| 004 | Consulting | shared | Header/footer/banner/form — ruled once in shared.md. | |
+| 005 | Free Tools | shared | Header/footer/banner/form — ruled once in shared.md. | |
+| 006 | Connect | shared | Header/footer/banner/form — ruled once in shared.md. | |
+| 007 | Mango | shared | Header/footer/banner/form — ruled once in shared.md. | |
+| 008 | Services | shared | Header/footer/banner/form — ruled once in shared.md. | |
+| 009 | Book a Call | shared | Header/footer/banner/form — ruled once in shared.md. | |
+| 010 | Save time. Make money. Make a difference. | shared | Header/footer/banner/form — ruled once in shared.md. | |
+| 011 | matthew@icodemybusiness.com | shared | Header/footer/banner/form — ruled once in shared.md. | |
+| 012 | Pages | shared | Header/footer/banner/form — ruled once in shared.md. | |
+| 013 | Join the Inner Circle | shared | Header/footer/banner/form — ruled once in shared.md. | |
+| 014 | → © 2026 iCodeMyBusiness. All rights reserved. | shared | Header/footer/banner/form — ruled once in shared.md. | |

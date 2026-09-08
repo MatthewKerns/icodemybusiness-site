@@ -4,4 +4,4 @@ Extracted from the live page 2026-09-08, document order (1 lines incl. shared he
 
 | # | Line | Verdict | Why | Matthew |
 |---|---|---|---|---|
-| 001 | iCodeMyBusiness | | | |
+| 001 | iCodeMyBusiness | ask | Page renders nothing server-side (1 line). /subscribe is the dormant Stripe flow (offer decision 09-02: no visible pricing). Recommend noindex + redirect to /consulting, or remove the route. | |
