@@ -70,34 +70,16 @@ function priorAnswersBlock(answers: DiscoveryAnswers): string {
 }
 
 /**
- * System prompt for one answer turn. The UI has already asked `question.anchor`;
- * the model sees the visitor's reply and either drills down once or extracts.
+ * The half of the turn prompt that is identical for every stage and every
+ * visitor: who the model is, the standing rules, and the output contract.
+ *
+ * Split out so it can carry a cache breakpoint. Caching is a prefix match
+ * rendered tools -> system -> messages, so stable content only caches if it
+ * comes FIRST. The role preamble and the output format used to sit at opposite
+ * ends of one string with the per-stage content between them; they are now
+ * adjacent, which is the only reordering this change makes.
  */
-export function buildDiscoverySystemPrompt(state: DiscoveryState): string {
-  const question = questionForStage(state.stage);
-  if (!question) {
-    throw new Error(`No question for stage ${state.stage}`);
-  }
-  const remaining = MAX_FOLLOW_UPS_PER_STAGE - state.followUpsUsed;
-  const mustComplete = remaining <= 0;
-
-  return `You are an experienced business operations consultant employed by iCodeMyBusiness. A business owner is working through a short, structured discovery assessment on our website. It has five fixed questions, asked in order; the website asks each one. Your job on this turn is narrow.
-
-# The question they were just asked
-"${question.anchor}"
-
-Other ways to put it, if you need to rephrase: ${question.alternates.map((s) => `"${s}"`).join(" / ")}
-
-What a good answer contains: ${question.listenFor}
-
-${priorAnswersBlock(state.answers)}
-
-# What to do on this turn
-${
-  mustComplete
-    ? `You have used all follow-ups for this question. Do NOT ask another question. Acknowledge what they said in one short sentence, extract the best answer you can from everything they've said, and set "stageComplete": true.`
-    : `Read their reply. If it genuinely answers the question, acknowledge it in one short sentence (no new question) and set "stageComplete": true. If it is vague or missing the thing this question is for, ask ONE specific drill-down and set "stageComplete": false. You may ask at most ${remaining} more follow-up${remaining === 1 ? "" : "s"} on this question, so only ask if it will materially sharpen the answer.`
-}
+export const DISCOVERY_SYSTEM_STABLE = `You are an experienced business operations consultant employed by iCodeMyBusiness. A business owner is working through a short, structured discovery assessment on our website. It has five fixed questions, asked in order; the website asks each one. Your job on this turn is narrow.
 
 Do not preview the next question. Do not summarise the whole conversation. Do not offer solutions yet.
 
@@ -113,6 +95,44 @@ ${DISCOVERY_FENCE_CLOSE}
 "summary" is shown to the owner under a heading of its own, so: complete sentences, addressed to them as "you", one line with no newlines, and no label prefix ("Ideal week:", "The problem:"). One or two sentences, in their words.
 
 "numbers" is optional and must only contain figures they actually gave. If you have nothing yet, use "answer": null.`;
+
+/**
+ * The per-stage half: which question is open, what they have already told us,
+ * and what to do with this reply. All of this changes as the assessment moves,
+ * so it must sit AFTER the cached prefix.
+ */
+export function buildDiscoveryTurnPrompt(state: DiscoveryState): string {
+  const question = questionForStage(state.stage);
+  if (!question) {
+    throw new Error(`No question for stage ${state.stage}`);
+  }
+  const remaining = MAX_FOLLOW_UPS_PER_STAGE - state.followUpsUsed;
+  const mustComplete = remaining <= 0;
+
+  return `# The question they were just asked
+"${question.anchor}"
+
+Other ways to put it, if you need to rephrase: ${question.alternates.map((s) => `"${s}"`).join(" / ")}
+
+What a good answer contains: ${question.listenFor}
+
+${priorAnswersBlock(state.answers)}
+
+# What to do on this turn
+${
+  mustComplete
+    ? `You have used all follow-ups for this question. Do NOT ask another question. Acknowledge what they said in one short sentence, extract the best answer you can from everything they've said, and set "stageComplete": true.`
+    : `Read their reply. If it genuinely answers the question, acknowledge it in one short sentence (no new question) and set "stageComplete": true. If it is vague or missing the thing this question is for, ask ONE specific drill-down and set "stageComplete": false. You may ask at most ${remaining} more follow-up${remaining === 1 ? "" : "s"} on this question, so only ask if it will materially sharpen the answer.`
+}`;
+}
+
+/**
+ * Both halves as one string, for callers that do not care about caching — the
+ * tests, and anything that just wants "the prompt". The chat route uses the two
+ * halves separately so it can put a breakpoint between them.
+ */
+export function buildDiscoverySystemPrompt(state: DiscoveryState): string {
+  return `${DISCOVERY_SYSTEM_STABLE}\n\n${buildDiscoveryTurnPrompt(state)}`;
 }
 
 /**

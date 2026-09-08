@@ -7,6 +7,7 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { requireRole } from "./lib/auth";
+import { rateLimit } from "./lib/rateLimits";
 import {
   DISCOVERY_QUESTIONS,
   DISCOVERY_STAGE,
@@ -50,7 +51,14 @@ async function assertMayUseSession(
 
 const MAX_FILES_PER_SESSION = 5;
 const MAX_TOTAL_BYTES_PER_SESSION = 15 * 1024 * 1024;
-const MAX_TURNS = 30;
+/**
+ * Exchanges per session (the guard compares `turnCount >= MAX_TURNS * 2`, since
+ * a turn is a user message and a reply). Five questions with up to two
+ * drill-downs each is ~15, and a visitor who corrects the recap a few times can
+ * add several more — 30 left less headroom than it looked like once answers got
+ * longer. Still a hard stop, just not one an engaged visitor meets.
+ */
+const MAX_TURNS = 50;
 
 const issueValidator = v.object({
   title: v.string(),
@@ -308,6 +316,36 @@ export const updateDiscoveryState = mutation({
     if (!session) return;
     await assertMayUseSession(ctx, session);
     await ctx.db.patch(session._id, { discoveryState: args.discoveryState });
+  },
+});
+
+/**
+ * Spend one model turn from this session's budget.
+ *
+ * Called by the chat route before it reaches Anthropic. Every turn is a model
+ * call we pay for and nothing bounded them, so a script could run turns
+ * indefinitely at our expense; the ceiling is set well above a real assessment
+ * (see CHAT_TURN_RATE) so an honest visitor never meets it.
+ *
+ * Returns rather than throws: a drained bucket is not an error, it is an answer
+ * the route needs so it can tell the visitor something useful and report the
+ * event.
+ */
+export const consumeChatTurn = mutation({
+  args: { sessionId: v.string() },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
+      .first();
+    if (!session) throw new ConvexError("Session not found");
+    await assertMayUseSession(ctx, session);
+
+    const { ok, retryAt } = await rateLimit(ctx, {
+      name: "chatTurn",
+      key: args.sessionId,
+    });
+    return { ok, retryAt: retryAt ?? null };
   },
 });
 
