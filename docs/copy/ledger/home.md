@@ -6,10 +6,11 @@ SVG labels) are appended in the section where they render.
 
 | # | Line | Verdict | Why | Matthew |
 |---|---|---|---|---|
-| 001 | iCodeMyBusiness | | | |
-| 002 | Save time. Make money. | | | |
-| 003 | Make a Difference. | | | |
-| 004 | Start Now | | | |
+| 001 | iCodeMyBusiness | keep | logo | ok |
+| 001a | Improve Operations *(new, splash line 1)* | — | Matthew's addition | "between 001 and 002 I want to have 'Improve Operations'" 09-08 |
+| 002 | Save time. Make money. | keep | his kicker | changed: "Make more money." 09-08 (applied to splash, footer, meta description) |
+| 003 | Make a Difference. | keep | his | ok |
+| 004 | Start Now | keep | his CTA | ok |
 | 005 | Most businesses don't need more software. | | | |
 | 006 | I'm Matthew Kerns. I help identify the key constraints on business workflows. We analyze what works, including creative, manual and repetitive work, to gain an understanding of your business, and help free your time so you can focus on doing the work that grows the business. | | | |
 | 007 | Repeating the same work | | | |

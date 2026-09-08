@@ -51,7 +51,7 @@ export function Footer() {
               iCodeMyBusiness
             </p>
             <p className="mt-2 text-sm text-text-muted">
-              Save time. Make money. Make a difference.
+              Save time. Make more money. Make a difference.
             </p>
             <a
               href="mailto:matthew@icodemybusiness.com"

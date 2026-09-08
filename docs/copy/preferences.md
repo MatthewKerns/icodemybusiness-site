@@ -15,3 +15,4 @@ line that taught it. New copy is written from this file plus `docs/copy-principl
 | P8 | Two lines beat three; a button needs a real affordance. | splash redesign | 2026-09-02 |
 | P9 | Don't restate a promise in two places; say it once where it lands. | copy-principles §"say things once" | 2026-09-02 |
 | P10 | Matthew's own sentences win over agent paraphrase, even when they mix "I" and "we". | subhead reorder declined | 2026-09-04 |
+| P11 | The brand line reads in this order: Improve Operations → Save time. Make more money. → Make a Difference. Keep the three consistent wherever the tagline appears (splash, footer, meta). | splash ruling | 2026-09-08 |
