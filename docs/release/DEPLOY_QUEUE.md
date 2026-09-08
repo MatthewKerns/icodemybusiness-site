@@ -26,3 +26,4 @@ status column after verification. Never delete rows.
 | 2026-09-06T22:24Z | 9cfcc7e | Merge branch 'agent/cmo/launch-readiness' | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
 | 2026-09-08T12:59Z | 288ba6b | Merge branch 'agent/intake/chat-rate-limit' | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
 | 2026-09-08T13:12Z | afd10e2 | Merge remote-tracking branch 'origin/main' into agent/offer/landing | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
+| 2026-09-08T13:26Z | 58e8a53 | Merge branch 'agent/skool/worksheets' | lint/tsc/test green on VPS | staging-verified (script checks) | matthewkerns@Drs-MacBook-Pro |
