@@ -314,7 +314,9 @@ repo; this roadmap holds them so the site work (R-024) is never scheduled ahead 
 
 ### R-023 · Per-client communication score and delivery score
 
-`status: ready` · `owner: matthew` (definitions) + `agent` (Mango build) · `evidence: reported`
+`status: verify` · `owner: matthew` (merge/deploy + `choose_score_definitions`) · `evidence: verified`
+
+**2026-09-08:** definitions decided by Matthew (communication = cadence + speed + quality[one-touch, closed-with-note, weekly self-rating, LLM judge off until reviewed]; delivery = progress[milestones, client-confirmed, hours on plan, shipped] × (0.5 + 0.5·time/10), time = due date / weekly movement / per-client SLA; 90 d; all focus tiles). Built on Mango `feat/client-scores` @ 8c5a8b9 (pushed, not merged/deployed): 13-layer engine with a provisional gate, 06:30 refresh, tile + sparklines, 7 tools + API. Gauntlet passed (three critics + 7am persona); 643 tests on the VPS lane. Spec: `mango-income-tool/docs/client-scores/PRD.md` v10. Remaining: merge + deploy Mango; run `choose_score_definitions` (chosen_by Matthew); first real refresh; Q7 (self-rating scale) and Q3 (Lambda) confirmations.
 · `priority: P1`
 
 Two scores per client, tracked separately: **communication** (frequency and quality of
@@ -359,7 +361,7 @@ before/after figures trace to a dashboard export Matthew signed.
 
 ### R-025 · Morning email names the one small task that moves the score today
 
-`status: ready` · `owner: agent` (Mango) · `evidence: reported` · `priority: P2`
+`status: verify` — built as the 🎯 line in the 07:00 Slack cadence post + daily-todo + `/api/planning` (Mango @ 8c5a8b9); Mango sends no morning email today — email delivery is phase 2 (`mango-income-tool/docs/client-scores/PHASE2-EMAIL.md`). Was `status: ready` · `owner: agent` (Mango) · `evidence: reported` · `priority: P2`
 
 The morning brief already exists. Add: for each client, the smallest high-impact action
 that would raise the communication or delivery score now (a reply owed, a delivery
@@ -372,7 +374,7 @@ has acted on one.
 
 ### R-026 · Protect ≥30 h/week on the main engagement; plan unpaid time ahead
 
-`status: ready` · `owner: matthew` + `agent` (Mango) · `evidence: reported` · `priority: P2`
+`status: verify` — Lambda 30 h/week floor active in `RETAINER_ENGAGEMENTS` (hourly billing flag) and planned-vs-actual (`plan_adherence`) wired into the daily grade (Mango @ 8c5a8b9); reply grammar `move <client> <day>` / `add <n>h <client> <day>` edits the week plan. Was `status: ready` · `owner: matthew` + `agent` (Mango) · `evidence: reported` · `priority: P2`
 
 Matthew: at least 30 h/week on the Lambda engagement, more if offered, and the remaining
 time planned in advance (which day is whose, how many billable hours today) so the agency
@@ -386,7 +388,7 @@ blocks, and the daily grade reflects the floor.
 
 ### R-027 · Agents spun up from Clockify entries, routed across VPS + subscriptions
 
-`status: proposed` · `owner: agent` (Mango) · `evidence: reported` · `priority: P3`
+`status: blocked` (design doc done: `mango-income-tool/docs/client-scores/R-027-agent-routing-design.md`; Matthew picks the first narrow trigger — recommended: idle block + failing-CI open PR → free-model fix commit on that PR, never main). Was `status: proposed` · `owner: agent` (Mango) · `evidence: reported` · `priority: P3`
 
 When time entries show Matthew has moved into a personal or unpaid block, the system
 uses the VPS local model and the coding subscriptions (Grok, Claude, ChatGPT Codex — with
@@ -400,7 +402,7 @@ Explicitly "intelligently, not willy-nilly". Large; needs a design before any bu
 
 ### R-028 · One email thread runs all unpaid time
 
-`status: proposed` · `owner: agent` (Mango) · `evidence: reported` · `priority: P2`
+`status: blocked` — Slack thread loop is built (reply `done:` / `confirmed:` / `rate` / `weights` / `move` / `add` → applied + answered in-thread, Mango @ 8c5a8b9); the EMAIL thread is phase 2 (`PHASE2-EMAIL.md`, one decision: inbound provider). Was `status: proposed` · `owner: agent` (Mango) · `evidence: reported` · `priority: P2`
 
 The outcome he described: a planning email that says what to do outside the main
 engagement ("today, just film Loom videos"), he replies with updates, the plan re-surfaces
