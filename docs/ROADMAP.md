@@ -10,7 +10,7 @@ start it cold, verify it, and ship it without asking a question first.
 - **Related planning:** [content/](../content/README.md) (YouTube→blog funnel),
   [offers/](../offers/consulting.md) (internal rate card), [.feature-factory/](../.feature-factory/)
 
-**Last swept:** 2026-09-02 · **Live at:** https://staging.icodemybusiness.com
+**Last swept:** 2026-09-08 (R-023–R-028 added from the 09-07 planning video) · **Live at:** https://staging.icodemybusiness.com
 
 ---
 
@@ -300,6 +300,114 @@ The letter must still make it obvious this is a tens-of-thousands engagement —
 scope, deliverables, engagement length, and the calibre of who it's for. The internal
 rate card in [offers/consulting.md](../offers/consulting.md) is the reality to signal
 toward. It is **internal only** and must never surface on the site.
+
+---
+
+## P1 — Agency proof: communication & delivery scores (Matthew, video 2026-09-07)
+
+Source: `Youtube Content Plan/Raw Videos/AgencyPlanningSept7.MOV` (Drive), transcript at
+`Youtube Content Plan/Transcripts/AgencyPlanningSept7.txt` (whisper, 2026-09-08). Matthew's
+words, not yet a spec: every number, claim and score definition below is his to confirm.
+Tracked as a **main objective with KPIs on the Mango tracker** (`icmb-overhead` and `mango`
+tiles) until R-023/R-024 are done. Cross-repo: R-023, R-025–R-028 are built in the Mango
+repo; this roadmap holds them so the site work (R-024) is never scheduled ahead of its data.
+
+### R-023 · Per-client communication score and delivery score
+
+`status: ready` · `owner: matthew` (definitions) + `agent` (Mango build) · `evidence: reported`
+· `priority: P1`
+
+Two scores per client, tracked separately: **communication** (frequency and quality of
+client-facing contact) and **delivery** (work landing on time and as promised). Computed
+from the last four to six months of data Matthew already has (Clockify time entries, Fathom
+meetings, Slack, email) and shown on the Mango dashboard per person, so a completed action
+visibly moves the score rather than only logging time.
+
+**Needs from Matthew first:** the scoring rule for each (what counts, what window, what a
+10 looks like) — an agent must not invent the definition of "good communication".
+
+**KPI (dashboard):** both scores exist per active client with a 4–6-month history line;
+`updated_at` within 24 h.
+
+**Done when:** the tracker shows both scores for every focus tile and Matthew has confirmed
+the two definitions in writing.
+
+---
+
+### R-024 · Landing page tells the scores story (before → system → after) + VSL
+
+`status: blocked` · `owner: matthew` (story, claims) + `offer` (letter) · `evidence: reported`
+· `priority: P1`
+
+The marketing use of R-023: the page says honestly that the agency used to be weaker at
+this, shows the earlier metrics, then the system that now handles prioritisation
+("my agent"), and walks through the process — daily brief, weekly must-haves per client,
+the day plan. Probably also a VSL (R-006 slot) explaining the same.
+
+**Blocked on:** R-023 producing real numbers. **Copy rule:** nothing about scores ships
+until they exist and Matthew asserts the figures (`docs/copy-principles.md` §2, "nothing
+promised that isn't built"). The offer session owns the letter; this item lands there as a
+new proof beat, not a rewrite.
+
+**Verify:** the live `/` shows the two scores with their source and window stated; the
+before/after figures trace to a dashboard export Matthew signed.
+
+**Done when:** the beat is live on the apex with figures Matthew signed, and the VSL slot
+(R-006) either carries the explanation or is explicitly deferred.
+
+---
+
+### R-025 · Morning email names the one small task that moves the score today
+
+`status: ready` · `owner: agent` (Mango) · `evidence: reported` · `priority: P2`
+
+The morning brief already exists. Add: for each client, the smallest high-impact action
+that would raise the communication or delivery score now (a reply owed, a delivery
+overdue), ranked. Depends on R-023.
+
+**Done when:** the morning email carries a "move the score" line per client and Matthew
+has acted on one.
+
+---
+
+### R-026 · Protect ≥30 h/week on the main engagement; plan unpaid time ahead
+
+`status: ready` · `owner: matthew` + `agent` (Mango) · `evidence: reported` · `priority: P2`
+
+Matthew: at least 30 h/week on the Lambda engagement, more if offered, and the remaining
+time planned in advance (which day is whose, how many billable hours today) so the agency
+moves on a cadence inside real capacity instead of drifting into ad-hoc planning. Context:
+September is short by roughly two to three thousand even at 60 h on Lambda (his number).
+
+**Done when:** the tracker shows a weekly plan with the 30-h floor and pre-planned unpaid
+blocks, and the daily grade reflects the floor.
+
+---
+
+### R-027 · Agents spun up from Clockify entries, routed across VPS + subscriptions
+
+`status: proposed` · `owner: agent` (Mango) · `evidence: reported` · `priority: P3`
+
+When time entries show Matthew has moved into a personal or unpaid block, the system
+uses the VPS local model and the coding subscriptions (Grok, Claude, ChatGPT Codex — with
+known credit balances) to pick up work: complete coding tasks, merge and test PRs in
+staging/local, review open PRs, and plan. Inputs: latest Fathom meetings, Slack, Clockify.
+Explicitly "intelligently, not willy-nilly". Large; needs a design before any build.
+
+**Done when:** a design doc exists and Matthew has picked the first narrow trigger.
+
+---
+
+### R-028 · One email thread runs all unpaid time
+
+`status: proposed` · `owner: agent` (Mango) · `evidence: reported` · `priority: P2`
+
+The outcome he described: a planning email that says what to do outside the main
+engagement ("today, just film Loom videos"), he replies with updates, the plan re-surfaces
+with them incorporated. All planning attention then stays on the main engagement.
+
+**Done when:** replying to the morning email updates the plan and the next email reflects
+it, verified on one full week.
 
 ---
 
