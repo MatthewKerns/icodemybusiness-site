@@ -1,9 +1,13 @@
 import { describe, it, expect } from "vitest";
 import {
+  copyUrl,
+  createFolder,
   createGoogleDoc,
   driveEnvFromProcess,
+  findChildFolder,
   getAccessToken,
   GOOGLE_DOC_MIME,
+  GOOGLE_FOLDER_MIME,
   type DriveEnv,
   type FetchFn,
 } from "./googleDrive";
@@ -117,5 +121,57 @@ describe("createGoogleDoc", () => {
     await expect(
       createGoogleDoc({ title: "t", html: "<p>x</p>", folderId: "folder123" }, ENV, fetchFn)
     ).rejects.toThrow(/rejected the document \(404\): File not found: folder123\./);
+  });
+});
+
+describe("createFolder", () => {
+  it("creates a folder under the parent with the folder mime type", async () => {
+    const { fetchFn, calls } = fakeFetch([json({ access_token: "at-4" }), json({ id: "fold7" })]);
+    const result = await createFolder({ name: "03 Your inbox runs your week", parentId: "root1" }, ENV, fetchFn);
+    expect(result).toEqual({ id: "fold7", url: "https://drive.google.com/drive/folders/fold7" });
+    const create = calls[1];
+    expect(create.url).toBe("https://www.googleapis.com/drive/v3/files?fields=id");
+    expect((create.init.headers as Record<string, string>).Authorization).toBe("Bearer at-4");
+    expect(JSON.parse(String(create.init.body))).toEqual({
+      name: "03 Your inbox runs your week",
+      mimeType: GOOGLE_FOLDER_MIME,
+      parents: ["root1"],
+    });
+  });
+
+  it("surfaces Drive's error for a bad parent", async () => {
+    const { fetchFn } = fakeFetch([
+      json({ access_token: "at-5" }),
+      json({ error: { message: "File not found: root1." } }, 404),
+    ]);
+    await expect(createFolder({ name: "x", parentId: "root1" }, ENV, fetchFn)).rejects.toThrow(
+      /rejected the folder \(404\): File not found: root1\./
+    );
+  });
+});
+
+describe("findChildFolder", () => {
+  it("queries by exact name under the parent and returns the first hit", async () => {
+    const { fetchFn, calls } = fakeFetch([json({ access_token: "at-6" }), json({ files: [{ id: "fold9" }] })]);
+    const hit = await findChildFolder({ name: "Matthew's module", parentId: "root1" }, ENV, fetchFn);
+    expect(hit).toEqual({ id: "fold9", url: "https://drive.google.com/drive/folders/fold9" });
+    const q = decodeURIComponent(new URL(calls[1].url).searchParams.get("q") ?? "");
+    expect(q).toContain("name = 'Matthew\\'s module'");
+    expect(q).toContain("'root1' in parents");
+    expect(q).toContain(`mimeType = '${GOOGLE_FOLDER_MIME}'`);
+    expect(q).toContain("trashed = false");
+  });
+
+  it("returns null when nothing matches", async () => {
+    const { fetchFn } = fakeFetch([json({ access_token: "at-7" }), json({ files: [] })]);
+    expect(await findChildFolder({ name: "none", parentId: "root1" }, ENV, fetchFn)).toBeNull();
+  });
+});
+
+describe("copyUrl", () => {
+  it("turns the edit link into the member copy link", () => {
+    expect(copyUrl("https://docs.google.com/document/d/doc42/edit")).toBe(
+      "https://docs.google.com/document/d/doc42/copy"
+    );
   });
 });

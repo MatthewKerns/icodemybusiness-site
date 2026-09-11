@@ -221,7 +221,9 @@ export const createWorksheetDoc = action({
  * tactic, and the one-time import of drafted files. Owner-only.
  */
 export const createDocFromMarkdown = action({
-  args: { title: v.string(), markdown: v.string() },
+  // `folderId` (optional) targets a folder the app created — a module folder from
+  // `academy:createModuleTree`. Absent, the doc lands in the worksheets folder as before.
+  args: { title: v.string(), markdown: v.string(), folderId: v.optional(v.string()) },
   handler: async (ctx, args): Promise<{ url: string }> => {
     await requireOwner(ctx);
     const title = args.title.trim();
@@ -229,7 +231,7 @@ export const createDocFromMarkdown = action({
     if (!args.markdown.trim()) throw new ConvexError("Document body is required");
     const env = driveEnvFromProcess();
     const doc = await createGoogleDoc(
-      { title, html: documentHtml(args.markdown), folderId: env.folderId },
+      { title, html: documentHtml(args.markdown), folderId: args.folderId ?? env.folderId },
       env
     );
     return { url: doc.url };

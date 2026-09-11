@@ -63,6 +63,24 @@ npx convex run xTactics:createWorksheetDoc '{"id":"<xTactics _id>"}' --identity 
 npx convex run xTactics:createDocFromMarkdown '{"title":"1.0 Start here","markdown":"# …"}' --identity "$ID"
 ```
 
+## Module trees (EcomAIOS Academy)
+
+`academy:createModuleTree` (owner-only) creates one root folder, one sub-folder per module, and one
+native Google Doc per training from Markdown, under `SKOOL_WORKSHEETS_FOLDER_ID` (or a `parentId` you
+pass). Folders are found by exact name before they are created, so a re-run after a partial failure
+does not duplicate them; Docs are always new (versioning an edited Doc is the caller's job).
+`createDocFromMarkdown` also accepts an optional `folderId` for one-off docs into a module folder.
+
+```bash
+npx convex run academy:createModuleTree "$(jq -n --rawfile t tree.json '$t|fromjson')" --identity "$ID"
+# tree.json: {"rootName":"EcomAIOS Academy","modules":[{"name":"00 Start here","docs":[{"title":"0.0 Start here","markdown":"# ..."}]}]}
+```
+
+It returns `{ root: {id,url}, modules: [{ name, folder: {id,url}, docs: [{ title, url, copyUrl }] }] }`;
+store that as the link index next to the Markdown sources. Sharing the root is still the one-time
+human step. Source for the academy's records and the first tree:
+`inventory_manager/docs/ecomaios/academy/` (drive-links.tsv).
+
 ## Errors you will see
 
 | Message | Meaning |
