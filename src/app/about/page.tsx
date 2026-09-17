@@ -11,10 +11,10 @@ export default function AboutPage() {
   return (
     <LegalPage title="About iCodeMyBusiness">
       <p>
-        iCodeMyBusiness is a one-person consulting and automation practice run by Matthew
-        Kerns. It helps business owners find the real constraint in how their work gets
-        done, then removes it — sometimes by changing the process, sometimes by building
-        software for the job.
+        iCodeMyBusiness is a consulting and automation practice led by Matthew Kerns, who
+        is your main point of contact. It helps business owners find the real constraint in
+        how their work gets done, then removes it — sometimes by changing the process,
+        sometimes by building software for the job.
       </p>
 
       <LegalSection title="What we do">
