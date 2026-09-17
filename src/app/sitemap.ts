@@ -21,8 +21,12 @@ const PUBLIC_PATHS = [
   "/privacy",
   "/services",
   "/terms",
-  "/testimonials",
 ] as const;
+
+// Deliberately absent: /testimonials. It is a draft that 404s unless
+// NEXT_PUBLIC_ENABLE_TESTIMONIALS_DRAFT is "true", and even when enabled the
+// page sets robots index:false — so it must never be advertised here. A sitemap
+// entry that answers 404 is exactly what a trust review notices.
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
