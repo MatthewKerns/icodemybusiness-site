@@ -35,6 +35,25 @@ function forbid(request: NextRequest) {
 }
 
 export default clerkMiddleware(async (auth, request: NextRequest) => {
+  // staging.icodemybusiness.com serves the SAME build as the apex, publicly. A
+  // byte-identical copy of a site on a second host is a cloned-site signal to a
+  // reputation scanner, and this domain is currently blocked by Comcast
+  // Advanced Security. Until the staging route is removed on the VPS
+  // (docs/staging-route-patch.md — not applied yet), keep it out of indexes.
+  // robots.ts is static per build and can't vary by host, so staging's
+  // robots.txt is answered here.
+  const isStagingHost = (request.headers.get("host") ?? "")
+    .toLowerCase()
+    .startsWith("staging.");
+  if (isStagingHost && request.nextUrl.pathname === "/robots.txt") {
+    return new NextResponse("User-agent: *\nDisallow: /\n", {
+      headers: {
+        "content-type": "text/plain; charset=utf-8",
+        "x-robots-tag": "noindex, nofollow",
+      },
+    });
+  }
+
   if (request.nextUrl.pathname.startsWith("/api/webhooks/")) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
     if (isWebhookRateLimited(ip)) {
@@ -73,6 +92,9 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
   }
 
   const response = NextResponse.next();
+  if (isStagingHost) {
+    response.headers.set("x-robots-tag", "noindex, nofollow");
+  }
   return applyAttribution(request, response);
 });
 

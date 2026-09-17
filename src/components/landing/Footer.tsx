@@ -3,11 +3,19 @@ import { SKOOL_COMMUNITY_URL } from "@/lib/constants";
 
 const FOOTER_LINKS = [
   { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
   { href: "/academy", label: "Academy" },
   { href: "/book", label: "Free Intro Call" },
   { href: "/consulting", label: "Consulting" },
   { href: "/free-tools", label: "Free Tools" },
   { href: "/services", label: "Services" },
+] as const;
+
+// Every page links to these: a policy page nothing links to counts for little,
+// to a reader or to a reputation scanner. See docs/trust-pages.md.
+const LEGAL_LINKS = [
+  { href: "/privacy", label: "Privacy Policy" },
+  { href: "/terms", label: "Terms of Use" },
 ] as const;
 
 const SOCIAL_LINKS = [
@@ -109,9 +117,22 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 border-t border-border pt-6 text-center text-sm text-text-dim">
-          &copy; {new Date().getFullYear()} iCodeMyBusiness. All rights
-          reserved.
+        <div className="mt-8 flex flex-col items-center gap-3 border-t border-border pt-6 text-center text-sm text-text-dim md:flex-row md:justify-between md:text-left">
+          <p>
+            &copy; {new Date().getFullYear()} iCodeMyBusiness. All rights
+            reserved.
+          </p>
+          <nav aria-label="Legal" className="flex gap-4">
+            {LEGAL_LINKS.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="transition-colors hover:text-gold"
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </div>
     </footer>
