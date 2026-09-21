@@ -16,16 +16,16 @@ exactly broke and where".
 
 | Layer | File | Role |
 |-------|------|------|
-| Client init | `src/instrumentation-client.ts` → `src/lib/posthog.ts` | Boots posthog-js at startup. `capture_pageview:false` (manual), `capture_pageleave:true`, `capture_exceptions:true`. Ingestion via same-origin `/ingest` proxy (ad-blocker resistant). |
-| Pageviews + identify | `src/components/shared/PostHogProvider.tsx` | Manual `$pageview` on route change (Suspense-wrapped), `identify()` on Clerk sign-in, `reset()` on sign-out. |
+| Client init | `src/instrumentation-client.ts` → `src/lib/posthog.ts` | Boots posthog-js at startup. `capture_pageview:false` (manual), `capture_pageleave:true`, `capture_exceptions:true`. Sends directly to `https://eu.i.posthog.com`; only an absolute `NEXT_PUBLIC_POSTHOG_HOST` is honoured (`resolveClientHost`). |
+| Pageviews + identify | `src/components/shared/PostHogProvider.tsx` | Manual `$pageview` on route change (Suspense-wrapped), `identify(user.id)` on Clerk sign-in (account id only, no email/name), `reset()` on sign-out. |
 | Client events | `src/lib/analytics.ts` | Typed `analytics.*` helpers; no-op when PostHog isn't loaded. |
-| Server events | `src/lib/posthog-server.ts` | posthog-node singleton. Direct EU host (server can't use `/ingest`). `captureServerEvent`, `captureServerError`, `flushServerAnalytics`. |
-| Reverse proxy | `next.config.js` | Rewrites `/ingest/*` → `eu(-assets).i.posthog.com`. Activate with `NEXT_PUBLIC_POSTHOG_HOST=/ingest`. |
+| Server events | `src/lib/posthog-server.ts` | posthog-node singleton. Direct EU host. `captureServerEvent`, `captureServerError`, `flushServerAnalytics`. |
+| ~~Reverse proxy~~ | removed 2026-09-21 | The `/ingest/*` → PostHog rewrite existed to defeat ad/tracking blockers. A first-party tunnel for a third-party tracker reads as evasive to the ISP security products blocking this domain (docs/trust-pages.md), so it was deleted. Some events are now lost to blockers — accepted. |
 | Error pipe | `src/lib/api-error-handler.ts` | `errorResponse` → Sentry (all) + PostHog `api_error` (5xx only), auto-tagged with `route`. |
 
 `NEXT_PUBLIC_POSTHOG_KEY` **must be project 206048's client token** and
-`NEXT_PUBLIC_POSTHOG_HOST` must resolve to EU (`/ingest` or
-`https://eu.i.posthog.com`). A US host or a different project's key sends data
+`NEXT_PUBLIC_POSTHOG_HOST` must be an absolute EU URL
+(`https://eu.i.posthog.com`, also the default when unset). A US host or a different project's key sends data
 into the void — see RUNBOOK "Dashboard is flat / no data".
 
 ---

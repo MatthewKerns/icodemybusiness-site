@@ -7,8 +7,8 @@ import type { MetadataRoute } from "next";
  * to a sign-in flow and no policy pages — is part of what makes an automated
  * reputation scanner treat a domain as unverifiable. See docs/trust-pages.md.
  *
- * Staging is handled separately in src/middleware.ts: that host answers with a
- * disallow-all body, because this file is static per build and can't vary by host.
+ * Staging is handled separately in src/middleware.ts: that host answers every
+ * page, robots.txt included, with a bare 404 (src/lib/staging-host.ts).
  */
 export default function robots(): MetadataRoute.Robots {
   return {

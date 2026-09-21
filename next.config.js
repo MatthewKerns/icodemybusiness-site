@@ -29,10 +29,6 @@ const nextConfig = {
   async headers() {
     return [{ source: '/:path*', headers: SECURITY_HEADERS }];
   },
-  // Reverse-proxy PostHog ingestion through our own origin so ad/tracking
-  // blockers don't drop analytics. The client points api_host at "/ingest"
-  // (set NEXT_PUBLIC_POSTHOG_HOST=/ingest, or remove it, to activate).
-  // Destinations are PostHog EU cloud (project 206048).
   skipTrailingSlashRedirect: true,
   async redirects() {
     return [
@@ -42,18 +38,6 @@ const nextConfig = {
         source: '/portal/free-resources',
         destination: '/portal/resources',
         permanent: true,
-      },
-    ];
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/ingest/static/:path*',
-        destination: 'https://eu-assets.i.posthog.com/static/:path*',
-      },
-      {
-        source: '/ingest/:path*',
-        destination: 'https://eu.i.posthog.com/:path*',
       },
     ];
   },

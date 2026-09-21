@@ -6,11 +6,23 @@ import posthog from "posthog-js";
  * Called once at app startup from `src/instrumentation-client.ts`. Idempotent —
  * the `__loaded` guard makes repeat calls a no-op.
  *
- * Events route through the same-origin `/ingest` reverse proxy (configured in
- * next.config.js) by default so ad/tracking blockers don't drop them. Setting
- * NEXT_PUBLIC_POSTHOG_HOST to an absolute URL (e.g. https://eu.i.posthog.com)
- * bypasses the proxy and sends directly.
+ * Events go straight to PostHog EU (project 206048), in the open. They used to
+ * route through a same-origin `/ingest` reverse proxy whose stated purpose was
+ * to stop ad/tracking blockers dropping them; that proxy was removed because a
+ * first-party tunnel for a third-party tracker reads as evasive to the ISP
+ * security products that block this domain (docs/trust-pages.md). Losing some
+ * events to blockers is the accepted cost.
+ *
+ * Only an absolute URL is honoured for NEXT_PUBLIC_POSTHOG_HOST: a relative
+ * value such as a leftover "/ingest" would now point at a route that 404s and
+ * silently drop every event, and an empty build arg would yield an empty host.
  */
+const POSTHOG_EU_HOST = "https://eu.i.posthog.com";
+
+export function resolveClientHost(configured: string | undefined): string {
+  return configured && /^https?:\/\//.test(configured) ? configured : POSTHOG_EU_HOST;
+}
+
 export function initPostHog() {
   if (
     typeof window === "undefined" ||
@@ -21,7 +33,7 @@ export function initPostHog() {
   }
 
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "/ingest",
+    api_host: resolveClientHost(process.env.NEXT_PUBLIC_POSTHOG_HOST),
     ui_host: "https://eu.posthog.com",
     person_profiles: "identified_only",
     capture_pageview: false, // captured manually in PostHogProvider

@@ -29,10 +29,10 @@ function PostHogIdentify() {
 
   useEffect(() => {
     if (user && posthog.__loaded) {
-      posthog.identify(user.id, {
-        email: user.primaryEmailAddress?.emailAddress,
-        name: user.fullName,
-      });
+      // Account id only. Email and full name used to be sent as person
+      // properties, which /privacy never disclosed — a policy-vs-code mismatch a
+      // reviewer can see in DevTools on a domain under an ISP trust review.
+      posthog.identify(user.id);
     } else if (!user && posthog.__loaded) {
       posthog.reset();
     }

@@ -19,7 +19,12 @@ set -euo pipefail
 
 VPS="${ICMB_VPS:-root@2.25.207.149}"
 DIR="${ICMB_DIR:-/opt/icodemybusiness-site}"
-STAGING="${ICMB_STAGING_URL:-https://staging.icodemybusiness.com}"
+# Post-deploy checks run against the APEX. staging.icodemybusiness.com now answers
+# every page with a bare 404 (src/lib/staging-host.ts), and it was never a separate
+# environment anyway: one container serves staging, the apex and www, so every run
+# of this script is a production deploy. Checking the host visitors actually use
+# is the honest check. ICMB_STAGING_URL is still honoured for an override.
+VERIFY_URL="${ICMB_VERIFY_URL:-${ICMB_STAGING_URL:-https://icodemybusiness.com}}"
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 QUEUE="$REPO/docs/release/DEPLOY_QUEUE.md"
 OFFLOAD="${ICMB_OFFLOAD:-$HOME/bin/offload-run}"
@@ -46,18 +51,18 @@ remote() { ssh -o ConnectTimeout=15 "$VPS" "$@"; }
 verify() {
   local bad=0
   for p in "${ROUTES[@]}"; do
-    local code; code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 "$STAGING$p" || echo 000)
+    local code; code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 "$VERIFY_URL$p" || echo 000)
     printf '   %-14s %s\n' "$p" "$code"
     [ "$code" = "200" ] || bad=1
   done
-  local home; home=$(curl -s --max-time 25 "$STAGING/")
+  local home; home=$(curl -s --max-time 25 "$VERIFY_URL/")
   # Visible currency amounts (ignores RSC refs like "$12" which are quoted/escaped).
   local prices; prices=$(printf '%s' "$home" | grep -oE '[^"\\]\$[0-9][0-9,]*(\.[0-9]+)?' | wc -l | tr -d ' ')
   printf '   visible $-amounts on /: %s (must be 0)\n' "$prices"
   [ "$prices" = "0" ] || bad=1
-  local sub; sub=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 "$STAGING/subscribe")
+  local sub; sub=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 "$VERIFY_URL/subscribe")
   printf '   /subscribe        %s (expect 307)\n' "$sub"
-  printf '   /vsl noindex      %s\n' "$(curl -s --max-time 25 "$STAGING/vsl" | grep -ciE 'name="robots"[^>]*noindex' || true)"
+  printf '   /vsl noindex      %s\n' "$(curl -s --max-time 25 "$VERIFY_URL/vsl" | grep -ciE 'name="robots"[^>]*noindex' || true)"
   return $bad
 }
 
@@ -180,7 +185,7 @@ ok "container swapped; DEPLOYED_SHA=$SHORT"
 sleep 8
 
 # 9. Verify and record evidence.
-log "verifying $STAGING"
+log "verifying $VERIFY_URL"
 if verify; then
   record_queue "staging-verified (script checks)"
   ok "staging is serving $SHORT — evidence appended to docs/release/DEPLOY_QUEUE.md (commit it)"
