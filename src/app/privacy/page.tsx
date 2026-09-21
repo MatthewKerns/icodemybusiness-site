@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/legal/LegalPage";
+import { PROCESSORS, FIRST_PARTY_COOKIES } from "@/lib/processors";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | iCodeMyBusiness",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy" updated="17 September 2026">
+    <LegalPage title="Privacy Policy" updated="21 September 2026">
       <p>
         iCodeMyBusiness is a consulting and automation practice operated by Matthew Kerns
         in the United States. This policy covers this website and the applications linked
@@ -34,8 +35,16 @@ export default function PrivacyPage() {
             Clockify API key that you supply and can revoke.
           </li>
           <li>
-            <strong>Basic usage analytics.</strong> Aggregate page and referral counts, so
-            we know which pages earn their place.
+            <strong>Usage analytics.</strong> Which pages you view, where you came from, and
+            your device and browser type, so we know which pages earn their place. If you
+            are signed in, analytics are tied to your account ID — never to your email
+            address or name.
+          </li>
+          <li>
+            <strong>Error monitoring and session replay.</strong> When something breaks we
+            record the technical details. On about 1 in 10 visits we also record a replay of
+            how the page was used, to find problems we would otherwise miss. Replays mask
+            all text and everything typed into forms.
           </li>
         </ul>
       </LegalSection>
@@ -57,9 +66,30 @@ export default function PrivacyPage() {
 
       <LegalSection title="Processors we rely on">
         <p>
-          Clerk for authentication, Clockify for time tracking when you connect it,
-          Anthropic for AI features, and our hosting providers. Each handles data under its
-          own policy.
+          These services receive data from this site or its applications, each under its
+          own policy. There are no others apart from our hosting providers.
+        </p>
+        <ul>
+          {PROCESSORS.map((p) => (
+            <li key={p.name}>
+              <strong>{p.name}</strong> — {p.purpose}. Receives {p.data}.
+            </li>
+          ))}
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="Cookies">
+        <p>This site sets two cookies of its own, and only when you arrive from a tagged link:</p>
+        <ul>
+          {FIRST_PARTY_COOKIES.map((c) => (
+            <li key={c.name}>
+              <code>{c.name}</code> — {c.purpose}. Kept for {c.lifetime}.
+            </li>
+          ))}
+        </ul>
+        <p>
+          Clerk sets cookies to keep you signed in, and PostHog stores an anonymous visitor
+          identifier so repeat visits are counted once. None are used for advertising.
         </p>
       </LegalSection>
 
