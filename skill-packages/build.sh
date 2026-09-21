@@ -1,11 +1,17 @@
 #!/bin/bash
-# Build downloadable skill zips into public/downloads/.
+# Build skill zips into skill-packages/dist/ for local use.
 # Run from repo root:  bash skill-packages/build.sh
+#
+# Never point OUT back at public/: this site must not SERVE these archives.
+# A domain distributing shell/Python scripts reads to ISP malware engines as
+# unwanted-software distribution, which is what got icodemybusiness.com blocked
+# by Comcast and Cox Advanced Security (see docs/trust-pages.md). The tools are
+# published on GitHub and the /free-tools cards link there instead.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$ROOT/skill-packages"
-OUT="$ROOT/public/downloads"
+OUT="$SRC/dist"
 mkdir -p "$OUT"
 
 PACKAGES=(disk-space-optimizer google-drive-archiver quarterly-planner ecommerce-brand-automation-audit)
@@ -34,7 +40,7 @@ for pkg in "${PACKAGES[@]}"; do
   ( cd "$SRC" && zip -r -X "$OUT/${pkg}-skill.zip" "$pkg" \
       -x '*.DS_Store' -x '*/__pycache__/*' -x '*/.venv/*' -x '*/tokens/*' \
       -x '*/credentials/*.json' >/dev/null )
-  echo "   → public/downloads/${pkg}-skill.zip"
+  echo "   → skill-packages/dist/${pkg}-skill.zip"
 done
 
 echo ""

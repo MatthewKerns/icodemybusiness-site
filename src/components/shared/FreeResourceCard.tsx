@@ -48,11 +48,11 @@ export const BUILDER_RESOURCES: FreeResource[] = [
     description:
       "A safety-gated loop that measures, then proposes cleanups across Docker, Downloads, and caches — archiving to Drive and deleting only what you approve. One real run freed 12 GB.",
     icon: HardDrive,
-    href: "/downloads/disk-space-optimizer-skill.zip",
+    href: "https://github.com/MatthewKerns/software-development-best-practices-guide/tree/main/skills/disk-space-optimizer",
     repoUrl:
       "https://github.com/MatthewKerns/software-development-best-practices-guide/tree/main/skills/disk-space-optimizer",
     category: "builders",
-    delivery: "download",
+    delivery: "external",
     disclaimer: "Can delete files — read the included disclaimer first.",
   },
   {
@@ -61,11 +61,11 @@ export const BUILDER_RESOURCES: FreeResource[] = [
     description:
       "Backs up Downloads, screenshots, and recordings to your own Google Drive — and removes the local copy only after the upload is verified. Your keys, your Drive.",
     icon: CloudUpload,
-    href: "/downloads/google-drive-archiver-skill.zip",
+    href: "https://github.com/MatthewKerns/software-development-best-practices-guide/tree/main/skills/google-drive-archiver",
     repoUrl:
       "https://github.com/MatthewKerns/software-development-best-practices-guide/tree/main/skills/google-drive-archiver",
     category: "builders",
-    delivery: "download",
+    delivery: "external",
     disclaimer: "Can delete files — read the included disclaimer first.",
   },
   {
@@ -83,9 +83,12 @@ export const BUILDER_RESOURCES: FreeResource[] = [
 ];
 
 /**
- * Founder tools — free, founder-facing workflows kept in this repo (packaged in
- * `skill-packages/` → `public/downloads/`), delivered as direct downloads. Their
- * "special place" is the Founder tools section on the free-tools / portal pages.
+ * Founder tools — free, founder-facing workflows. Source lives in
+ * `skill-packages/` and is published on GitHub; the cards link there. This site
+ * deliberately does NOT serve the archives itself: a domain distributing shell
+ * and Python scripts reads to ISP malware engines as unwanted-software
+ * distribution (see docs/trust-pages.md). Their "special place" is the Founder
+ * tools section on the free-tools / portal pages.
  */
 export const FOUNDER_RESOURCES: FreeResource[] = [
   {
@@ -94,9 +97,11 @@ export const FOUNDER_RESOURCES: FreeResource[] = [
     description:
       "A founder's quarterly planning session. Reads context from your Google Drive, Apple Notes, and Claude history (read-only), then walks the EOS pulse — review last quarter, set 3–7 Rocks, build a weekly Scorecard, and output a 90-day plan + Level 10 agenda.",
     icon: Target,
-    href: "/downloads/quarterly-planner-skill.zip",
+    href: "https://github.com/MatthewKerns/software-development-best-practices-guide/tree/main/skills/quarterly-planner",
+    repoUrl:
+      "https://github.com/MatthewKerns/software-development-best-practices-guide/tree/main/skills/quarterly-planner",
     category: "founders",
-    delivery: "download",
+    delivery: "external",
     disclaimer:
       "Reads your Drive / Notes / Claude history (read-only) — see the included disclaimer.",
   },
@@ -107,9 +112,11 @@ export const FOUNDER_RESOURCES: FreeResource[] = [
     description:
       "A four-stage strategic audit for an e-commerce or Amazon FBA brand — yours or a client's. Five Claude skills run as one pipeline: structured discovery → Theory-of-Constraints diagnosis → a ranked, reasoned opportunity matrix with a Kill List → a time-phased roadmap. Turns a brand's messy reality into a short list of what to actually do next, everything else deferred.",
     icon: Compass,
-    href: "/downloads/ecommerce-brand-automation-audit-skill.zip",
+    href: "https://github.com/MatthewKerns/software-development-best-practices-guide/tree/main/skills/ecommerce-brand-automation-audit",
+    repoUrl:
+      "https://github.com/MatthewKerns/software-development-best-practices-guide/tree/main/skills/ecommerce-brand-automation-audit",
     category: "founders",
-    delivery: "download",
+    delivery: "external",
     disclaimer:
       "Strategic guidance, not financial or legal advice — see the included disclaimer.",
   },

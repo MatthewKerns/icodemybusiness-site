@@ -65,3 +65,4 @@ _bmad-output/
 .worktrees/
 .security-key
 logs/security/
+skill-packages/dist/

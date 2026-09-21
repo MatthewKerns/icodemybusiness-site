@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
-import { CaseStudyFilter } from "@/components/landing/CaseStudyFilter";
 import { EmailCapture } from "@/components/shared/EmailCapture";
 
 export const metadata: Metadata = {
@@ -14,55 +13,6 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
-
-// Placeholder case studies — hidden on the live site until real client
-// projects are ready to feature. Set to true to show them again.
-const SHOW_CASE_STUDIES = false;
-
-const CASE_STUDIES = [
-  {
-    slug: "eos-implementation-dashboard",
-    category: "AUTOMATION",
-    title: "EOS Implementation Dashboard",
-    summary:
-      "Built a real-time Entrepreneurial Operating System dashboard that replaced 6 spreadsheets and 3 weekly meetings with a single automated command center.",
-    metric: "12 hrs/week saved per leadership team",
-    challenge:
-      "A 40-person services company ran EOS on spreadsheets. Scorecard updates took 2 hours weekly, rocks were tracked in a separate tool, and the L10 agenda lived in yet another doc. Leadership spent more time updating systems than making decisions.",
-    solution:
-      "Designed a Convex-backed dashboard with live scorecards, rock tracking, and auto-generated L10 agendas. Integrated with QuickBooks and HubSpot to pull actuals automatically. Added Slack notifications for off-track metrics.",
-    results:
-      "Eliminated 12 hours/week of manual data entry across the leadership team. L10 meetings shortened from 90 to 60 minutes. Scorecard accuracy went from ~70% to 99% because data flows directly from source systems.",
-  },
-  {
-    slug: "ai-content-pipeline",
-    category: "AI_TOOLS",
-    title: "AI Content Pipeline",
-    summary:
-      "Created an AI-powered content system that turns one client interview into a week of platform-specific posts, emails, and blog drafts.",
-    metric: "5x content output, 80% less writing time",
-    challenge:
-      "A solo consultant was spending 10+ hours per week writing LinkedIn posts, newsletters, and blog content. Quality was inconsistent and they kept falling behind on their publishing schedule.",
-    solution:
-      "Built a Claude-powered pipeline: record a 20-minute voice memo, auto-transcribe it, then generate platform-optimized drafts for LinkedIn, email, and blog. Each piece matches the client's voice and includes a human review step before publishing.",
-    results:
-      "Content output went from 2 posts/week to 10+ across platforms. Writing time dropped from 10 hours to 2 hours (review and editing only). Newsletter open rates increased 23% because content was more consistent and timely.",
-  },
-  {
-    slug: "business-process-audit",
-    category: "CONSULTING",
-    title: "Business Process Audit & Automation Map",
-    summary:
-      "Conducted a deep-dive operational audit for a digital agency, identifying $47K/year in labor costs that could be automated with existing tools.",
-    metric: "$47K/yr in automatable labor identified",
-    challenge:
-      "A 15-person digital agency felt overwhelmed but couldn't pinpoint where time was leaking. They suspected they needed to hire two more people but weren't sure the revenue justified it.",
-    solution:
-      "Ran a 2-week process audit: interviewed every team member, mapped 23 workflows end-to-end, and scored each for automation potential. Delivered a prioritized roadmap with ROI estimates, starting with three quick wins that needed zero new tools.",
-    results:
-      "Identified $47K/year in automatable labor across client onboarding, reporting, and invoicing. The three quick wins saved 8 hours/week within the first month. The agency decided to automate instead of hire, improving margins by 15%.",
-  },
-];
 
 const TECH_STACK = [
   { name: "Next.js + React", desc: "Production web applications" },
@@ -98,17 +48,6 @@ export default function OffersPage() {
               growth potential.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
-              {SHOW_CASE_STUDIES && (
-                <a
-                  href="#case-studies"
-                  className={cn(
-                    "rounded-lg bg-gold px-6 py-3 font-medium text-black transition-shadow",
-                    "hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
-                  )}
-                >
-                  See my work
-                </a>
-              )}
               <a
                 href="#how-i-work"
                 className="rounded-lg border border-border px-6 py-3 font-medium text-text-primary transition-colors hover:border-gold-dim hover:text-gold"
@@ -118,24 +57,6 @@ export default function OffersPage() {
             </div>
           </div>
         </section>
-
-        {/* Case Studies */}
-        {SHOW_CASE_STUDIES && (
-          <section id="case-studies" className="py-12 md:py-20">
-            <div className="mx-auto max-w-6xl">
-              <h2 className="text-center text-h2 font-bold text-text-primary">
-                Case Studies
-              </h2>
-              <p className="mt-2 text-center text-text-muted">
-                Real projects. Real metrics. Real business impact.
-              </p>
-
-              <div className="mt-10">
-                <CaseStudyFilter studies={CASE_STUDIES} />
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* How I Work */}
         <section id="how-i-work" className="py-12 md:py-20">
