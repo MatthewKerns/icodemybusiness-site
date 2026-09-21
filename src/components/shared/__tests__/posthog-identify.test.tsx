@@ -10,6 +10,8 @@
  */
 import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
 import { render, cleanup } from "@testing-library/react";
+import fs from "fs";
+import path from "path";
 
 const identify = vi.fn();
 const reset = vi.fn();
@@ -84,12 +86,9 @@ describe("resolveClientHost", () => {
 });
 
 describe("next.config.js", () => {
-  it("has no /ingest rewrite tunnelling PostHog through our own domain", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const config = require("../../../../next.config.js");
-    const rewrites = typeof config.rewrites === "function" ? await config.rewrites() : [];
-    const all = Array.isArray(rewrites) ? rewrites : [...(rewrites.beforeFiles ?? []), ...(rewrites.afterFiles ?? []), ...(rewrites.fallback ?? [])];
-    const tunnels = all.filter((r: { destination?: string }) => /posthog\.com/.test(r.destination ?? ""));
-    expect(tunnels).toEqual([]);
+  it("has no /ingest rewrite tunnelling PostHog through our own domain", () => {
+    const source = fs.readFileSync(path.resolve(__dirname, "../../../../next.config.js"), "utf8");
+    expect(source).not.toMatch(/destination:\s*['"]https:\/\/[^'"]*posthog\.com/);
+    expect(source).not.toMatch(/source:\s*['"]\/ingest/);
   });
 });
