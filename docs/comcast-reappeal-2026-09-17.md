@@ -79,10 +79,10 @@ on the domain at the time, and any of them could explain a categoryless "safety 
 1. **Four ZIP archives of shell and Python scripts were served from `/downloads/`**, ungated and
    linked from `/free-tools` — one script deletes files, one runs a Google OAuth flow. ISP security
    products are malware engines first; this is the likeliest trigger. Fix: trust-remediation D1
-   (commit 73beed3; **not yet deployed** as of 2026-09-21): the tools moved to GitHub and the site links there.
+   (commits 73beed3 + 1cb0dd8; **deployed 2026-09-21 12:32Z, verified from the VPS**): the tools moved to GitHub and the site links there.
 2. **`staging.` served a byte-identical copy of the apex** (the letter correctly said only
-   "de-indexed"). Fix: D2 (02599ff; **not yet deployed**): the staging host now answers a bare 404.
+   "de-indexed"). Fix: D2 (02599ff; **deployed 2026-09-21**): the staging host now answers a bare 404.
 3. **Analytics were tunnelled through the domain** (`/ingest`, stated purpose: defeat tracking
-   blockers) and carried visitor email and name, undisclosed in `/privacy`. Fix: D2 (02599ff; **not yet deployed**).
+   blockers) and carried visitor email and name, undisclosed in `/privacy`. Fix: D2 (02599ff; **deployed 2026-09-21**).
 
-Once deployed and verified from the VPS, cite these with the live before/after measurements in the follow-up call or any new report.
+Cite these with the live before/after measurements in the follow-up call or any new report.
