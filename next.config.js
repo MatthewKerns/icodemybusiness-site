@@ -39,6 +39,16 @@ const nextConfig = {
         destination: '/portal/resources',
         permanent: true,
       },
+      // One canonical host. www and the apex served identical HTML, which a
+      // reputation scanner reads as a duplicate site. Traefik routes both hosts
+      // to this container, so the redirect lives here — no label change. The
+      // host match is EXACT: matching the apex too would loop the live site.
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.icodemybusiness.com' }],
+        destination: 'https://icodemybusiness.com/:path*',
+        permanent: true,
+      },
     ];
   },
 }

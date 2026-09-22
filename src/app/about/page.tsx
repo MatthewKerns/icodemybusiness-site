@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/legal/LegalPage";
+import { BUSINESS, LEGAL_ENTITY_LINE } from "@/lib/business";
 
 export const metadata: Metadata = {
   title: "About | iCodeMyBusiness",
@@ -12,7 +13,7 @@ export default function AboutPage() {
     <LegalPage title="About iCodeMyBusiness">
       <p>
         iCodeMyBusiness is a one-person consulting and automation practice run by Matthew
-        Kerns. It helps business owners find the real constraint in how their work gets
+        Kerns, operating as {LEGAL_ENTITY_LINE}. It helps business owners find the real constraint in how their work gets
         done, then removes it — sometimes by changing the process, sometimes by building
         software for the job.
       </p>
@@ -44,10 +45,17 @@ export default function AboutPage() {
 
       <LegalSection title="Contact">
         <p>
-          Matthew Kerns, iCodeMyBusiness —{" "}
-          <a href="mailto:matthew@icodemybusiness.com" className="text-blue hover:underline">
-            matthew@icodemybusiness.com
+          {BUSINESS.founder}, {BUSINESS.legalName} —{" "}
+          <a href={`mailto:${BUSINESS.email}`} className="text-blue hover:underline">
+            {BUSINESS.email}
           </a>
+          {BUSINESS.telephone && <> · {BUSINESS.telephone}</>}
+          {BUSINESS.postalAddress && (
+            <>
+              {" "}· {BUSINESS.postalAddress.streetAddress}, {BUSINESS.postalAddress.addressLocality},{" "}
+              {BUSINESS.postalAddress.addressRegion} {BUSINESS.postalAddress.postalCode}
+            </>
+          )}
           . Prefer to talk? Book a free intro call from the{" "}
           <a href="/book" className="text-blue hover:underline">
             booking page

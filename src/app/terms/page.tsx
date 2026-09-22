@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/legal/LegalPage";
+import { BUSINESS, LEGAL_ENTITY_LINE } from "@/lib/business";
 
 export const metadata: Metadata = {
   title: "Terms of Use | iCodeMyBusiness",
@@ -9,11 +10,11 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <LegalPage title="Terms of Use" updated="17 September 2026">
+    <LegalPage title="Terms of Use" updated="22 September 2026">
       <p>
         These terms cover this website, the free tools on it, and the applications linked
-        from it. They are an agreement between you and iCodeMyBusiness (Matthew Kerns). By
-        using the site, you accept them.
+        from it. They are an agreement between you and {LEGAL_ENTITY_LINE} (&quot;iCodeMyBusiness&quot;,
+        &quot;we&quot;). By using the site, you accept them.
       </p>
 
       <LegalSection title="What this site is">
@@ -55,13 +56,28 @@ export default function TermsPage() {
         </p>
       </LegalSection>
 
+      <LegalSection title="Governing law">
+        <p>
+          These terms are governed by the laws of the State of {BUSINESS.jurisdiction}, without
+          regard to its conflict-of-law rules. Any dispute that cannot be settled between us
+          will be brought in the state or federal courts located in {BUSINESS.jurisdiction}.
+        </p>
+      </LegalSection>
+
       <LegalSection title="Changes and contact">
         <p>
           We may update these terms; the date above always names the current version.
           Questions:{" "}
-          <a href="mailto:matthew@icodemybusiness.com" className="text-blue hover:underline">
-            matthew@icodemybusiness.com
+          <a href={`mailto:${BUSINESS.email}`} className="text-blue hover:underline">
+            {BUSINESS.email}
           </a>
+          {" "}— {BUSINESS.legalName}
+          {BUSINESS.postalAddress && (
+            <>
+              , {BUSINESS.postalAddress.streetAddress}, {BUSINESS.postalAddress.addressLocality},{" "}
+              {BUSINESS.postalAddress.addressRegion} {BUSINESS.postalAddress.postalCode}
+            </>
+          )}
         </p>
       </LegalSection>
     </LegalPage>
