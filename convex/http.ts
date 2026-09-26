@@ -1,6 +1,7 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { internal, api } from "./_generated/api";
+import { verifyResendSignature } from "./lib/resendWebhook";
 
 const http = httpRouter();
 
@@ -94,6 +95,66 @@ async function verifyRetellSignature(
 
   return computedHex === digest;
 }
+
+// --- Resend webhook endpoint ---
+// Delivery/engagement callbacks (email.delivered / opened / clicked / bounced /
+// complained). Signed by Svix; RESEND_WEBHOOK_SECRET comes from the Convex env.
+// Payload shape per https://resend.com/docs/webhooks/emails/clicked.md:
+// { type, created_at, data: { email_id, to: string[], click?: { link } } }.
+
+http.route({
+  path: "/webhooks/resend",
+  method: "POST",
+  handler: httpAction(async (ctx, req) => {
+    const id = req.headers.get("svix-id");
+    const timestamp = req.headers.get("svix-timestamp");
+    const signature = req.headers.get("svix-signature");
+    if (!id || !timestamp || !signature) {
+      return new Response(JSON.stringify({ error: "Missing signature headers" }), { status: 401 });
+    }
+
+    const body = await req.text();
+
+    const secret = process.env.RESEND_WEBHOOK_SECRET;
+    if (!secret) {
+      console.error("RESEND_WEBHOOK_SECRET not configured");
+      return new Response(JSON.stringify({ error: "Server configuration error" }), { status: 500 });
+    }
+
+    const valid = await verifyResendSignature(body, { id, timestamp, signature }, secret);
+    if (!valid) {
+      return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 401 });
+    }
+
+    let payload: {
+      type?: string;
+      created_at?: string;
+      data?: { email_id?: string; to?: string | string[]; click?: { link?: string } };
+    };
+    try {
+      payload = JSON.parse(body);
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON" }), { status: 400 });
+    }
+
+    const emailId = payload.data?.email_id;
+    const to = Array.isArray(payload.data?.to) ? payload.data?.to[0] : payload.data?.to;
+    if (!payload.type || !emailId || !to) {
+      // Not an email event we store (domain.*, contact.*, …) or malformed: ack so Svix stops retrying.
+      return new Response(JSON.stringify({ received: true, stored: false }), { status: 200 });
+    }
+
+    const occurredAt = Date.parse(payload.created_at ?? "") || Date.now();
+    await ctx.runMutation(internal.emailEvents.record, {
+      resendId: emailId,
+      type: payload.type,
+      email: to,
+      link: payload.data?.click?.link,
+      occurredAt,
+    });
+    return new Response(JSON.stringify({ received: true, stored: true }), { status: 200 });
+  }),
+});
 
 // --- Retell webhook endpoint ---
 

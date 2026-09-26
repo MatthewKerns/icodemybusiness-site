@@ -52,6 +52,24 @@ export default defineSchema(
       .index("by_createdAt", ["createdAt"]),
 
     // APPEND-ONLY
+    // Delivery/engagement callbacks from Resend (signed webhook -> convex/http.ts
+    // -> emailEvents.record). Deliberately NOT folded into `emailSends`: that
+    // table is append-only by contract, and patching a row by `resendId` on
+    // every open would quietly break the invariant.
+    emailEvents: defineTable({
+      resendId: v.string(),
+      type: v.string(), // "email.delivered" | "email.opened" | "email.clicked" | …
+      email: v.string(),
+      /** Click target, when the event carries one. */
+      link: v.optional(v.string()),
+      occurredAt: v.number(),
+      createdAt: v.number(),
+    })
+      .index("by_resendId", ["resendId"])
+      .index("by_email", ["email"])
+      .index("by_createdAt", ["createdAt"]),
+
+    // APPEND-ONLY
     // Visitor events: durable system-of-record log of clicks and decisions made
     // on the marketing site (CTA clicks, plan/tier/path selection, copies,
     // downloads). Dual-written alongside PostHog so an admin can review the full

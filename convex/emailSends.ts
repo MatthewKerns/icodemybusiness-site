@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { validateEmail } from "./lib/validators";
+import { requireOwner } from "./lib/auth";
 
 /**
  * Record the outcome of a transactional send. Called by the Next.js email
@@ -67,5 +68,41 @@ export const listForEmail = query({
       .withIndex("by_to", (q) => q.eq("to", to))
       .order("desc")
       .take(50);
+  },
+});
+
+const MAX_ROWS = 10_000;
+const DAY_MS = 86_400_000;
+
+/**
+ * Owner-only send counts for the funnel report: sent/failed totals and a
+ * per-template split over the last `windowDays`.
+ */
+export const adminCounts = query({
+  args: { windowDays: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    await requireOwner(ctx);
+    const windowDays = Math.min(365, Math.max(1, Math.floor(args.windowDays ?? 30)));
+    const until = Date.now();
+    const since = until - windowDays * DAY_MS;
+    const rows = await ctx.db
+      .query("emailSends")
+      .withIndex("by_createdAt", (q) => q.gte("createdAt", since))
+      .take(MAX_ROWS);
+
+    const byTemplate: Record<string, { sent: number; failed: number }> = {};
+    let sent = 0;
+    let failed = 0;
+    for (const r of rows) {
+      const t = (byTemplate[r.template] ??= { sent: 0, failed: 0 });
+      if (r.status === "sent") {
+        sent++;
+        t.sent++;
+      } else {
+        failed++;
+        t.failed++;
+      }
+    }
+    return { windowDays, since, until, total: rows.length, sent, failed, byTemplate, truncated: rows.length === MAX_ROWS };
   },
 });
