@@ -11,6 +11,7 @@ import { requireRole } from "./lib/auth";
 import { rateLimit } from "./lib/rateLimits";
 import { scoreLead } from "./lib/leadScoring";
 import { validateEmail } from "./lib/validators";
+import { scheduleLeadPush } from "./mango";
 import {
   DISCOVERY_QUESTIONS,
   DISCOVERY_STAGE,
@@ -183,6 +184,7 @@ export const submit = mutation({
         clerkUserId,
         createdAt: Date.now(),
       });
+      await scheduleLeadPush(ctx, leadId);
     }
 
     const answers: {

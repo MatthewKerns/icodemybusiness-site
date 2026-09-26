@@ -7,6 +7,7 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { requireRole } from "./lib/auth";
+import { scheduleLeadPush } from "./mango";
 
 const SOURCE = "ecommerce-tools-application";
 
@@ -51,6 +52,7 @@ export const submitApplication = mutation({
         clerkUserId: args.clerkUserId,
         createdAt: Date.now(),
       });
+      await scheduleLeadPush(ctx, leadId);
     }
 
     // Snapshot the intake profile captured during the chat.
