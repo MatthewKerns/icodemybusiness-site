@@ -21,6 +21,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
  * Owner-only via the /admin middleware gate + requireOwner in the query.
  */
 
+// EU project 206048 holds these dashboards and all history before the
+// 2026-09-26 move to US project 629815. Repoint once they are rebuilt there.
 const POSTHOG_PROJECT = "https://eu.posthog.com/project/206048";
 const REALITY_DASHBOARD = `${POSTHOG_PROJECT}/dashboard/933266`;
 const OVERVIEW_DASHBOARD = `${POSTHOG_PROJECT}/dashboard/761841`;

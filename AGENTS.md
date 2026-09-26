@@ -29,7 +29,7 @@ are NOT restated here — consult `~/workspace/software-development-best-practic
   status; the deploy script always uses the VPS). A gate that could not run is not a passed gate.
 - Hand off deploys to the **deploy session** with: `ready to deploy: <sha> / Convex: y|n / env: none|NAME=… / gates: <pasted result> / verify: <what a human must look at>`.
 - Wrap API routes in `withErrorHandler`; surface agent/LLM failures with `visitorSafeAgentError`; record every transactional send with `api.emailSends.record`.
-- Add analytics events to `src/lib/analytics-events.ts` first; never hardcode event names. PostHog project 206048, EU host only.
+- Add analytics events to `src/lib/analytics-events.ts` first; never hardcode event names. PostHog project 629815, US host only (EU 206048 retired 2026-09-26).
 - Keep the site free of visible prices. Paid interest goes to a booked call (`/book`, `/consulting`).
 
 ### Ask First (Matthew)
@@ -70,7 +70,7 @@ are NOT restated here — consult `~/workspace/software-development-best-practic
 | Auth | Clerk (dev keys until R-003) | owner gate: `OWNER_EMAIL_DOMAINS` |
 | Email | Resend via `/api/email/*` and `convex/emails.ts` | from `matthew@icodemybusiness.com`; log with `emailSends.record` |
 | AI | Anthropic SDK in API routes / Convex actions only | key in VPS env AND Convex env |
-| Analytics / errors | PostHog 206048 (EU), Sentry | `src/lib/analytics-events.ts` taxonomy; dashboard `/project/206048/dashboard/761841`; `docs/observability.md`, `docs/RUNBOOK.md` |
+| Analytics / errors | PostHog 629815 (US, org iCodeMyBusiness, matthew@icodemybusiness.com), Sentry | `src/lib/analytics-events.ts` taxonomy; dashboards not yet rebuilt in 629815; `docs/observability.md`, `docs/RUNBOOK.md` |
 | Booking | Calendly embed (`CalendlyEmbed`) | live event: `12kernsmatthew/new-meeting-1` (15 min) |
 | Styling | Tailwind | gold/black brand tokens |
 | Tests | vitest (+ `convex-test`) | `npm test` |

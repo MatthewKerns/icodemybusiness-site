@@ -67,21 +67,21 @@ describe("PostHogProvider identify", () => {
 });
 
 describe("resolveClientHost", () => {
-  it("defaults to PostHog EU when unset or empty (an empty build arg must not yield an empty host)", async () => {
+  it("defaults to PostHog US when unset or empty (an empty build arg must not yield an empty host)", async () => {
     const { resolveClientHost } = await import("@/lib/posthog");
-    expect(resolveClientHost(undefined)).toBe("https://eu.i.posthog.com");
-    expect(resolveClientHost("")).toBe("https://eu.i.posthog.com");
+    expect(resolveClientHost(undefined)).toBe("https://us.i.posthog.com");
+    expect(resolveClientHost("")).toBe("https://us.i.posthog.com");
   });
 
   it("never returns a relative, same-origin path — a leftover /ingest would 404 and drop every event", async () => {
     const { resolveClientHost } = await import("@/lib/posthog");
-    expect(resolveClientHost("/ingest")).toBe("https://eu.i.posthog.com");
-    expect(resolveClientHost("ingest")).toBe("https://eu.i.posthog.com");
+    expect(resolveClientHost("/ingest")).toBe("https://us.i.posthog.com");
+    expect(resolveClientHost("ingest")).toBe("https://us.i.posthog.com");
   });
 
   it("honours an explicit absolute host", async () => {
     const { resolveClientHost } = await import("@/lib/posthog");
-    expect(resolveClientHost("https://eu.i.posthog.com")).toBe("https://eu.i.posthog.com");
+    expect(resolveClientHost("https://us.i.posthog.com")).toBe("https://us.i.posthog.com");
   });
 });
 

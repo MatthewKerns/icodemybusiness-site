@@ -4,7 +4,7 @@ Operational runbook for the analytics + error-tracking layer and the API routes
 it covers. Goal: a teammate (or future you at 2am) resolves an issue without
 asking anyone.
 
-- **Dashboard:** [iCodeMyBusiness — Operations](https://eu.posthog.com/project/206048/dashboard/761841) (PostHog project 206048, EU)
+- **Dashboard:** [PostHog project 629815 (US)](https://us.posthog.com/project/629815/dashboard) — Operations dashboard not yet rebuilt there; EU 206048/761841 holds history before 2026-09-26
 - **Error detail:** Sentry (stack traces, breadcrumbs, replays)
 - **Metric catalog & wiring:** [observability.md](./observability.md)
 
@@ -80,9 +80,9 @@ the `route` breakdown points you at the section below.
 ## Dashboard is flat / no data
 
 If conversions are happening but the dashboard shows nothing:
-1. **Region/key:** Confirm `NEXT_PUBLIC_POSTHOG_KEY` is **project 206048's** client token and `NEXT_PUBLIC_POSTHOG_HOST` resolves to **EU** (`/ingest` or `https://eu.i.posthog.com`). A US host or wrong-project key drops everything silently.
+1. **Region/key:** Confirm `NEXT_PUBLIC_POSTHOG_KEY` is **project 629815's** client token and `NEXT_PUBLIC_POSTHOG_HOST` is **US** (`https://us.i.posthog.com`). An EU host or wrong-project key drops everything silently.
 2. **Proxy:** With `/ingest`, open the browser Network tab and confirm `/ingest/*` requests return 200. If 404, the `next.config.js` rewrites aren't deployed.
-3. **Server events:** posthog-node uses the direct EU host even when the client uses `/ingest`. Confirm `NEXT_PUBLIC_POSTHOG_KEY` exists in the server runtime env (not just the browser bundle).
+3. **Server events:** posthog-node uses the same direct US host as the client. Confirm `NEXT_PUBLIC_POSTHOG_KEY` exists in the server runtime env (not just the browser bundle).
 4. **Test-account filter:** The insights have `filterTestAccounts:false`, so internal traffic is included — not the cause of emptiness.
 
 ---
