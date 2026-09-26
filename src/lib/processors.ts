@@ -30,7 +30,7 @@ export const PROCESSORS: Processor[] = [
     data: "what you submit in forms and the assessment chat, and your account records",
   },
   {
-    name: "PostHog (EU)",
+    name: "PostHog (US)",
     purpose: "product analytics",
     data: "pages viewed, referrer, device and browser type, and — if you are signed in — your account ID (never your email or name)",
   },
