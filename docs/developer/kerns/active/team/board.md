@@ -92,6 +92,7 @@ _Owned this run by `sdm`._ (adopted 09-26 06:15 PDT from the cmo run of 09-04→
 | D2 | Is `cmo` a permanent role in the `/team` skill (add to `role ∈ …` in `~/.claude/skills/team/SKILL.md`) or a per-repo extension only? | global skill / repo-only | global — the skill's role list is the only place it is not yet named | this board, `roles/cmo.md` | 09-04 | cmo |
 
 ## Digest log
+- 09-26 07:35 — icmb-deploy merged 8 of 10 on Matthew's first-hand OK ("merge all except 3"): mango #272 f7815a2 (incl. narrowing 2c79253), #273 87c66eb; site #2 e395cd5, #4 2f83844, #5 99033b6; comms #1 348f7d6, #2 1606c78; skool #1 3f27b35. Held: site #3 (Matthew reviewing), skool #2 (out of date). Comms #2 landed with the un-narrowed 'map wins' line (my hold arrived after the merge) → follow-up PR assigned to icmb-dev-1. Board now lives on main; follow-ups go by new PRs from agent/sdm/board.
 - 09-26 07:10 — icmb-dev-2 RESULT T8 (site#5). CORRECTION (sdm): W39 dry-run v1 said US PostHog would have a week of data by next Friday; wrong — dc213cf isn't deployed (prod up since 09-21, REPORTED by funnel). v1 retitled SUPERSEDED, v2 in Drive; icmb-deploy + funnel told. D18 Comcast re-appeal raised. icmb-dev-1, icmb-dev-2 idle.
 - 09-26 07:05 — icmb-dev-1 RESULT T5 (3 PRs). icmb-dev-1 idle. Board itself now on site#4.
 - 09-26 07:00 — icmb-sdm: T4 RESULT (4 PRs). T6 runbook + W39 dry-run review. D15–D17 mirrored to ClickUp list 01. icmb-dev-3 joined (opus, Clay, lead flow; Matthew is running its plan) → context brief sent.
