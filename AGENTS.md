@@ -11,7 +11,9 @@ are NOT restated here — consult `~/workspace/software-development-best-practic
 
 **System map:** this repo is the *Frontend* lane of the ICMB Funnel OS —
 [`docs/agency/icmb-funnel-os.md`](https://github.com/MatthewKerns/mango-income-tool/blob/main/docs/agency/icmb-funnel-os.md)
-in `mango-income-tool`. Where this file and the map disagree, the map wins.
+in `mango-income-tool`. The map wins on system structure only: lanes, where things live, the
+cadence, repo roles. It never overrides this file's Boundaries / Never Do / Ask First, which always
+win in this repo.
 
 ## On Startup
 
