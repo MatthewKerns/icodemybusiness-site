@@ -3,6 +3,7 @@ import { v, ConvexError } from "convex/values";
 import { scoreLead } from "./lib/leadScoring";
 import { rateLimit } from "./lib/rateLimits";
 import { validateEmail } from "./lib/validators";
+import { scheduleLeadPush } from "./mango";
 
 export const createLead = mutation({
   args: {
@@ -63,6 +64,7 @@ export const createLead = mutation({
       clerkUserId: args.clerkUserId,
       createdAt: Date.now(),
     });
+    await scheduleLeadPush(ctx, leadId);
 
     return leadId;
   },
