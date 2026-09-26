@@ -39,6 +39,9 @@ convex/_generated/ai/
 !.claude/hooks/
 !.claude/settings.json
 !.claude/team/
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/funnel-analysis/
 
 # Testing
 coverage/

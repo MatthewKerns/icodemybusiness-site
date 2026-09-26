@@ -1,0 +1,208 @@
+<title>ICMB Funnel State</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #faf8f3; --panel: #ffffff; --ink: #1c1a15; --muted: #6b6558; --line: #e4dfd3;
+    --gold: #b8860b; --gold-soft: #f3e8c8; --ok: #2f7d4f; --warn: #b7791f; --bad: #b3261e; --bad-soft: #fbe9e7;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #12110e; --panel: #1b1914; --ink: #f1ece0; --muted: #a39b8a; --line: #2e2a22;
+      --gold: #d4a72c; --gold-soft: #2c2410; --ok: #6cc08b; --warn: #e0a84a; --bad: #f28b82; --bad-soft: #3a1a17;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #12110e; --panel: #1b1914; --ink: #f1ece0; --muted: #a39b8a; --line: #2e2a22;
+    --gold: #d4a72c; --gold-soft: #2c2410; --ok: #6cc08b; --warn: #e0a84a; --bad: #f28b82; --bad-soft: #3a1a17;
+  }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.45; padding: 0 16px; padding-block: 24px 48px; }
+  main { max-width: 1040px; margin: 0 auto; display: grid; gap: 24px; }
+  h1 { font-size: 1.5rem; font-weight: 600; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+  h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 10px; }
+  .eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 14px; }
+  .stamp { font-family: var(--mono); font-size: 0.85rem; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; }
+  .stamp.stale { color: var(--bad); border-color: var(--bad); background: var(--bad-soft); }
+  section.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .constraint { border-left: 4px solid var(--gold); }
+  .constraint .kind { font-family: var(--mono); font-size: 0.78rem; color: var(--gold); }
+  .constraint p { margin: 6px 0; }
+  .constraint ul { margin: 6px 0 0 18px; padding: 0; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 500; color: var(--muted); font-size: 0.8rem; }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .table-wrap { overflow-x: auto; }
+  .pill { display: inline-block; font-family: var(--mono); font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .pill.ok { color: var(--ok); border-color: var(--ok); }
+  .pill.notrun { color: var(--warn); border-color: var(--warn); }
+  .pill.bad { color: var(--bad); border-color: var(--bad); }
+  svg.spark { width: 96px; height: 24px; display: block; }
+  svg.spark polyline { fill: none; stroke: var(--gold); stroke-width: 1.5; }
+  svg.spark circle { fill: var(--gold); }
+  .muted { color: var(--muted); }
+  .mono { font-family: var(--mono); font-size: 0.85rem; }
+  .claims td { font-size: 0.85rem; }
+  .claims td.cmd { font-family: var(--mono); font-size: 0.78rem; word-break: break-all; }
+  footer { color: var(--muted); font-size: 0.8rem; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<main>
+  <header>
+    <div>
+      <div class="eyebrow">iCodeMyBusiness · funnel</div>
+      <h1>ICMB Funnel State</h1>
+    </div>
+    <div id="stamp" class="stamp">Last updated —</div>
+  </header>
+
+  <section class="panel constraint" id="constraint"></section>
+
+  <section class="panel">
+    <h2>Funnel steps <span class="muted" id="window"></span></h2>
+    <div class="table-wrap"><table id="steps"></table></div>
+  </section>
+
+  <div class="grid">
+    <section class="panel"><h2>Landing pages</h2><div id="landing"></div></section>
+    <section class="panel"><h2>Leads <span class="pill">record: Mango</span></h2><div id="leads"></div></section>
+    <section class="panel"><h2>Email</h2><div id="email"></div></section>
+    <section class="panel"><h2>Booking</h2><div id="booking"></div></section>
+  </div>
+
+  <section class="panel">
+    <h2>Channels (pre-landing)</h2>
+    <div class="table-wrap"><table id="channels"></table></div>
+  </section>
+
+  <section class="panel">
+    <h2>Sources this run</h2>
+    <div class="table-wrap"><table id="sources"></table></div>
+  </section>
+
+  <section class="panel claims">
+    <h2>Claims</h2>
+    <p class="muted">Every number above, with the command that produced it. VERIFIED = run this time; REPORTED = said by a person or tool, not run; INFERRED = derived; NOT RUN = the reason.</p>
+    <div class="table-wrap"><table id="claims"></table></div>
+  </section>
+
+  <footer id="footer"></footer>
+</main>
+
+<script id="funnel-snapshot" type="application/json">
+{"version":1,"runId":"template","generatedAt":0,"windowDays":7,"sources":{},"steps":[],"transitions":[],"constraint":{"kind":"insufficient","title":"No run yet","why":["This is the page template; the first /funnel-analysis run replaces this data island."],"nextAction":"Run /funnel-analysis."},"landing":null,"leads":null,"email":null,"booking":null,"channels":{},"usage":null,"claims":[],"history":[]}
+</script>
+<script>
+(function () {
+  var S;
+  try { S = JSON.parse(document.getElementById("funnel-snapshot").textContent); } catch (e) { S = { constraint: { title: "Snapshot unreadable", why: [String(e)] } }; }
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var isNotRun = function (v) { return typeof v === "string" && /^not run/i.test(v); };
+  var pill = function (v) { return isNotRun(v) ? '<span class="pill notrun">' + esc(v) + "</span>" : '<span class="pill ok">ok</span>'; };
+  var num = function (v) { return typeof v === "number" ? v.toLocaleString() : esc(v); };
+
+  // Last-updated stamp; stale after 8 days (one missed weekly run).
+  var STALE_MS = 8 * 24 * 3600 * 1000;
+  var gen = Number(S.generatedAt) || 0;
+  var stamp = $("stamp");
+  if (!gen) { stamp.textContent = "Not yet run"; stamp.classList.add("stale"); }
+  else {
+    var age = Date.now() - gen, hrs = Math.floor(age / 3600000), days = Math.floor(hrs / 24);
+    var ago = days >= 1 ? days + "d " + (hrs % 24) + "h ago" : hrs + "h ago";
+    stamp.textContent = "Last updated " + new Date(gen).toLocaleString("en-US", { timeZone: "America/Los_Angeles", dateStyle: "medium", timeStyle: "short" }) + " PT (" + ago + ")";
+    if (age > STALE_MS) { stamp.classList.add("stale"); stamp.textContent += " — STALE, expected weekly"; }
+  }
+  $("window").textContent = S.windowDays ? "· last " + S.windowDays + " days" : "";
+
+  // Constraint verdict, verbatim from adminFunnelConstraint.
+  var c = S.constraint || {};
+  $("constraint").innerHTML = '<div class="kind">constraint · ' + esc(c.kind || "unknown") + "</div>" +
+    "<h2>" + esc(c.title || "—") + "</h2>" +
+    (c.why && c.why.length ? "<ul>" + c.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul>" : "") +
+    (c.nextAction ? "<p><strong>Next:</strong> " + esc(c.nextAction) + "</p>" : "");
+
+  // Sparkline from history (oldest first).
+  function spark(values) {
+    var v = values.filter(function (x) { return typeof x === "number"; });
+    if (v.length < 2) return '<span class="muted mono">—</span>';
+    var max = Math.max.apply(null, v), min = Math.min.apply(null, v), span = max - min || 1;
+    var pts = v.map(function (y, i) { return [(i / (v.length - 1)) * 92 + 2, 22 - ((y - min) / span) * 18].map(function (n) { return n.toFixed(1); }).join(","); });
+    var last = pts[pts.length - 1].split(",");
+    return '<svg class="spark" viewBox="0 0 96 24" aria-hidden="true"><polyline points="' + pts.join(" ") + '"></polyline><circle cx="' + last[0] + '" cy="' + last[1] + '" r="2"></circle></svg>';
+  }
+  var hist = Array.isArray(S.history) ? S.history : [];
+
+  // Steps table.
+  var steps = Array.isArray(S.steps) ? S.steps : [];
+  var stepRows = steps.map(function (s, i) {
+    var t = (S.transitions || [])[i - 1];
+    var histKey = s.key === "arrived" ? "arrivals" : s.key === "email" ? "leads" : s.key === "booked" ? "bookings" : null;
+    return "<tr><td>" + esc(s.label || s.key) + (s.measured === false ? ' <span class="pill notrun">unmeasured</span>' : "") + "</td>" +
+      '<td class="num">' + (s.measured === false ? "—" : num(s.count)) + "</td>" +
+      '<td class="num">' + (t && typeof t.lost === "number" ? "−" + num(t.lost) : "") + "</td>" +
+      "<td>" + (histKey ? spark(hist.map(function (h) { return h[histKey]; })) : "") + "</td>" +
+      '<td class="muted mono">' + esc(s.source || "") + "</td></tr>";
+  }).join("");
+  $("steps").innerHTML = "<thead><tr><th>Step</th><th>People</th><th>Lost</th><th>12 runs</th><th>Source</th></tr></thead><tbody>" +
+    (stepRows || '<tr><td colspan="5" class="muted">No step data — Convex funnelConstraint not run.</td></tr>') + "</tbody>";
+
+  // Landing.
+  var L = S.landing;
+  $("landing").innerHTML = !L || isNotRun(L) ? pill(L || "not run") :
+    '<table><tr><th>Visitors</th><td class="num">' + num(L.visitors) + '</td></tr><tr><th>Sessions</th><td class="num">' + num(L.sessions) + "</td></tr>" +
+    (L.topPages && L.topPages.length ? "<tr><th>Top pages</th><td>" + L.topPages.slice(0, 5).map(function (p) { return esc(p.path || p.page) + ' <span class="mono muted">' + num(p.views) + "</span>"; }).join("<br>") + "</td></tr>" : "") +
+    (L.utmSources && L.utmSources.length ? "<tr><th>UTM sources</th><td>" + L.utmSources.slice(0, 5).map(function (u) { return esc(u.source) + ' <span class="mono muted">' + num(u.visitors) + "</span>"; }).join("<br>") + "</td></tr>" : "") + "</table>";
+
+  // Leads.
+  var Ld = S.leads;
+  function kv(obj) { return Object.keys(obj || {}).map(function (k) { return esc(k) + ' <span class="mono">' + num(obj[k]) + "</span>"; }).join(" · ") || '<span class="muted">none</span>'; }
+  $("leads").innerHTML = !Ld ? pill("not run") :
+    "<table>" +
+    "<tr><th>ClickUp 50 Leads</th><td>" + (isNotRun(Ld.clickup) ? pill(Ld.clickup) : '<span class="mono">' + num(Ld.clickup.total) + "</span> · stages: " + kv(Ld.clickup.byStage) + "<br>sources: " + kv(Ld.clickup.bySource)) + "</td></tr>" +
+    "<tr><th>Convex leads</th><td>" + (isNotRun(Ld.convex) ? pill(Ld.convex) : '<span class="mono">' + num(Ld.convex.total) + "</span> · " + kv(Ld.convex.bySource)) + "</td></tr>" +
+    "<tr><th>Apollo contacts</th><td>" + (isNotRun(Ld.apollo) ? pill(Ld.apollo) : '<span class="mono">' + num(Ld.apollo.contacts) + "</span>" + (Ld.apollo.newest ? ' <span class="muted">newest ' + esc(Ld.apollo.newest) + "</span>" : "")) + "</td></tr></table>";
+
+  // Email.
+  var E = S.email;
+  $("email").innerHTML = !E ? pill("not run") :
+    "<table>" +
+    "<tr><th>Site transactional</th><td>" + (isNotRun(E.transactional) ? pill(E.transactional) : 'sent <span class="mono">' + num(E.transactional.sent) + '</span> · failed <span class="mono">' + num(E.transactional.failed) + "</span><br>engagement: " + (isNotRun(E.transactional.engagement) ? pill(E.transactional.engagement) : kv(E.transactional.engagement))) + "</td></tr>" +
+    "<tr><th>Apollo sequences</th><td>" + (isNotRun(E.apolloSequences) || !Array.isArray(E.apolloSequences) ? pill(E.apolloSequences || "not run") : E.apolloSequences.map(function (q) { return esc(q.name) + ': active <span class="mono">' + num(q.active) + '</span> · opened <span class="mono">' + num(q.opened) + '</span> · replied <span class="mono">' + num(q.replied) + "</span>"; }).join("<br>")) + "</td></tr>" +
+    "<tr><th>Nurture engine</th><td>" + pill(E.nurtureEngine || "not run") + "</td></tr></table>";
+
+  // Booking.
+  var B = S.booking;
+  $("booking").innerHTML = !B ? pill("not run") : (isNotRun(B.count) ? pill(B.count) : '<span class="mono" style="font-size:1.4rem">' + num(B.count) + "</span> booked") + '<div class="muted">' + esc(B.caveat || "") + "</div>";
+
+  // Channels.
+  var ch = S.channels || {};
+  var chRows = Object.keys(ch).map(function (k) {
+    var v = ch[k] || {};
+    var st = v.status || "not connected";
+    return "<tr><td>" + esc(k) + "</td><td>" + (st === "connected" ? '<span class="pill ok">connected</span>' : '<span class="pill notrun">' + esc(st) + "</span>") + "</td><td>" + (v.data ? kv(v.data) : '<span class="muted">not run: not connected</span>') + "</td></tr>";
+  }).join("");
+  $("channels").innerHTML = "<thead><tr><th>Channel</th><th>Windsor</th><th>Last 7 days</th></tr></thead><tbody>" + (chRows || '<tr><td colspan="3" class="muted">No channels listed.</td></tr>') + "</tbody>";
+
+  // Sources.
+  var src = S.sources || {};
+  $("sources").innerHTML = "<tbody>" + (Object.keys(src).map(function (k) { return "<tr><th>" + esc(k) + "</th><td>" + (src[k] === "ok" ? '<span class="pill ok">ok</span>' : '<span class="pill notrun">' + esc(src[k]) + "</span>") + "</td></tr>"; }).join("") || '<tr><td class="muted">No preflight recorded.</td></tr>') + "</tbody>";
+
+  // Claims.
+  var cl = Array.isArray(S.claims) ? S.claims : [];
+  $("claims").innerHTML = "<thead><tr><th>#</th><th>Claim</th><th>Label</th><th>Source</th><th>Command</th><th>Result</th></tr></thead><tbody>" +
+    (cl.map(function (r, i) {
+      var lab = String(r.label || "").toUpperCase();
+      var cls = lab === "VERIFIED" ? "ok" : lab === "NOT RUN" ? "notrun" : "";
+      return "<tr><td>" + (i + 1) + "</td><td>" + esc(r.claim) + '</td><td><span class="pill ' + cls + '">' + esc(lab) + "</span></td><td>" + esc(r.source) + '</td><td class="cmd">' + esc(r.command) + "</td><td>" + esc(r.result) + "</td></tr>";
+    }).join("") || '<tr><td colspan="6" class="muted">No claims yet.</td></tr>') + "</tbody>";
+
+  $("footer").textContent = "Run " + esc(S.runId || "—") + " · Mango is the system of record; this page and the ClickUp task are projections of that run · Counts only, no promises.";
+})();
+</script>

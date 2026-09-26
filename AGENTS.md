@@ -113,7 +113,7 @@ checkout are tolerated until every session is on a worktree; then `PROTECTED_BRA
 
 Skills live in `~/.claude/skills/` (global) and the guide. Relevant: `new-worktree`, `pr-retrospective`,
 `release-verify-local` / `release-stage-verify` / `release-queue` / `release-deploy-prod` (project layer: `docs/RELEASE_PIPELINE.md`),
-`initiate-team-review`, `deploy-database` (ask-first).
+`initiate-team-review`, `deploy-database` (ask-first). Project skill: `funnel-analysis` (`.claude/skills/funnel-analysis/SKILL.md`, contract in `docs/marketing/funnel/README.md`) — the Friday-review funnel step.
 
 ## Communication
 
