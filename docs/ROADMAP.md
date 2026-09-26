@@ -152,17 +152,23 @@ against the final apex rather than doing this twice.
 
 `status: blocked` · `owner: matthew` · `evidence: verified`
 
-The Retell public key and agent ID are unset on the VPS, so the widget mounts and then
-throws. Two console errors on every page load: *"Retell public key or agent ID not
-configured"* → *"Retell chat widget failed to load"*.
+The Retell public key and agent ID are unset on the VPS, so the widget cannot work.
+Until `69a2ea7` it was mounted on `/` and threw two console errors on every page load:
+*"Retell public key or agent ID not configured"* → *"Retell chat widget failed to load"*.
+Since `69a2ea7` **nothing mounts it** — `AgentSection`, `RetellChatWidget` and
+`RetellVoiceWidget` have no importers (see R-015), so those errors can no longer occur
+on any page and there is no visible "Talk to Alex" control.
 
-**Verify:** browser console on any page.
+**Verify:** `git grep -lE "AgentSection|RetellChatWidget|RetellVoiceWidget" -- src` returns
+only the three component files. If that ever lists a page or layout, the widget is mounted
+again: check that page's console.
 
-**Done when:** both keys are configured, rebuilt, and the widget connects.
+**Done when:** both keys are configured, rebuilt, the widget is mounted (R-015), and it connects.
 
-**Ship-independently option (`owner: agent`):** if the voice agent isn't coming back
-soon, stop *mounting* the widget when the keys are absent, so visitors don't get a
-broken control. That fix needs no secrets and can land before Matthew supplies keys.
+**Ship-independently option (`owner: agent`): resolved by `69a2ea7`.** The widget is
+unmounted, so visitors see no broken control. If R-015 re-mounts `AgentSection` before the
+keys exist, guard the mount on the keys being set at that point; until then a guard would be
+code for an unmounted component.
 
 ---
 
