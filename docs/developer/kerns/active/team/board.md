@@ -1,6 +1,6 @@
 # Team board — icodemybusiness-site — run started 2026-09-04 09:51 PDT
 
-_Owned this run by `cmo`._
+_Owned this run by `sdm`._ (adopted 09-26 06:15 PDT from the cmo run of 09-04→09-06; cmo is not live. M#/D# rows below are that run's last state, unverified since 09-06.)
 
 ## 0. Objectives
 
@@ -18,6 +18,7 @@ _Owned this run by `cmo`._
 ## Roster
 | name [ref] | session_id (uuid) | role | tier | worktree | status | since |
 |---|---|---|---|---|---|---|
+| sdm (pending `/rename sdm`; currently `icodemybusiness-site-2d` [5acf53]) | 2ffbbc1a-0ba1-4da2-8696-7015e2201631 | sdm | opus | .worktrees/team-sdm | active | 09-26 |
 | cmo [144b81] (pending `/rename`; currently `icodemybusiness-site-86`) | f9ec1669-ade1-4050-a37d-6b0989a1b017 | cmo | fable | .worktrees/team-cmo | active | 09-04 |
 | offer [a878a0] | 1c021960-799f-46f1-a2f7-88c22654d9ee | peer (owns homepage letter) | — | ../icmb-wt-offer | live, not on team | 09-04 |
 | email-followup [9c72de] | 999a964d-7db5-4e1d-9fd0-509f227b3ac1 | peer | — | shared checkout | live, not on team | 09-04 |
@@ -26,6 +27,9 @@ _Owned this run by `cmo`._
 ## Tasks
 | id | title | serves | owner | tier | worktree / branch | PR | done-predicate | state | last update | next action | human gate? |
 |---|---|---|---|---|---|---|---|---|---|---|---|
+| T1 | R-004 ship-independently: don't mount the Retell widget when `NEXT_PUBLIC_RETELL_PUBLIC_KEY` / agent id are unset (today `RetellChatWidget.tsx:18` console.errors on every page) | R-004 | queued | — | — | — | no widget + 0 Retell console errors with keys unset; mounts with keys set; test; gates green at head | queued | 09-26 06:15 | assign to first free dev-N; check M14 (business-intake, 09-04) never landed — VERIFIED: guard absent on origin/main 1cb0dd8 | merge |
+| T2 | R-010 verify: Clerk sign-ins reach `users` (status `verify` in ROADMAP) | R-010 | queued | — | — | — | a fresh sign-in on staging creates a `users` row (names/ids only, no PII in the report) | queued | 09-26 06:15 | needs a human sign-in → pair with Matthew | YES (his login) |
+| T3 | R-013 blog route — brief first (M4 never started) | R-013 | queued | — | — | — | one-page brief from `content/README.md` + tracker: first 4 posts, route + content model, sized for dev-N | queued | 09-26 06:15 | assign brief; route build is ask-first (new route) | YES (new route) |
 | M1 | Land the team protocol + cmo role card | directive | cmo | fable | team-cmo / agent/cmo/team-protocol | — | `.claude/team/{PROTOCOL.md,roles/*.md,board.template.md}` committed on the branch | review | 09-04 10:05 | Matthew reviews the cmo card; push + merge are his | YES (push/merge) |
 | M2 | Baseline the funnel numbers | R-011 | cmo | fable | team-cmo | — | `docs/marketing/funnel-baseline.md` with `{ref, tree, command, result}` per step from PostHog 206048 | **done** — 65 pageviews/30d, all staging; 1 lead, 1 book click, recap reached once ever | 09-04 11:05 | re-run after cutover (R-002) and after `ac20cfb` deploys | none |
 | M3 | Claim scan of live surfaces — audit at `docs/marketing/copy-trust-gap-audit.md`; C7/C8 sent to email-followup for story-intake | copy-principles §2 | cmo | fable | team-cmo | — | list of every number/duration/"every"/"guarantee" on `/`, `/consulting`, `/book`, `/free-tools` with source or `[CLAIM NEEDED]` | **done** | 09-04 12:05 | grep `src/content` + route files; coordinate with `offer` before touching the letter. Authoritative claims inventory is `docs/matthew-story-intake.md` on `agent/nurture/email-sequence` (email-followup) — groups C1–C6 cover landing.ts :67 :134 :145 :154 :155 :195 and academy :95 :229 :238; M3 appends to it, never a second list. Known-unverified already with `offer` (do not re-flag): `PATHS.fractional.commitment` "I hold very few of these at once", `PATHS.program.commitment` "a handful a year" — both agent-authored; second contradicts paper (2/month) | none (edits to the letter need `offer`) |
@@ -75,6 +79,7 @@ _Owned this run by `cmo`._
 | D2 | Is `cmo` a permanent role in the `/team` skill (add to `role ∈ …` in `~/.claude/skills/team/SKILL.md`) or a per-repo extension only? | global skill / repo-only | global — the skill's role list is the only place it is not yet named | this board, `roles/cmo.md` | 09-04 | cmo |
 
 ## Digest log
+- 09-26 06:15 — sdm (opus): adopted the board; seeded T1–T3 from ROADMAP `owner: agent` open rows (R-004 option, R-010 verify, R-013). No dev-N / qa-N live in this project (dev_roster: only connector-setup, funnel, this session). Laptop RAM CRIT (27.1 GB swap) → all gates VPS-routed. Objectives table still names PostHog EU 206048; memory says the site moves to US 629815 as of 09-26 — unverified, not edited.
 - 09-06 15:05 — AGENTS.md now carries the `Test-Change-Approved: <who, date>` trailer rule with pre-push enforcement (deploy; ENGINEERING_LOG 09-06) — D13's structural fix is landed. Laptop CRIT (17.9 GB swap): the screenshot watcher was killed by the OS and stays off until memory recovers; Matthew reports screenshots directly.
 - 09-06 14:55 — CORRECTION: Matthew approved the M29 test-expectation change in deploy's session before the merge; the gap was visibility, not permission. I stated "no OK" as fact on the board and to business-intake — wrong; fixed here. Deploy adopts the `Test-Change-Approved` trailer + pre-push enforcement. DEPLOYED_SHA corrected to 9d15b03. Note: my outbound peer messaging has failed 4× since my session ref changed; peers still reach me. Board is the record until it recovers.
 - 09-06 14:40 — business-intake, straight: no OK from Matthew on the M29 test-assertion change; it shipped on deploy's merge (D13, process incident — structural gate proposed). DEPLOYED_SHA marker stale after the manual recovery (D14). Both to deploy; D13 ratify/object to Matthew.
