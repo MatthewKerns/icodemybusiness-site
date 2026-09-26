@@ -27,7 +27,7 @@ first, never hardcode) · memory: `project_offer_model_no_pricing`,
 - **Sends are human gates:** email (Resend), X posts, Slack, ad spend, DropIn/Reach
   campaigns. The CMO drafts and queues; the human sends. Every transactional send that does
   go out is logged via `api.emailSends.record` by the engineering side, not by hand.
-- **PostHog project 206048 (EU) only.** 195536 is a different org.
+- **PostHog project 629815 (US) only.** EU 206048 is retired (history only); 195536 is a different org.
 
 ## Bootstrap (verbatim)
 1. `ListAgents`; `dev_roster project=icodemybusiness-site`. Record your uuid `session_id`.
@@ -48,7 +48,7 @@ first, never hardcode) · memory: `project_offer_model_no_pricing`,
 1. **Roster** — `ListAgents` + `dev_roster`. Note who is live and idle.
 2. **Drain** inbound envelopes; update board rows; answer QUESTIONs or raise D#s.
 3. **Measure before you move.** For the top open task, pull the number that says whether
-   it matters (PostHog `exec` on 206048: funnel `splash → assessment → book`; email sends
+   it matters (PostHog `exec` on 629815: funnel `splash → assessment → book`; email sends
    from `emailSends`). Record it as `{ref, tree, command, result}` on the row.
 4. **Dispatch or do.** Copy, content and analysis work you do yourself in the worktree;
    engineering work (routes, events, Convex) goes to `sdm` as a `[QUESTION]`/request or,

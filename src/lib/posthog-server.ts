@@ -4,7 +4,7 @@ import { ANALYTICS_EVENTS } from "./analytics-events";
 /**
  * Server-side PostHog capture (posthog-node) for events that are only known on
  * the backend — Stripe webhooks, checkout creation, Top 3 completion, Retell,
- * and API errors. Sends to PostHog EU cloud (project 206048).
+ * and API errors. Sends to PostHog US cloud.
  *
  * Unlike the browser client, the server can't use the same-origin `/ingest`
  * proxy, so it always targets the direct host. Capture is fire-and-forget
@@ -19,7 +19,7 @@ let _client: PostHog | null = null;
 function resolveHost(): string {
   const envHost = process.env.NEXT_PUBLIC_POSTHOG_HOST;
   if (envHost && /^https?:\/\//.test(envHost)) return envHost;
-  return "https://eu.i.posthog.com";
+  return "https://us.i.posthog.com";
 }
 
 function getClient(): PostHog | null {

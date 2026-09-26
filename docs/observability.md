@@ -1,12 +1,12 @@
 # Observability — icodemybusiness.com
 
 How the site is instrumented, what we measure, and where to look. Product
-analytics + error health live in **PostHog project 206048** (EU cloud); deep
+analytics + error health live in **PostHog project 629815** (US cloud, org iCodeMyBusiness; EU 206048 retired 2026-09-26); deep
 error debugging lives in **Sentry**. The two are complementary: PostHog answers
 "how is the business doing / how often are we erroring", Sentry answers "what
 exactly broke and where".
 
-- **Main dashboard:** [iCodeMyBusiness — Operations](https://eu.posthog.com/project/206048/dashboard/761841) (pinned, project 206048)
+- **Main dashboard:** not yet rebuilt in 629815 — [dashboards](https://us.posthog.com/project/629815/dashboard). The EU Operations dashboard (206048/761841) holds pre-2026-09-26 history.
 - **Runbook:** [RUNBOOK.md](./RUNBOOK.md)
 - **Event taxonomy (code):** [`src/lib/analytics-events.ts`](../src/lib/analytics-events.ts)
 
@@ -16,16 +16,16 @@ exactly broke and where".
 
 | Layer | File | Role |
 |-------|------|------|
-| Client init | `src/instrumentation-client.ts` → `src/lib/posthog.ts` | Boots posthog-js at startup. `capture_pageview:false` (manual), `capture_pageleave:true`, `capture_exceptions:true`. Sends directly to `https://eu.i.posthog.com`; only an absolute `NEXT_PUBLIC_POSTHOG_HOST` is honoured (`resolveClientHost`). |
+| Client init | `src/instrumentation-client.ts` → `src/lib/posthog.ts` | Boots posthog-js at startup. `capture_pageview:false` (manual), `capture_pageleave:true`, `capture_exceptions:true`. Sends directly to `https://us.i.posthog.com`; only an absolute `NEXT_PUBLIC_POSTHOG_HOST` is honoured (`resolveClientHost`). |
 | Pageviews + identify | `src/components/shared/PostHogProvider.tsx` | Manual `$pageview` on route change (Suspense-wrapped), `identify(user.id)` on Clerk sign-in (account id only, no email/name), `reset()` on sign-out. |
 | Client events | `src/lib/analytics.ts` | Typed `analytics.*` helpers; no-op when PostHog isn't loaded. |
-| Server events | `src/lib/posthog-server.ts` | posthog-node singleton. Direct EU host. `captureServerEvent`, `captureServerError`, `flushServerAnalytics`. |
+| Server events | `src/lib/posthog-server.ts` | posthog-node singleton. Direct US host. `captureServerEvent`, `captureServerError`, `flushServerAnalytics`. |
 | ~~Reverse proxy~~ | removed 2026-09-21 | The `/ingest/*` → PostHog rewrite existed to defeat ad/tracking blockers. A first-party tunnel for a third-party tracker reads as evasive to the ISP security products blocking this domain (docs/trust-pages.md), so it was deleted. Some events are now lost to blockers — accepted. |
 | Error pipe | `src/lib/api-error-handler.ts` | `errorResponse` → Sentry (all) + PostHog `api_error` (5xx only), auto-tagged with `route`. |
 
-`NEXT_PUBLIC_POSTHOG_KEY` **must be project 206048's client token** and
-`NEXT_PUBLIC_POSTHOG_HOST` must be an absolute EU URL
-(`https://eu.i.posthog.com`, also the default when unset). A US host or a different project's key sends data
+`NEXT_PUBLIC_POSTHOG_KEY` **must be project 629815's client token** and
+`NEXT_PUBLIC_POSTHOG_HOST` must be an absolute US URL
+(`https://us.i.posthog.com`, also the default when unset). An EU host or a different project's key sends data
 into the void — see RUNBOOK "Dashboard is flat / no data".
 
 ---

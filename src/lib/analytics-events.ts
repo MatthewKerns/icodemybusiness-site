@@ -4,7 +4,7 @@
  * Shared by the client (`src/lib/analytics.ts`) and server
  * (`src/lib/posthog-server.ts`) capture helpers so event names never drift
  * between the two. The tiers below mirror the operational dashboard in
- * PostHog project 206048 and the metric catalog in docs/observability.md.
+ * PostHog project 629815 (US) and the metric catalog in docs/observability.md.
  *
  *   Tier 1 (most important)  — leads & revenue: the business depends on these.
  *   Tier 2 (next most important) — activation & engagement that precede Tier 1.
