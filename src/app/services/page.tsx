@@ -1,27 +1,19 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { EmailCapture } from "@/components/shared/EmailCapture";
 
 export const metadata: Metadata = {
   title: "AI Development Services | iCodeMyBusiness",
   description:
-    "Full-stack development meets practical AI. Custom business tools, built and handed over so your team can run them.",
+    "A working system your team can run — and the hours back that it frees up.",
   openGraph: {
     title: "AI Development Services | iCodeMyBusiness",
     description:
-      "Full-stack development meets practical AI. Custom business tools, built and handed over so your team can run them.",
+      "A working system your team can run — and the hours back that it frees up.",
     type: "website",
   },
 };
-
-const TECH_STACK = [
-  { name: "Next.js + React", desc: "Production web applications" },
-  { name: "Convex", desc: "Real-time backend & database" },
-  { name: "Claude AI", desc: "Custom AI tools & automation" },
-  { name: "n8n / Zapier", desc: "Workflow automation" },
-  { name: "Stripe", desc: "Payments & billing" },
-  { name: "Vercel", desc: "Deployment & infrastructure" },
-];
 
 export default function OffersPage() {
   return (
@@ -37,49 +29,39 @@ export default function OffersPage() {
               Professional Engineering &middot; AI specialist
             </p>
             <h1 className="mt-4 text-h1 font-bold text-text-primary">
-              I build AI-powered business tools
+              A working system your team can run
             </h1>
             <p className="mt-4 text-lg leading-relaxed text-text-muted">
-              Full-stack development meets practical AI.
+              The capability of a senior engineering hire inside your business —
+              without the search, the seat, or the salary.
             </p>
             <p className="mt-4 text-lg leading-relaxed text-text-muted">
-              I ask a lot of questions to help pinpoint the root causes and
-              underlying problems holding your business back from its true
-              growth potential.
+              It starts by finding the one thing costing you the most.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <a
-                href="#how-i-work"
+              <Link
+                href="/assessment"
                 className="rounded-lg border border-border px-6 py-3 font-medium text-text-primary transition-colors hover:border-gold-dim hover:text-gold"
               >
-                How I work
-              </a>
+                Find the one thing to fix first
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* How I Work */}
-        <section id="how-i-work" className="py-12 md:py-20">
+        {/* What you end up with */}
+        <section id="what-you-end-up-with" className="py-12 md:py-20">
           <div className="mx-auto max-w-4xl">
             <h2 className="text-center text-h2 font-bold text-text-primary">
-              How I work
+              What you end up with
             </h2>
-            <p className="mt-2 text-center text-text-muted">
-              Senior-quality work. No fluff. You pay for output, not overhead.
-            </p>
 
             <div className="mt-10 space-y-6">
               <div className="rounded-xl border border-border bg-bg-secondary p-6">
-                <h3 className="text-h3 font-bold text-text-primary">
-                  Senior engineering, without the agency price tag
-                </h3>
-                <p className="mt-3 leading-relaxed text-text-muted">
-                  Most agencies staff your project with junior devs and bill
-                  big-agency rates. I work differently: you get senior,
-                  professional engineering end to end. I write the architecture,
-                  use AI to build faster, and review every line myself — so you
-                  get senior-quality work without the agency overhead or the
-                  junior-dev guesswork.
+                <p className="leading-relaxed text-text-muted">
+                  Most consultants leave you with a slide deck and an invoice.
+                  You end up with a working system your team can run — and the
+                  hours back that it frees up.
                 </p>
               </div>
 
@@ -87,21 +69,21 @@ export default function OffersPage() {
                 {[
                   {
                     number: "01",
-                    title: "Discovery & audit",
+                    title: "You know the one thing to fix first",
                     description:
-                      "I research your business, map your workflows, and identify the highest-impact automation opportunities before we write a line of code.",
+                      "Five questions in your own words find it, and you get a write-up.",
                   },
                   {
                     number: "02",
-                    title: "Build & iterate",
+                    title: "You see what changed, every week",
                     description:
-                      "Rapid development in weekly sprints. You see working software every week — not wireframes, not mockups, real tools you can use.",
+                      "Weekly updates come as a short video — a screen share run-through of what changed in the software that week.",
                   },
                   {
                     number: "03",
-                    title: "Launch & support",
+                    title: "You own it outright",
                     description:
-                      "Deployment, training, and 30 days of follow-up support included. I make sure the system works in the real world, not just in demo.",
+                      "The system, and a plain-language explanation of how it runs. Nothing about it is designed to keep you dependent on me.",
                   },
                 ].map((step) => (
                   <div
@@ -127,31 +109,9 @@ export default function OffersPage() {
           </div>
         </section>
 
-        {/* Tech Stack */}
-        <section className="py-12 md:py-20">
-          <div className="mx-auto max-w-4xl">
-            <h2 className="text-center text-h2 font-bold text-text-primary">
-              Tech stack
-            </h2>
-            <p className="mt-2 text-center text-text-muted">
-              Modern tools, proven in production
-            </p>
-
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {TECH_STACK.map((tech) => (
-                <div
-                  key={tech.name}
-                  className="rounded-xl border border-border bg-bg-secondary p-4 transition-colors hover:border-gold-dim"
-                >
-                  <p className="font-accent text-sm font-semibold text-text-primary">
-                    {tech.name}
-                  </p>
-                  <p className="mt-1 text-xs text-text-dim">{tech.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <p className="pb-12 text-center text-sm text-text-dim">
+          Built with Next.js, Convex and Claude.
+        </p>
 
         {/* Email Capture */}
         <section className="py-12 md:py-20">
