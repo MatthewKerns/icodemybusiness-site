@@ -18,7 +18,8 @@ _Owned this run by `sdm`._ (adopted 09-26 06:15 PDT from the cmo run of 09-04→
 ## Roster
 | name [ref] | session_id (uuid) | role | tier | worktree | status | since |
 |---|---|---|---|---|---|---|
-| sdm (pending `/rename sdm`; currently `icodemybusiness-site-2d` [5acf53]) | 2ffbbc1a-0ba1-4da2-8696-7015e2201631 | sdm | opus | .worktrees/team-sdm | active | 09-26 |
+| sdm [5acf53] | 2ffbbc1a-0ba1-4da2-8696-7015e2201631 | sdm | opus | .worktrees/team-sdm | active | 09-26 |
+| dev-1 [876231] (name collides with dev-1 [e2bb1a], another project — always send with ref) | a90fd45c-9bf3-41a3-a733-affd4ca5d8a9 | sde | sonnet | .worktrees/dev-1-retell | active | 09-26 |
 | cmo [144b81] (pending `/rename`; currently `icodemybusiness-site-86`) | f9ec1669-ade1-4050-a37d-6b0989a1b017 | cmo | fable | .worktrees/team-cmo | active | 09-04 |
 | offer [a878a0] | 1c021960-799f-46f1-a2f7-88c22654d9ee | peer (owns homepage letter) | — | ../icmb-wt-offer | live, not on team | 09-04 |
 | email-followup [9c72de] | 999a964d-7db5-4e1d-9fd0-509f227b3ac1 | peer | — | shared checkout | live, not on team | 09-04 |
@@ -27,7 +28,7 @@ _Owned this run by `sdm`._ (adopted 09-26 06:15 PDT from the cmo run of 09-04→
 ## Tasks
 | id | title | serves | owner | tier | worktree / branch | PR | done-predicate | state | last update | next action | human gate? |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| T1 | R-004 ship-independently: don't mount the Retell widget when `NEXT_PUBLIC_RETELL_PUBLIC_KEY` / agent id are unset (today `RetellChatWidget.tsx:18` console.errors on every page) | R-004 | queued | — | — | — | no widget + 0 Retell console errors with keys unset; mounts with keys set; test; gates green at head | queued | 09-26 06:15 | assign to first free dev-N; check M14 (business-intake, 09-04) never landed — VERIFIED: guard absent on origin/main 1cb0dd8 | merge |
+| T1 | R-004 ship-independently: don't mount the Retell widget when `NEXT_PUBLIC_RETELL_PUBLIC_KEY` / agent id are unset (today `RetellChatWidget.tsx:18` console.errors on every page) | R-004 | dev-1 | sonnet | .worktrees/dev-1-retell / agent/dev-1/retell-guard | — | no widget + 0 Retell console errors with keys unset; mounts with keys set; test; gates green at head | assigned | 09-26 06:18 | dev-1 ACKs with plan; check M14 (business-intake, 09-04) never landed — VERIFIED: guard absent on origin/main 1cb0dd8 | merge |
 | T2 | R-010 verify: Clerk sign-ins reach `users` (status `verify` in ROADMAP) | R-010 | queued | — | — | — | a fresh sign-in on staging creates a `users` row (names/ids only, no PII in the report) | queued | 09-26 06:15 | needs a human sign-in → pair with Matthew | YES (his login) |
 | T3 | R-013 blog route — brief first (M4 never started) | R-013 | queued | — | — | — | one-page brief from `content/README.md` + tracker: first 4 posts, route + content model, sized for dev-N | queued | 09-26 06:15 | assign brief; route build is ask-first (new route) | YES (new route) |
 | M1 | Land the team protocol + cmo role card | directive | cmo | fable | team-cmo / agent/cmo/team-protocol | — | `.claude/team/{PROTOCOL.md,roles/*.md,board.template.md}` committed on the branch | review | 09-04 10:05 | Matthew reviews the cmo card; push + merge are his | YES (push/merge) |
@@ -79,6 +80,7 @@ _Owned this run by `sdm`._ (adopted 09-26 06:15 PDT from the cmo run of 09-04→
 | D2 | Is `cmo` a permanent role in the `/team` skill (add to `role ∈ …` in `~/.claude/skills/team/SKILL.md`) or a per-repo extension only? | global skill / repo-only | global — the skill's role list is the only place it is not yet named | this board, `roles/cmo.md` | 09-04 | cmo |
 
 ## Digest log
+- 09-26 06:18 — sdm: dev-1 [876231] (sonnet) joined; ASSIGN T1 sent (msg 93f0ad6a).
 - 09-26 06:15 — sdm (opus): adopted the board; seeded T1–T3 from ROADMAP `owner: agent` open rows (R-004 option, R-010 verify, R-013). No dev-N / qa-N live in this project (dev_roster: only connector-setup, funnel, this session). Laptop RAM CRIT (27.1 GB swap) → all gates VPS-routed. Objectives table still names PostHog EU 206048; memory says the site moves to US 629815 as of 09-26 — unverified, not edited.
 - 09-06 15:05 — AGENTS.md now carries the `Test-Change-Approved: <who, date>` trailer rule with pre-push enforcement (deploy; ENGINEERING_LOG 09-06) — D13's structural fix is landed. Laptop CRIT (17.9 GB swap): the screenshot watcher was killed by the OS and stays off until memory recovers; Matthew reports screenshots directly.
 - 09-06 14:55 — CORRECTION: Matthew approved the M29 test-expectation change in deploy's session before the merge; the gap was visibility, not permission. I stated "no OK" as fact on the board and to business-intake — wrong; fixed here. Deploy adopts the `Test-Change-Approved` trailer + pre-push enforcement. DEPLOYED_SHA corrected to 9d15b03. Note: my outbound peer messaging has failed 4× since my session ref changed; peers still reach me. Board is the record until it recovers.
