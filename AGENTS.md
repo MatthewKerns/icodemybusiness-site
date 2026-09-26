@@ -9,6 +9,10 @@ what applies everywhere. Generic engineering standards (naming, TDD, refactoring
 are NOT restated here — consult `~/workspace/software-development-best-practices-guide`
 (`99-reference/*.md` checklists, `04-quality-through-testing/`, `07-agentic-coding/`).
 
+**System map:** this repo is the *Frontend* lane of the ICMB Funnel OS —
+[`docs/agency/icmb-funnel-os.md`](https://github.com/MatthewKerns/mango-income-tool/blob/main/docs/agency/icmb-funnel-os.md)
+in `mango-income-tool`. Where this file and the map disagree, the map wins.
+
 ## On Startup
 
 - Load this file (via `CLAUDE.md` → `@AGENTS.md`) — always.
@@ -108,6 +112,9 @@ checkout are tolerated until every session is on a worktree; then `PROTECTED_BRA
 | `convex/` | schema/function rules, Convex-before-app ordering, Convex env, `convex-test` |
 | `src/app/api/` | error handling, visitor-safe messages, email logging, secrets |
 | `scripts/` | deploy ownership and the deploy script contract |
+| `mango-income-tool` (repo) | Brain lane: system of record, KPIs, scheduler — its own `AGENTS.md` |
+| `icmb-comms` (repo) | Comms lane: internal vs external comms — its own `AGENTS.md` |
+| `icmb-skool` (repo) | Skool lane: community and academy — its own `AGENTS.md` |
 
 ## Skills Index
 
