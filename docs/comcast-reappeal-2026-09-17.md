@@ -86,3 +86,62 @@ on the domain at the time, and any of them could explain a categoryless "safety 
    blockers) and carried visitor email and name, undisclosed in `/privacy`. Fix: D2 (02599ff; **not yet deployed**).
 
 Once deployed and verified from the VPS, cite these with the live before/after measurements in the follow-up call or any new report.
+
+---
+
+## Update 2026-09-30 — the engine, the subdomains, and the follow-up call
+
+**Correction: Cox and Comcast are one engine.** The block page `safebrowse.io` is registered to
+Comcast Corporation (`whois safebrowse.io`) and is one multi-brand page (Xfinity, Cox, Sky "Wifi
+Sicuro"). Cox customers see Comcast's verdict, so ticket IH270482834 is the right channel for both.
+The "Cox is a separate engine" line above was wrong.
+
+**The block is by name, not by host.** `clerk.icodemybusiness.com` is served by Clerk on Cloudflare
+(`frontend-api.clerk.services`), not by our VPS, and is blocked too (verified from a Cox connection:
+http → 302 to `safebrowse.io/warn.html`, https → TLS handshake refused). From the VPS every host
+returns 200.
+
+**The 09-20 findings are fixed and live** (verified 2026-09-30 from the VPS, deployed sha `5079f53`):
+`/downloads/` → 404 (D1, 73beed3), `staging.` → 404 (D2, 02599ff), `/ingest/*` → 404 (D2).
+
+**New finding — third-party brands on our subdomains.** Certificate-transparency logs
+(`crt.sh`, `%.icodemybusiness.com`) list 11 hostnames. On 2026-09-30:
+
+| Host | State |
+|---|---|
+| `cultivateelite.` | live — another business's site (Cultivate Elite Basketball) |
+| `ideabrandcoach.` | live — another brand (IDEA Brand Coach), sign-in page |
+| `mcf-tts.` | **dangling** — A record → 44.223.102.94, a dead AWS EC2 IP (takeover risk) |
+| `tiktok.` | no DNS; carried Google's "Deceptive pages" verdict in May 2026 |
+| `mango.`, `demos.`, `engine-api.`, `www.`, `staging.`, `clerk.` | ours |
+
+A domain created 2025-10-20 whose subdomains carry other brands' names (TikTok, IDEA Brand Coach,
+Cultivate Elite) and sign-in pages matches the brand-impersonation pattern reputation engines score
+on. **Inferred, not confirmed** — Comcast has never named the URL or category.
+
+**Remediation (Matthew decided 2026-09-30: remove them entirely):** delete the `mcf-tts`,
+`cultivateelite` and `ideabrandcoach` records at Namecheap (DNS: `registrar-servers.com`), by
+hostname — `mango.` and `demos.` share the IP 54.243.53.44 and must stay.
+
+### Call script — Customer Security Assurance, 888-565-4329, ticket IH270482834
+
+1. "I'm the owner of icodemybusiness.com, ticket IH270482834. The first review was denied on
+   **15 September** without a category or URL. I've made the changes below and I'm asking for a
+   re-scan, and for the specific URL and category if anything is still flagged."
+2. Changes, with dates:
+   - Privacy, Terms, About pages, robots.txt and sitemap live since 21 September.
+   - Downloadable script archives removed from the site (tools now on GitHub).
+   - Staging copy of the site taken down; analytics no longer proxied through the domain.
+   - Old and third-party subdomains removed on 30 September (`mcf-tts`, `cultivateelite`,
+     `ideabrandcoach`; `tiktok` earlier).
+   - Google Safe Browsing reports no unsafe content for the domain.
+3. "My connection is on **Cox**, and I see the same Advanced Security page at safebrowse.io. Does
+   this review cover Cox customers too, or do I need to file with Cox as well?"
+4. Ask for: the category, the data source, the URL that was evaluated, and a turnaround date. Note
+   the rep's name and any new ticket number here.
+
+### Watching for the lift
+
+The only vantage that can see the block is a Cox or Comcast connection. From the laptop:
+`curl -s -o /dev/null -w '%{redirect_url}\n' http://icodemybusiness.com/` — a `safebrowse.io` URL
+means still blocked; empty means lifted.
