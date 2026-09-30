@@ -96,7 +96,7 @@ Comcast Corporation (`whois safebrowse.io`) and is one multi-brand page (Xfinity
 Sicuro"). Cox customers see Comcast's verdict, so ticket IH270482834 is the right channel for both.
 The "Cox is a separate engine" line above was wrong.
 
-**The block is by name, not by host.** `clerk.icodemybusiness.com` is served by Clerk on Cloudflare
+**The block is per hostname** (corrected 22:25 UTC the same day — see below). `clerk.icodemybusiness.com` is served by Clerk on Cloudflare
 (`frontend-api.clerk.services`), not by our VPS, and is blocked too (verified from a Cox connection:
 http → 302 to `safebrowse.io/warn.html`, https → TLS handshake refused). From the VPS every host
 returns 200.
@@ -145,3 +145,15 @@ hostname — `mango.` and `demos.` share the IP 54.243.53.44 and must stay.
 The only vantage that can see the block is a Cox or Comcast connection. From the laptop:
 `curl -s -o /dev/null -w '%{redirect_url}\n' http://icodemybusiness.com/` — a `safebrowse.io` URL
 means still blocked; empty means lifted.
+
+### Correction 2026-09-30 22:25 UTC — the apex is unblocked; the block is per hostname
+
+Re-checked from the Cox connection: `https://icodemybusiness.com/` and `/book` → **200**, and plain
+http now redirects to our own https (not safebrowse.io) — **the apex has been cleared**. Still
+blocked: `clerk.icodemybusiness.com` (sign-in, Clerk on Cloudflare) and `mango.icodemybusiness.com`.
+So verdicts are per hostname, not per domain; the call should ask for `clerk.` and `mango.` by name.
+
+Visitor impact while `clerk.` stays blocked, on Cox/Comcast only: public pages load; sign-in and any
+returning visitor with an expired Clerk session (the middleware handshake redirects to `clerk.`) hit
+the block page. Code-side option (ask-first: auth/middleware change): serve Clerk's frontend API
+through the apex with Clerk's proxy feature, so no visitor ever needs `clerk.` directly.
