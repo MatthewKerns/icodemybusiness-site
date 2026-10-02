@@ -1,6 +1,6 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import type { NextFetchEvent, NextRequest } from "next/server";
 import { isWebhookRateLimited } from "@/lib/webhook-rate-limit";
 import { applyAttribution } from "@/lib/attribution-middleware";
 import { isOwnerEmail, isOwnerUserId } from "@/lib/owner";
@@ -8,6 +8,7 @@ import { isOwnerByApiLookup } from "@/lib/owner-lookup";
 import { publicOrigin, publicUrl } from "@/lib/public-url";
 import { isNavigationRequest, describeRequestKind } from "@/lib/navigation-kind";
 import { isStagingHost, stagingNotFound } from "@/lib/staging-host";
+import { clerkProxyTarget, isClerkProxyPath } from "@/lib/clerk-proxy";
 
 /**
  * A browser navigation gets the /forbidden page; an API/fetch caller keeps the
@@ -35,7 +36,7 @@ function forbid(request: NextRequest) {
   );
 }
 
-export default clerkMiddleware(async (auth, request: NextRequest) => {
+const clerkHandler = clerkMiddleware(async (auth, request: NextRequest) => {
   // The staging host answers nothing but a bare 404 — see src/lib/staging-host.ts
   // for why it can't be removed in Traefik instead. First, before any other
   // work, so the duplicate host never renders the site. (The matcher below skips
@@ -86,9 +87,25 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
   return applyAttribution(request, response);
 });
 
+export default function middleware(request: NextRequest, event: NextFetchEvent) {
+  // Clerk's Frontend API through the apex (src/lib/clerk-proxy.ts). Before
+  // clerkMiddleware, so its session handshake never runs on a proxied request.
+  if (isClerkProxyPath(request.nextUrl.pathname)) {
+    const target = clerkProxyTarget(request, request.headers, process.env.CLERK_SECRET_KEY);
+    if (!target) {
+      console.error("[clerk-proxy] CLERK_SECRET_KEY not set — refusing to proxy");
+      return NextResponse.json({ error: "Auth proxy not configured" }, { status: 503 });
+    }
+    return NextResponse.rewrite(target.url, { request: { headers: target.headers } });
+  }
+  return clerkHandler(request, event);
+}
+
 export const config = {
   matcher: [
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     "/(api|trpc)(.*)",
+    // The proxied Clerk script ends in .js, which the first pattern skips.
+    "/__clerk/(.*)",
   ],
 };
