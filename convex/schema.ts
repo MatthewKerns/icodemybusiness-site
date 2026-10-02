@@ -51,6 +51,45 @@ export default defineSchema(
       .index("by_to", ["to"])
       .index("by_createdAt", ["createdAt"]),
 
+    // APPEND-ONLY in spirit: `text` is never rewritten once stored.
+    //
+    // Matthew's story, accumulated in fragments. Story material arrives while
+    // you are doing something else — a memory, a number, a phrase — not in a
+    // sitting, so this is a place to drop one and move on.
+    //
+    // Fragments are routed to the questions in src/content/story-questions.ts.
+    // Routing is METADATA: it says which question a fragment speaks to, and it
+    // never edits, merges or summarises what he wrote. That separation is the
+    // whole point — copy-principles §2 reserves claims about the business to
+    // Matthew, and an agent that rewrote these into tidy prose would be
+    // authoring his backstory, which is the 2026-09-02 failure with better
+    // tooling.
+    storyFragments: defineTable({
+      /** Exactly what he typed. Never altered by any code path. */
+      text: v.string(),
+      /** Question ids this fragment answers, e.g. ["A3","B1"]. May be empty. */
+      questionIds: v.array(v.string()),
+      /** Who decided the routing. "auto" is a proposal he can correct. */
+      routingSource: v.union(
+        v.literal("auto"),
+        v.literal("manual"),
+        v.literal("seed")
+      ),
+      /** True between insert and the classifier answering. */
+      routingPending: v.boolean(),
+      /** Set when the classifier failed, so the UI can say so honestly. */
+      routingError: v.optional(v.string()),
+      /** Where it came from: "admin" | "conversation" | "seed". */
+      source: v.optional(v.string()),
+      /** Provenance for anything not typed directly by Matthew. */
+      note: v.optional(v.string()),
+      /** Soft delete — nothing he wrote is ever hard-deleted by the app. */
+      archivedAt: v.optional(v.number()),
+      createdAt: v.number(),
+    })
+      .index("by_createdAt", ["createdAt"])
+      .index("by_routingPending", ["routingPending"]),
+
     // APPEND-ONLY
     // Delivery/engagement callbacks from Resend (signed webhook -> convex/http.ts
     // -> emailEvents.record). Deliberately NOT folded into `emailSends`: that

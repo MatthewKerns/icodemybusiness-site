@@ -13,6 +13,7 @@ const ADMIN_LINKS = [
   { href: "/admin/conversations", label: "Conversations" },
   { href: "/admin/events", label: "Events" },
   { href: "/admin/funnel", label: "Funnel" },
+  { href: "/admin/story", label: "Story" },
   { href: "/admin/x", label: "X Posts" },
 ];
 
