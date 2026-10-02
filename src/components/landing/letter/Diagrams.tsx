@@ -63,10 +63,16 @@ function Figure({
 /**
  * Beat 1 — the problem, as a month of weeks against a 48-hour threshold.
  *
- * Matthew's shape: weeks run 50-60 hours, and growth work doesn't begin until
+ * Matthew's shape: weeks run 55-70 hours, and growth work doesn't begin until
  * hour 48 in any of them. So the bar is mostly grind and the gold slice at the
  * end is whatever was left — the visual argument is that the valuable work is
  * not squeezed, it is *last in the queue*.
+ *
+ * The totals and the threshold are Matthew's to set and he set them separately:
+ * longer weeks, same hour 48. That combination is deliberate and it does change
+ * the picture — a 66-hour week now shows 18 gold hours where a 58-hour week
+ * shows 10, so the gold is roughly double what it was. The argument survives
+ * because the gold still arrives LAST; it is a claim about order, not scarcity.
  *
  * Colour does the arguing: three greys for the three time-sinks, gold only for
  * growth. Gold is the brand's premium colour and there is almost none of it on
@@ -77,7 +83,7 @@ function Figure({
  * not a measurement.
  */
 export function WeekDiagram() {
-  const MAX_HOURS = 60;
+  const MAX_HOURS = 72;
   const GROWTH_STARTS = 48;
   const X0 = 104;
   const X1 = 624;
@@ -91,10 +97,10 @@ export function WeekDiagram() {
   ];
   // Total hours per week. Everything past 48 is growth.
   const WEEKS = [
-    { name: "Week 1", total: 52 },
-    { name: "Week 2", total: 58 },
-    { name: "Week 3", total: 50 },
-    { name: "Week 4", total: 56 },
+    { name: "Week 1", total: 58 },
+    { name: "Week 2", total: 66 },
+    { name: "Week 3", total: 55 },
+    { name: "Week 4", total: 62 },
   ];
 
   const rowY = (i: number) => 74 + i * 46;
@@ -105,7 +111,7 @@ export function WeekDiagram() {
 
   return (
     <Figure
-      caption={`Illustrative, not measured. Four weeks at 50-60 hours each — ${monthTotal} hours in the month, of which ${growthTotal} went to growing the business. The other ${monthTotal - growthTotal} went to the same three things every week.`}
+      caption={`Illustrative, not measured. Four weeks at 55-66 hours each — ${monthTotal} hours in the month, of which ${growthTotal} went to growing the business. The other ${monthTotal - growthTotal} went to the same three things every week.`}
       legend={[
         ...SINKS.map((s) => ({ label: s.label, fill: s.fill })),
         { label: "Growing the business", fill: GOLD },
@@ -119,7 +125,7 @@ export function WeekDiagram() {
       >
         <title id="week-t">A month of weeks against the hour that growth starts</title>
         <desc id="week-d">
-          {`Four stacked bars, one per week, each 50 to 60 hours long. In every week the first 48 hours go to repeating the same work, chasing information and fixing broken handoffs. Only the hours after 48 go to growing the business: ${WEEKS.map((w) => `${w.name} ${w.total - GROWTH_STARTS}`).join(", ")}. Across the month that is ${growthTotal} hours out of ${monthTotal}.`}
+          {`Four stacked bars, one per week, each 55 to 66 hours long. In every week the first 48 hours go to repeating the same work, chasing information and fixing broken handoffs. Only the hours after 48 go to growing the business: ${WEEKS.map((w) => `${w.name} ${w.total - GROWTH_STARTS}`).join(", ")}. Across the month that is ${growthTotal} hours out of ${monthTotal}.`}
         </desc>
 
         <text x="30" y="28" fill={TEXT} fontSize="24" fontWeight="600">
@@ -175,7 +181,7 @@ export function WeekDiagram() {
 
         {/* Hour scale */}
         <line x1={X0} y1={rowY(3) + BAR_H + 10} x2={X1} y2={rowY(3) + BAR_H + 10} stroke={LINE} strokeWidth="1" />
-        {[0, 12, 24, 36, 48, 60].map((h) => (
+        {[0, 12, 24, 36, 48, 60, 72].map((h) => (
           <g key={h}>
             <line
               x1={X0 + h * perHour} y1={rowY(3) + BAR_H + 10}
