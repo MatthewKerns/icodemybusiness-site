@@ -1,7 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { validateEmail } from "./lib/validators";
-import { requireOwner } from "./lib/auth";
+import { requireOwner, requireRole } from "./lib/auth";
 
 /**
  * Record the outcome of a transactional send. Called by the Next.js email
@@ -46,10 +46,17 @@ export const record = mutation({
   },
 });
 
-/** Most recent sends, newest first (admin/debug use). */
+/**
+ * Most recent sends, newest first.
+ *
+ * Admin-gated. This was a public query until 2026-09-04, which meant anyone
+ * holding the Convex deployment URL could enumerate every address the site had
+ * ever emailed.
+ */
 export const listRecent = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
+    await requireRole(ctx, "admin");
     return await ctx.db
       .query("emailSends")
       .withIndex("by_createdAt")
@@ -58,10 +65,11 @@ export const listRecent = query({
   },
 });
 
-/** Sends to one address, newest first. */
+/** Sends to one address, newest first. Admin-gated — see `listRecent`. */
 export const listForEmail = query({
   args: { email: v.string() },
   handler: async (ctx, args) => {
+    await requireRole(ctx, "admin");
     const to = validateEmail(args.email);
     return await ctx.db
       .query("emailSends")

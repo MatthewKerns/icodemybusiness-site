@@ -220,6 +220,66 @@ export const finalizeAssessment = internalAction({
       pathWhat: path.what,
       bookingUrl: bookingUrlFor(doc.sessionId, doc.email, doc.name),
       degraded: !result,
+      ...visitorOwnWords(doc.answers),
     });
   },
 });
+
+/**
+ * Pull the visitor's own words out of the stored answers for the report email.
+ *
+ * These are captured on every turn and were never sent back to them, which
+ * made "a mirror held up to what they said" a mirror with no reflection.
+ * Quotes stay verbatim — no paraphrase, no tidying; the email collapses
+ * whitespace at render only.
+ *
+ * Nothing here invents a figure: `costLabel` appears only when the visitor
+ * actually gave one, matching the assessment's own rule that a missing number
+ * is marked TBD rather than guessed.
+ */
+function visitorOwnWords(
+  answers: {
+    key: string;
+    summary: string;
+    quotes: string[];
+    numbers?: unknown;
+  }[]
+): { quotes?: string[]; costLabel?: string; correction?: string } {
+  const MAX_QUOTES = 6;
+  const quotes: string[] = [];
+  for (const a of answers) {
+    if (a.key === "correction") continue;
+    for (const q of a.quotes ?? []) {
+      if (quotes.length >= MAX_QUOTES) break;
+      if (typeof q === "string" && q.trim()) quotes.push(q);
+    }
+  }
+
+  const cost = answers.find((a) => a.key === "cost");
+  const costLabel = formatCost(cost?.numbers);
+
+  const correction = answers.find((a) => a.key === "correction")?.summary;
+
+  return {
+    ...(quotes.length ? { quotes } : {}),
+    ...(costLabel ? { costLabel } : {}),
+    ...(correction ? { correction } : {}),
+  };
+}
+
+/** Render a stored cost figure, or nothing. Never fabricates one. */
+function formatCost(numbers: unknown): string | undefined {
+  if (!numbers || typeof numbers !== "object") return undefined;
+  const n = numbers as { amount?: unknown; unit?: unknown };
+  if (typeof n.amount !== "number" || !Number.isFinite(n.amount)) return undefined;
+
+  const amount = n.amount.toLocaleString("en-US");
+  const unit = typeof n.unit === "string" ? n.unit : "";
+  if (unit.includes("usd")) {
+    return unit.includes("month") ? `$${amount} / month` : `$${amount}`;
+  }
+  if (unit.includes("hour")) {
+    return unit.includes("week") ? `${amount} hours / week` : `${amount} hours`;
+  }
+  return `${amount}`;
+}

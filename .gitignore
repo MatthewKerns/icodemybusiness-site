@@ -44,6 +44,7 @@ convex/_generated/ai/
 !.claude/skills/funnel-analysis/
 !.claude/skills/check-in/
 !.claude/skills/dig/
+!.claude/skills/email-voice/
 
 # Testing
 coverage/
