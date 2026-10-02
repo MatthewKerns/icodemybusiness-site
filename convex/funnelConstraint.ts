@@ -1,4 +1,4 @@
-import { query } from "./_generated/server";
+import { query, internalQuery, type QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { requireOwner } from "./lib/auth";
 import { analyzeFunnel, type StepCount, type StepKey } from "./lib/funnelConstraint";
@@ -41,67 +41,82 @@ function stageOf(props: unknown): number | undefined {
 }
 
 /**
- * Owner-only: the funnel over a window, with the single constraint named and the
- * numbers that name it. Authorised from the verified Clerk identity (the owner
- * allowlist in the Convex env), never from `users.role`.
+ * The funnel over a window, with the single constraint named and the numbers
+ * that name it. No auth here — callers gate it (`adminFunnelConstraint` for the
+ * owner, `internalFunnelConstraint` for server-side jobs).
+ */
+async function computeFunnelConstraint(ctx: QueryCtx, requestedWindowDays: number | undefined) {
+  const windowDays = Math.min(365, Math.max(1, Math.floor(requestedWindowDays ?? 30)));
+  const until = Date.now();
+  const since = until - windowDays * DAY_MS;
+
+  const events = await ctx.db
+    .query("visitorEvents")
+    .withIndex("by_timestamp", (q) => q.gte("timestamp", since))
+    .take(MAX_ROWS);
+  const pageViews = await ctx.db
+    .query("pageViews")
+    .withIndex("by_timestamp", (q) => q.gte("timestamp", since))
+    .take(MAX_ROWS);
+
+  const sessions = new Map<StepKey, Set<string>>();
+  for (const d of STEP_DEFS) sessions.set(d.key, new Set());
+  for (const e of events) {
+    const who = e.sessionId ?? e.clerkUserId ?? `anon:${e._id}`;
+    for (const d of STEP_DEFS) {
+      if (d.event !== e.name) continue;
+      if (d.stage !== undefined && stageOf(e.props) !== d.stage) continue;
+      sessions.get(d.key)!.add(who);
+    }
+  }
+
+  const firstSeen = new Map<string, number | undefined>();
+  for (const d of STEP_DEFS) {
+    if (d.event === null || firstSeen.has(d.event)) continue;
+    const first = await ctx.db
+      .query("visitorEvents")
+      .withIndex("by_name", (q) => q.eq("name", d.event as string))
+      .order("asc")
+      .first();
+    firstSeen.set(d.event, first?.timestamp);
+  }
+
+  const steps: StepCount[] = STEP_DEFS.map((d) => ({
+    key: d.key,
+    label: d.label,
+    n: d.event === null ? pageViews.length : sessions.get(d.key)!.size,
+    measured: d.measured,
+    firstSeenAt: d.event === null ? undefined : firstSeen.get(d.event),
+    source: d.source,
+  }));
+
+  const report = analyzeFunnel({ windowDays, since, until, steps });
+  return {
+    ...report,
+    sampled: {
+      events: events.length,
+      pageViews: pageViews.length,
+      truncated: events.length === MAX_ROWS || pageViews.length === MAX_ROWS,
+    },
+  };
+}
+
+/**
+ * Owner-only. Authorised from the verified Clerk identity (the owner allowlist
+ * in the Convex env), never from `users.role`.
  */
 export const adminFunnelConstraint = query({
   args: { windowDays: v.optional(v.number()) },
   handler: async (ctx, args) => {
     await requireOwner(ctx);
+    return await computeFunnelConstraint(ctx, args.windowDays);
+  },
+});
 
-    const windowDays = Math.min(365, Math.max(1, Math.floor(args.windowDays ?? 30)));
-    const until = Date.now();
-    const since = until - windowDays * DAY_MS;
-
-    const events = await ctx.db
-      .query("visitorEvents")
-      .withIndex("by_timestamp", (q) => q.gte("timestamp", since))
-      .take(MAX_ROWS);
-    const pageViews = await ctx.db
-      .query("pageViews")
-      .withIndex("by_timestamp", (q) => q.gte("timestamp", since))
-      .take(MAX_ROWS);
-
-    const sessions = new Map<StepKey, Set<string>>();
-    for (const d of STEP_DEFS) sessions.set(d.key, new Set());
-    for (const e of events) {
-      const who = e.sessionId ?? e.clerkUserId ?? `anon:${e._id}`;
-      for (const d of STEP_DEFS) {
-        if (d.event !== e.name) continue;
-        if (d.stage !== undefined && stageOf(e.props) !== d.stage) continue;
-        sessions.get(d.key)!.add(who);
-      }
-    }
-
-    const firstSeen = new Map<string, number | undefined>();
-    for (const d of STEP_DEFS) {
-      if (d.event === null || firstSeen.has(d.event)) continue;
-      const first = await ctx.db
-        .query("visitorEvents")
-        .withIndex("by_name", (q) => q.eq("name", d.event as string))
-        .order("asc")
-        .first();
-      firstSeen.set(d.event, first?.timestamp);
-    }
-
-    const steps: StepCount[] = STEP_DEFS.map((d) => ({
-      key: d.key,
-      label: d.label,
-      n: d.event === null ? pageViews.length : sessions.get(d.key)!.size,
-      measured: d.measured,
-      firstSeenAt: d.event === null ? undefined : firstSeen.get(d.event),
-      source: d.source,
-    }));
-
-    const report = analyzeFunnel({ windowDays, since, until, steps });
-    return {
-      ...report,
-      sampled: {
-        events: events.length,
-        pageViews: pageViews.length,
-        truncated: events.length === MAX_ROWS || pageViews.length === MAX_ROWS,
-      },
-    };
+/** Server-side only (the weekly Mango push cron); same report, no identity. */
+export const internalFunnelConstraint = internalQuery({
+  args: { windowDays: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    return await computeFunnelConstraint(ctx, args.windowDays);
   },
 });

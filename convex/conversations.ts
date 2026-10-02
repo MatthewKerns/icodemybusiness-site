@@ -7,6 +7,7 @@ import {
 import { internal } from "./_generated/api";
 import { requireRole } from "./lib/auth";
 import { scoreLead } from "./lib/leadScoring";
+import { scheduleLeadPush } from "./mango";
 
 // --- Internal mutations (called by webhook handler) ---
 
@@ -168,13 +169,15 @@ export const createLeadFromConversation = internalMutation({
   },
   handler: async (ctx, args) => {
     const score = scoreLead("retell-agent");
-    return await ctx.db.insert("leads", {
+    const leadId = await ctx.db.insert("leads", {
       email: args.email,
       name: args.name,
       source: "retell-agent",
       score,
       createdAt: Date.now(),
     });
+    await scheduleLeadPush(ctx, leadId);
+    return leadId;
   },
 });
 

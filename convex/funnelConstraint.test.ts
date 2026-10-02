@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { convexTest } from "convex-test";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import schema from "./schema";
 import {
   analyzeFunnel,
@@ -200,5 +200,30 @@ describe("adminFunnelConstraint (Convex)", () => {
     expect(r.constraint.kind).toBe("traffic");
     expect(r.steps.find((s) => s.key === "booked")!.measured).toBe(false);
     expect(r.sampled.truncated).toBe(false);
+  });
+});
+
+describe("internalFunnelConstraint (Convex)", () => {
+  it("returns the owner's report with no identity — server-side callers only", async () => {
+    const t = convexTest(schema, modules);
+    const now = Date.now();
+    await t.run(async (ctx) => {
+      await ctx.db.insert("pageViews", { page: "/", timestamp: now - 1000 });
+      await ctx.db.insert("visitorEvents", {
+        name: "splash_entered",
+        category: "decision",
+        sessionId: "s1",
+        timestamp: now - 1000,
+      });
+    });
+    const internalReport = await t.query(internal.funnelConstraint.internalFunnelConstraint, {
+      windowDays: 7,
+    });
+    const ownerReport = await t
+      .withIdentity(OWNER)
+      .query(api.funnelConstraint.adminFunnelConstraint, { windowDays: 7 });
+    expect(internalReport.steps).toEqual(ownerReport.steps);
+    expect(internalReport.constraint).toEqual(ownerReport.constraint);
+    expect(internalReport.window.days).toBe(7);
   });
 });
