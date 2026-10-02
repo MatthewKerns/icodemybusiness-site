@@ -39,7 +39,7 @@ describe("markdownToHtml", () => {
         "",
         "Module 1 · Clockify · Training 1.4",
         "",
-        "**What you will finish:** the next block cut into chunks.",
+        "**Expected Lesson Outcome:** the next block cut into chunks.",
         "",
         "## Do this",
         "",
@@ -53,7 +53,7 @@ describe("markdownToHtml", () => {
     );
     expect(html).toContain("<h1>Time slicing</h1>");
     expect(html).toContain("<h2>Do this</h2>");
-    expect(html).toContain("<strong>What you will finish:</strong>");
+    expect(html).toContain("<strong>Expected Lesson Outcome:</strong>");
     expect(html).toContain("<ol>");
     expect(html).toContain("<li>What did you get done in the last 30 minutes?<br>Answer: ________________</li>");
     expect(html).toContain("<li>How long until the next thing? ______ minutes</li>");
