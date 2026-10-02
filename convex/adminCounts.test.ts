@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { convexTest } from "convex-test";
 import { api } from "./_generated/api";
 import schema from "./schema";
@@ -26,12 +26,15 @@ const OUTSIDER = {
 
 let savedDomains: string | undefined;
 beforeEach(() => {
+  // createLead schedules mango.pushLead; fake the timers so it never fires after the test.
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
   savedDomains = process.env.OWNER_EMAIL_DOMAINS;
   process.env.OWNER_EMAIL_DOMAINS = "icodemybusiness.com";
 });
 afterEach(() => {
   if (savedDomains === undefined) delete process.env.OWNER_EMAIL_DOMAINS;
   else process.env.OWNER_EMAIL_DOMAINS = savedDomains;
+  vi.useRealTimers();
 });
 
 const DAY = 86_400_000;

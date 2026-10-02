@@ -32,6 +32,8 @@ async function asAdmin(t: TestConvex<typeof schema>) {
 let savedDomains: string | undefined;
 
 beforeEach(() => {
+  // createLead schedules mango.pushLead; fake the timers so it never fires after the test.
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
   savedDomains = process.env.OWNER_EMAIL_DOMAINS;
   process.env.OWNER_EMAIL_DOMAINS = "icodemybusiness.com";
 });
@@ -40,6 +42,7 @@ afterEach(() => {
   if (savedDomains === undefined) delete process.env.OWNER_EMAIL_DOMAINS;
   else process.env.OWNER_EMAIL_DOMAINS = savedDomains;
   vi.restoreAllMocks();
+  vi.useRealTimers();
 });
 
 async function withLead(email: string) {
