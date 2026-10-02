@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/legal/LegalPage";
 import { PROCESSORS, FIRST_PARTY_COOKIES } from "@/lib/processors";
+import { BUSINESS, LEGAL_ENTITY_LINE } from "@/lib/business";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | iCodeMyBusiness",
@@ -10,10 +11,10 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy" updated="21 September 2026">
+    <LegalPage title="Privacy Policy" updated="22 September 2026">
       <p>
-        iCodeMyBusiness is a consulting and automation practice operated by Matthew Kerns
-        in the United States. This policy covers this website and the applications linked
+        iCodeMyBusiness is a consulting and automation practice operated by {LEGAL_ENTITY_LINE},
+        run by {BUSINESS.founder}. This policy covers this website and the applications linked
         from it, including the Mango dashboard at mango.icodemybusiness.com.
       </p>
 
@@ -107,10 +108,17 @@ export default function PrivacyPage() {
 
       <LegalSection title="Contact">
         <p>
-          iCodeMyBusiness (Matthew Kerns) —{" "}
-          <a href="mailto:matthew@icodemybusiness.com" className="text-blue hover:underline">
-            matthew@icodemybusiness.com
+          {BUSINESS.legalName} ({BUSINESS.founder}) —{" "}
+          <a href={`mailto:${BUSINESS.email}`} className="text-blue hover:underline">
+            {BUSINESS.email}
           </a>
+          {BUSINESS.telephone && <> · {BUSINESS.telephone}</>}
+          {BUSINESS.postalAddress && (
+            <>
+              {" "}· {BUSINESS.postalAddress.streetAddress}, {BUSINESS.postalAddress.addressLocality},{" "}
+              {BUSINESS.postalAddress.addressRegion} {BUSINESS.postalAddress.postalCode}
+            </>
+          )}
         </p>
       </LegalSection>
     </LegalPage>

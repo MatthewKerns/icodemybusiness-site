@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SKOOL_COMMUNITY_URL } from "@/lib/constants";
+import { BUSINESS, LEGAL_ENTITY_LINE } from "@/lib/business";
 
 const FOOTER_LINKS = [
   { href: "/", label: "Home" },
@@ -20,7 +21,7 @@ const LEGAL_LINKS = [
 
 const SOCIAL_LINKS = [
   {
-    href: "https://youtube.com/@icodemybusiness",
+    href: BUSINESS.sameAs.youtube,
     label: "YouTube channel",
     icon: (
       <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
@@ -29,7 +30,7 @@ const SOCIAL_LINKS = [
     ),
   },
   {
-    href: "https://x.com/icodemybusiness",
+    href: BUSINESS.sameAs.x,
     label: "X (Twitter) profile",
     icon: (
       <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
@@ -38,7 +39,7 @@ const SOCIAL_LINKS = [
     ),
   },
   {
-    href: "https://tiktok.com/@icodemybusiness",
+    href: BUSINESS.sameAs.tiktok,
     label: "TikTok profile",
     icon: (
       <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
@@ -62,11 +63,25 @@ export function Footer() {
               Save time. Make more money. Make a difference.
             </p>
             <a
-              href="mailto:matthew@icodemybusiness.com"
+              href={`mailto:${BUSINESS.email}`}
               className="mt-3 inline-block text-sm text-blue hover:underline"
             >
-              matthew@icodemybusiness.com
+              {BUSINESS.email}
             </a>
+            {/* Who is behind the domain — a reputation reviewer looks for exactly
+                this. Address and phone appear here once BUSINESS carries them. */}
+            <p className="mt-3 text-sm text-text-dim">{LEGAL_ENTITY_LINE}</p>
+            {BUSINESS.postalAddress && (
+              <p className="text-sm text-text-dim">
+                {BUSINESS.postalAddress.streetAddress}, {BUSINESS.postalAddress.addressLocality},{" "}
+                {BUSINESS.postalAddress.addressRegion} {BUSINESS.postalAddress.postalCode}
+              </p>
+            )}
+            {BUSINESS.telephone && (
+              <a href={`tel:${BUSINESS.telephone}`} className="text-sm text-text-dim hover:text-gold">
+                {BUSINESS.telephone}
+              </a>
+            )}
           </div>
 
           {/* Page links */}
@@ -119,7 +134,7 @@ export function Footer() {
 
         <div className="mt-8 flex flex-col items-center gap-3 border-t border-border pt-6 text-center text-sm text-text-dim md:flex-row md:justify-between md:text-left">
           <p>
-            &copy; {new Date().getFullYear()} iCodeMyBusiness. All rights
+            &copy; {new Date().getFullYear()} {BUSINESS.legalName}. All rights
             reserved.
           </p>
           <nav aria-label="Legal" className="flex gap-4">
