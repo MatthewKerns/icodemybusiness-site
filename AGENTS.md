@@ -77,7 +77,7 @@ win in this repo.
 | Email | Resend via `/api/email/*` and `convex/emails.ts` | from `matthew@icodemybusiness.com`; log with `emailSends.record` |
 | AI | Anthropic SDK in API routes / Convex actions only | key in VPS env AND Convex env |
 | Analytics / errors | PostHog 629815 (US, org iCodeMyBusiness, matthew@icodemybusiness.com), Sentry | `src/lib/analytics-events.ts` taxonomy; dashboards not yet rebuilt in 629815; `docs/observability.md`, `docs/RUNBOOK.md` |
-| Booking | Calendly embed (`CalendlyEmbed`) | live event: `12kernsmatthew/new-meeting-1` (15 min) |
+| Booking | Calendly embed (`CalendlyEmbed`) | live event: `matthew-icodemybusiness/intro-call` (15 min) |
 | Styling | Tailwind | gold/black brand tokens |
 | Tests | vitest (+ `convex-test`) | `npm test` |
 | Hosting | Hostinger VPS, Docker + Traefik | `scripts/deploy-staging.sh`; **not** Dokploy/Vercel |

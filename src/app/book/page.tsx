@@ -4,14 +4,15 @@ import { CalendlyEmbed } from "@/components/shared/CalendlyEmbed";
 import { FAQAccordion } from "@/components/landing/FAQAccordion";
 import { Clock, MessageCircle, Sparkles, ShieldCheck } from "lucide-react";
 
-// The free 15-minute "Introduction Call" event (Matthew, 2026-09-02). Kept in
+// The free 15-minute "Intro Call" event on the matthew-icodemybusiness
+// Calendly account (Matthew, 2026-10-02; replaces 12kernsmatthew). Kept in
 // code rather than only in env: the URL isn't a secret, and the previous
 // default (`new-meeting`) was deactivated on Calendly, which is exactly the
 // failure an env-only value hides. Env still wins if set.
 const CALENDLY_INTRO_URL =
   process.env.NEXT_PUBLIC_CALENDLY_INTRO_URL ??
   process.env.NEXT_PUBLIC_CALENDLY_URL ??
-  "https://calendly.com/12kernsmatthew/new-meeting-1";
+  "https://calendly.com/matthew-icodemybusiness/intro-call";
 
 export const metadata: Metadata = {
   title: "Book a Free 15-Minute Intro Call | iCodeMyBusiness",
