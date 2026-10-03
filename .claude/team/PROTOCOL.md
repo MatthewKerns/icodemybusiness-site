@@ -1,7 +1,7 @@
 # Agent-team protocol — icodemybusiness-site
 
 Multi-session Claude Code team for this repo. One human (Matthew). Each role is one
-`/rename`d session. Roles: `cto | sdm | qam | sde | qa | ux-reviewer | cmo`. Cards in
+`/rename`d session. Roles: `cto | sdm | qam | sde | qa | ux-reviewer | cmo | training-builder`. Cards in
 `roles/`. The `/team <role>` skill (`~/.claude/skills/team/SKILL.md`) is the entry point.
 
 Landed 2026-09-04 by the `cmo` session (first team run in this repo). Before then the
@@ -42,6 +42,7 @@ source, and mango's `TeamBoardReader` parses the board in §5.
 | `sde` (`dev-N`) | any | sdm (or cmo for content work) | wait for ASSIGN |
 | `qa` (`qa-N`) | any | qam | wait for ASSIGN |
 | `ux-reviewer` (`-N`) | any | qam | on demand (G# from qam) |
+| `training-builder` (`-N`) | any | cmo (else human) | wait for ASSIGN; kit: `.claude/skills/training-kit/` |
 
 Bare `qa`/`dev`/`ux-reviewer` names are reserved-and-taken; always number. One `cto` per
 machine, one `sdm`/`qam`/`cmo` per project. The tier goes on the board roster and in

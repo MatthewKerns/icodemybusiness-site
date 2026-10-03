@@ -1,0 +1,34 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:40px;flex:1;margin-bottom:52px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.card img{display:block;width:100%;aspect-ratio:1460/752;object-fit:cover}
+.body{padding:20px 20px 22px}
+.num{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--gold);letter-spacing:.14em}
+.name{font-family:'Anton',sans-serif;font-size:34px;text-transform:uppercase;margin:6px 0 16px}
+.tier{display:flex;gap:10px;align-items:flex-start;font-size:18px;line-height:1.4;color:var(--ink);margin-top:14px}
+.tag{flex:none;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;padding:3px 7px;border-radius:4px;margin-top:2px}
+.free{border:1px solid var(--muted);color:var(--muted)}
+.prem{background:var(--gold);color:#0A0A0A;font-weight:500}
+.foot{position:absolute;left:64px;right:64px;bottom:40px;display:flex;justify-content:space-between;font-size:19px;color:var(--muted)}
+.foot b{color:var(--ink);font-weight:600}
+</style></head><body>
+<div class="brand">skool.com/<b>icodemybusiness</b></div>
+<div class="kicker">What's inside</div>
+<h1>Four skills. <em>One way of working.</em></h1>
+<div class="grid">
+ <div class="card"><img src="m1.png"><div class="body"><div class="num">MODULE 1</div><div class="name">Clockify</div>
+  <div class="tier"><span class="tag free">FREE</span>Start tracking, first entries, time slicing</div>
+  <div class="tier"><span class="tag prem">PREMIUM</span>Log objectives, turn time data into strategy</div></div></div>
+ <div class="card"><img src="m2.png"><div class="body"><div class="num">MODULE 2</div><div class="name">Plan on Paper</div>
+  <div class="tier"><span class="tag free">FREE</span>One-question session, mind maps, diagrams</div>
+  <div class="tier"><span class="tag prem">PREMIUM</span>The planning session, AI vs. just do it</div></div></div>
+ <div class="card"><img src="m3.png"><div class="body"><div class="num">MODULE 3</div><div class="name">Writing Clarity</div>
+  <div class="tier"><span class="tag free">FREE</span>Get to the point, small words, know your reader</div>
+  <div class="tier"><span class="tag prem">PREMIUM</span>Review, reflect, teach it to find the gaps</div></div></div>
+ <div class="card"><img src="m4.png"><div class="body"><div class="num">MODULE 4</div><div class="name">Claude</div>
+  <div class="tier"><span class="tag free">FREE</span>Your first accountability automation</div>
+  <div class="tier"><span class="tag prem">PREMIUM</span>A weekly system for what gets done</div></div></div>
+</div>
+<div class="foot"><span>Every module opens with the problem it solves.</span><span><b>Worksheets</b> you copy and fill in</span></div>
+</body></html>
