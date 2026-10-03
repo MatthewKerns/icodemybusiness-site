@@ -51,6 +51,11 @@ source on its own) · `[Fathom <call-id> m:ss]` (his segment, unpaid-client call
 worksheet row) · `[Matthew: …]` (open — he must say it; list it for his sign-off). A quotation with no
 citation is a FAIL; a number, duration or absolute ("every", "always") with none is a WARN under
 `docs/copy-principles.md` §2. Two independent angles per claim where the goal prompt asks for it.
+**Build-file format (value-delivery's builds, also accepted):** tags defined in the file itself under
+`# SOURCES` / `# INFERRED` (`- [S6] …`, `- [I3] …`, used as `[S6]`, `[S6:79]`, `[S24 §2]`), and publish-ready
+text with the tags stripped and a `# SOURCE MAP` saying which sources back each section, step, question
+or item. The lint skips `SOURCES`, `SOURCE MAP`, `OPEN ITEMS` and everything under `NOT FOR MEMBERS`;
+a quote or number backed only by the map is a WARN naming the map entry — open that source and check it.
 Worksheets link trainings by the tsv Doc URL; trainings cite worksheets as `[tsv N.T]`; a tactic links
 its worksheet in Convex (`worksheetUrl`). `academy.py check` proves the three agree.
 

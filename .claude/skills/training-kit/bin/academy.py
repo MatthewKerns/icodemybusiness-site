@@ -226,6 +226,55 @@ def brief(query):
     print(f"\n## Citation tags available\n" + "\n".join(f"- [{k}] → {v}" for k, v in sorted(tags.items())))
 
 
+# Sections that are not member copy: they define or map sources, or are notes for Matthew.
+DEF_SECTION = re.compile(r"^#+\s*(SOURCES|INFERRED)\b", re.I)
+SKIP_SECTION = re.compile(r"^#+\s*(SOURCES|INFERRED|SOURCE MAP|OPEN ITEMS)\b", re.I)
+NOT_FOR_MEMBERS = re.compile(r"^#+\s*NOT FOR MEMBERS\b", re.I)   # everything after it is internal
+USE_TAG = re.compile(r"\[([A-Z]{1,4}\d+[a-z]?)(?:[:\s][^\]]*)?\]")  # [S6] [S6:79] [S24 §2] [I3] [BT] excluded
+
+
+def file_sources(lines):
+    """Tags a draft defines itself ("- [S1] …" under # SOURCES / # INFERRED) and its SOURCE MAP keys."""
+    defined, keys, section = set(), [], None
+    for line in lines:
+        if line.startswith("#"):
+            section = line
+            continue
+        if section and DEF_SECTION.match(section):
+            m = re.match(r"^\s*[-*]?\s*\[([A-Z]{1,4}\d+[a-z]?)\]", line)
+            if m:
+                defined.add(m.group(1))
+        if section and re.match(r"^#+\s*SOURCE MAP\b", section, re.I):
+            body = re.sub(r"\[[^\]]*\]|\([^)]*\)", " ", re.sub(r"^\s*[-*]\s*", "", line)).lower()
+            for part in re.split(r"\.\s+|;\s*", body):
+                if ":" in part:
+                    keys.append(part.split(":", 1)[0].strip())
+                # numbered sub-keys anywhere in the entry: "step 6", "question 2", "item 2", "items 3-7"
+                for kind, a, b in re.findall(r"\b(step|question|item)s?\s+(\d+)(?:\s*-\s*(\d+))?", part):
+                    for k in range(int(a), int(b or a) + 1):
+                        keys.append(f"{kind} {k}")
+    return defined, keys
+
+
+def map_key(heading, keys, item=None):
+    """The SOURCE MAP key that covers this line: its numbered step/item/question, else its heading
+    (matched on the heading's first two words)."""
+    if item is not None:
+        for kind in ("step", "item", "question"):
+            if f"{kind} {item}" in keys:
+                return f"{kind} {item}"
+    words = re.findall(r"[a-z0-9]+", heading.lower().lstrip("# "))
+    if not words:
+        return None
+    lead = " ".join(words[:2])
+    for k in keys:
+        kws = re.findall(r"[a-z0-9]+", k)
+        kw = " ".join(kws)
+        if kw and (kw.startswith(lead) or lead.startswith(kw) or f" {kw} " in f" {' '.join(words)} "):
+            return k
+    return None
+
+
 def lint(paths):
     rows = read_tsv()
     _, tags, _ = read_outline()
@@ -234,20 +283,29 @@ def lint(paths):
     tsv_nums = {r["num"] for r in rows if r["num"]}
     known = {t["tacticId"] for t in tactics} if tactics is not None else None
     for path in paths:
-        in_fence = False
-        for n, line in enumerate(open(path, encoding="utf-8"), 1):
+        lines = open(path, encoding="utf-8").read().split("\n")
+        local, keys = file_sources(lines)
+        in_fence, skip, internal, heading, item = False, False, False, "", None
+        for n, line in enumerate(lines, 1):
             if line.strip().startswith("```"):
                 in_fence = not in_fence
-            if in_fence or not line.strip() or line.lstrip().startswith("#"):
+            if not in_fence and line.startswith("#"):
+                internal = internal or bool(NOT_FOR_MEMBERS.match(line))
+                skip = internal or bool(SKIP_SECTION.match(line))
+                heading, item = line, None
+                continue
+            num = re.match(r"^\s{0,3}(?:\*\*)?(\d+)\.\s", line)
+            if num:
+                item = int(num.group(1))
+            if in_fence or skip or not line.strip():
                 continue
             where = f"{os.path.basename(path)}:{n}"
             for d in DOC_ID.findall(line):
                 if d not in tsv_docs:
                     say("FAIL", f"{where}: links a Google Doc that is not in worksheet-links.tsv ({d[:12]}…)")
-            for t in re.findall(r"\[(?:BT|WC|P2D|P4D|[A-Z][A-Z0-9]{1,4})\]", line):
-                tag = t.strip("[]")
-                if not TACTIC_ID.fullmatch(tag) and tag not in tags:
-                    say("FAIL", f"{where}: citation tag {t} is not defined in the outline header")
+            for tag in USE_TAG.findall(line):
+                if not TACTIC_ID.fullmatch(tag) and tag not in tags and tag not in local:
+                    say("FAIL", f"{where}: citation tag [{tag}] is defined neither in the outline header nor in this file's # SOURCES")
             for tid in set(m.group(0) for m in TACTIC_ID.finditer(line)):
                 if known is not None and tid not in known:
                     say("FAIL", f"{where}: tactic {tid} is not in the bank")
@@ -255,15 +313,24 @@ def lint(paths):
                 if n2 not in tsv_nums:
                     say("FAIL", f"{where}: [tsv {n2}] has no row")
             cited = (re.search(r"\[(?:%s)\]" % "|".join(map(re.escape, tags)), line) or VIDEO_TS.search(line)
-                     or FATHOM.search(line) or TACTIC_ID.search(line) or re.search(r"\[tsv \d+\.\d+\]", line))
+                     or FATHOM.search(line) or TACTIC_ID.search(line) or re.search(r"\[tsv \d+\.\d+\]", line)
+                     or any(t in local for t in USE_TAG.findall(line)))
             open_q = MATTHEW.search(line)
-            if re.search(r"[\"“][^\"”]{12,}[\"”]", line) and not (cited or open_q):
-                say("FAIL", f"{where}: quotation with no citation — trace it or cut it")
+            mapped = None if (cited or open_q) else map_key(heading, keys, item)
+            quotes = [q for q in re.findall(r"[\"“]([^\"“”]*)[\"”]", line) if len(q) >= 12]  # paired left→right
+            if quotes and not (cited or open_q):
+                if mapped:
+                    say("WARN", f"{where}: quotation backed only by SOURCE MAP '{mapped}' — check the quote against that entry's sources")
+                else:
+                    say("FAIL", f"{where}: quotation with no citation — trace it or cut it")
             elif CLAIM.search(line) and not (cited or open_q):
-                say("WARN", f"{where}: number/duration/absolute with no citation — copy-principles §2 claim scan: "
+                via = f"backed only by SOURCE MAP '{mapped}' — check it against that entry" if mapped else "with no citation"
+                say("WARN", f"{where}: number/duration/absolute {via} — copy-principles §2 claim scan: "
                             f"{CLAIM.search(line).group(0)!r}")
             if open_q:
                 say("INFO", f"{where}: open [Matthew: …] marker — list it for his sign-off")
+        if local or keys:
+            say("INFO", f"{os.path.basename(path)}: {len(local)} tags defined in-file, {len(keys)} SOURCE MAP keys")
     return report()
 
 
