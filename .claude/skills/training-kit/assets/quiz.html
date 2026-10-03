@@ -1,0 +1,374 @@
+<title>__TITLE__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column; each question is a fieldset; the result panel follows the form.
+   Single dark look on purpose: the academy brand is black and gold everywhere members see it. */
+:root {
+  --bg: #0A0A0A; --panel: #141414; --line: #2A2A2A; --ink: #F2EEE3; --muted: #A39E92;
+  --gold: #D4AF37; --gold-lt: #E8C84A; --good: #6FCF97; --bad: #EB7A6A; --gold-wash: #1C1708;
+  --display: 'Anton', 'Impact', 'Arial Narrow', sans-serif;
+  --body: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; margin: 0; }
+.wrap { max-width: 760px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 64px; display: grid; gap: 28px; }
+header { display: grid; gap: 8px; min-width: 0; }
+.kicker { font-family: var(--mono); font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(34px, 7vw, 52px); line-height: 1.02; text-transform: uppercase; margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 62ch; margin: 0; }
+.status { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+.status b { color: var(--gold); font-weight: 500; }
+form { display: grid; gap: 22px; min-width: 0; }
+fieldset.q { margin: 0; border: 1px solid var(--line); background: var(--panel); border-radius: 12px; padding: 18px 18px 20px; display: grid; gap: 12px; min-width: 0; }
+fieldset.q.personal { border-color: #3a3220; }
+legend.qhead { display: flex; gap: 12px; align-items: baseline; padding: 0; float: left; width: 100%; }
+legend.qhead + * { clear: both; }
+.qnum { font-family: var(--mono); color: var(--gold); font-size: 13px; flex: none; }
+.qtext { font-weight: 600; min-width: 0; }
+.qtype { font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.opts { display: grid; gap: 8px; }
+.opt { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.opt:hover { border-color: #4a4434; }
+.opt input { accent-color: var(--gold); margin-top: 4px; }
+.order { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.order li { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); touch-action: none; user-select: none; }
+.order li.dragging { border-color: var(--gold); background: var(--gold-wash); }
+.order .grip { font-family: var(--mono); color: var(--muted); cursor: grab; padding-inline: 2px; }
+.order .label { flex: 1; min-width: 0; }
+.order button { background: none; border: 1px solid var(--line); color: var(--ink); border-radius: 6px; width: 34px; height: 34px; cursor: pointer; font-size: 15px; flex: none; }
+.order button:disabled { opacity: .35; cursor: default; }
+.chart { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.chart svg { display: block; width: 100%; min-width: 520px; height: auto; }
+.chart [data-el] { cursor: pointer; outline: none; }
+.chart [data-el]:hover rect, .chart [data-el]:hover polygon, .chart [data-el]:hover ellipse { stroke: var(--gold-lt); }
+.chart [data-el][aria-pressed="true"] rect, .chart [data-el][aria-pressed="true"] polygon, .chart [data-el][aria-pressed="true"] ellipse { stroke: var(--gold); stroke-width: 5; fill: var(--gold-wash); }
+.chart [data-el]:focus-visible rect, .chart [data-el]:focus-visible polygon, .chart [data-el]:focus-visible ellipse { stroke-dasharray: 10 6; }
+.chart [data-el]:focus-visible { outline: 3px dashed var(--ink); outline-offset: 4px; }
+.hint { font-size: 13.5px; color: var(--muted); margin: 0; }
+textarea { width: 100%; min-height: 120px; resize: vertical; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font: inherit; }
+textarea:focus, .opt:focus-within, .order button:focus-visible, .btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.src { font-family: var(--mono); font-size: 11.5px; color: var(--muted); overflow-wrap: anywhere; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.btn { font: 600 15px var(--body); border-radius: 8px; padding: 12px 20px; cursor: pointer; border: 1px solid var(--gold); background: var(--gold); color: #0A0A0A; }
+.btn.ghost { background: none; color: var(--ink); border-color: var(--line); }
+.btn:disabled { opacity: .5; cursor: default; }
+.msg { margin: 0; font-size: 14.5px; }
+.msg.err { color: var(--bad); }
+.verdict { font-family: var(--mono); font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; }
+.verdict.ok { color: var(--good); } .verdict.no { color: var(--bad); } .verdict.wait { color: var(--gold); }
+.key { font-size: 14.5px; color: var(--muted); margin: 0; }
+.key b { color: var(--ink); font-weight: 600; }
+.panel { border-top: 1px solid var(--line); padding-top: 22px; display: grid; gap: 14px; min-width: 0; }
+.panel h2 { font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: 26px; margin: 0; letter-spacing: .01em; }
+.score { font-family: var(--display); font-size: 44px; color: var(--gold); line-height: 1; font-variant-numeric: tabular-nums; }
+.feedback { border-left: 2px solid var(--gold); padding-left: 12px; white-space: pre-wrap; }
+.attempt { border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.attempt pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; font-family: var(--body); }
+.sources { font-size: 13.5px; color: var(--muted); }
+.sources ul { margin: 6px 0 0; padding-left: 18px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: no-preference) { .order li { transition: border-color .12s ease; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="kicker" id="kicker"></div>
+    <h1 id="title"></h1>
+    <p class="lede" id="lede"></p>
+    <div class="status" id="status">Loading your saved attempts…</div>
+  </header>
+  <form id="quiz" novalidate></form>
+  <div class="actions">
+    <button class="btn" id="submit" type="submit" form="quiz">Check my answers</button>
+    <button class="btn ghost" id="copy" type="button" hidden>Copy my answers</button>
+    <p class="msg" id="msg" role="status" aria-live="polite"></p>
+  </div>
+  <section class="panel" id="results" hidden></section>
+  <section class="panel" id="history" hidden></section>
+  <footer class="sources" id="sources" hidden></footer>
+  <div class="sr" id="announce" aria-live="polite"></div>
+</div>
+
+<script type="application/json" id="quiz-data">__QUIZ_JSON__</script>
+<script>
+"use strict";
+// ---- pure scoring — bin/test_quiz.mjs and bin/rescore.mjs load THIS block from the template ----
+const Score = {
+  sameSet(a, b) { const A = [...new Set(a)].sort(), B = [...new Set(b)].sort(); return A.length === B.length && A.every((v, i) => v === B[i]); },
+  item(item, given) {
+    if (item.type === "open") return { scored: false };
+    if (given == null || (Array.isArray(given) && given.length === 0)) return { scored: true, correct: false, blank: true };
+    if (item.type === "choice" || item.type === "chart") return { scored: true, correct: Score.sameSet([].concat(given), [].concat(item.answer)) };
+    if (item.type === "order") {                                  // given = indices of item.items, in the member's order
+      if (!Array.isArray(given) || given.length !== item.items.length) return { scored: true, correct: false, blank: true };
+      const placed = given.filter((v, i) => v === i).length;
+      return { scored: true, correct: placed === item.items.length, placed, of: item.items.length };
+    }
+    return { scored: false };
+  },
+  quiz(items, answers) {
+    const res = {}; let correct = 0, total = 0;
+    for (const it of items) { const r = Score.item(it, answers?.[it.id]); res[it.id] = r; if (r.scored) { total++; if (r.correct) correct++; } }
+    return { results: res, correct, total };
+  },
+  // deterministic shuffle that never returns the solved order (for 2+ items)
+  shuffle(n, seedText) {
+    let h = 2166136261; for (const c of seedText) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+    const idx = [...Array(n).keys()];
+    for (let i = n - 1; i > 0; i--) { h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0; const j = h % (i + 1); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+    if (n > 1 && idx.every((v, i) => v === i)) idx.push(idx.shift());
+    return idx;
+  },
+};
+if (typeof module !== "undefined") module.exports = Score;
+</script>
+<script>
+"use strict";
+(() => {
+const Q = JSON.parse(document.getElementById("quiz-data").textContent);
+const OPEN_MAX = 8000;
+const $ = (id) => document.getElementById(id);
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) { if (k === "text") n.textContent = v; else if (v !== false && v != null) n.setAttribute(k, v === true ? "" : v); }
+  for (const k of kids) n.append(k);
+  return n;
+};
+const announce = (t) => { $("announce").textContent = ""; setTimeout(() => { $("announce").textContent = t; }, 30); };
+const state = { order: {}, lists: {}, touched: {}, chart: {}, db: null, me: null, owner: false, canSave: null, attempts: [], grades: {}, pendingRef: null, lastAttempt: null };
+
+$("kicker").textContent = Q.kicker || "";
+$("title").textContent = Q.title;
+$("lede").textContent = Q.lede || "";
+
+// ---- render questions (complete at rest, before any capability answers) ---------------------
+const form = $("quiz");
+const TYPE_LABEL = { order: "Put in order", chart: "Select on the chart", open: "Your own words · optional" };
+Q.items.forEach((it, i) => {
+  const multi = Array.isArray(it.answer) && it.answer.length > 1;
+  const box = el("fieldset", { class: "q" + (it.personal ? " personal" : ""), id: "q-" + it.id });
+  box.append(el("legend", { class: "qhead" }, el("span", { class: "qnum", "aria-hidden": "true", text: String(i + 1).padStart(2, "0") }), el("span", { class: "qtext", text: it.prompt })));
+  box.append(el("div", { class: "qtype", text: (it.type === "choice" ? (multi ? "Choose all that apply" : "Choose one") : TYPE_LABEL[it.type]) + (it.personal ? " · just for you" : "") }));
+  form.append(box);                                             // attach first: renderers below look things up in the DOM
+  if (it.type === "choice") {
+    const opts = el("div", { class: "opts" });
+    it.options.forEach((o, k) => {
+      const id = `in-${it.id}-${k}`;
+      opts.append(el("label", { class: "opt", for: id }, el("input", { type: multi ? "checkbox" : "radio", name: "in-" + it.id, id, value: String(k) }), el("span", { text: o })));
+    });
+    box.append(opts);
+  } else if (it.type === "order") {
+    state.order[it.id] = Score.shuffle(it.items.length, Q.id + ":" + it.id);
+    const list = el("ol", { class: "order", "aria-label": "Order for question " + (i + 1) });
+    state.lists[it.id] = list;
+    box.append(list, el("p", { class: "hint", text: "Drag the rows, or use the arrows." }));
+    drawOrder(it);
+    wireDrag(it, list);
+  } else if (it.type === "chart") {
+    const wrap = el("div", { class: "chart" });
+    wrap.innerHTML = it.svg;                                   // built by quiz.py from diagram.py (escaped labels), never member input
+    state.chart[it.id] = new Set();
+    wrap.querySelectorAll("[data-el]").forEach((g) => {
+      g.setAttribute("role", "button"); g.setAttribute("tabindex", "0"); g.setAttribute("aria-pressed", "false");
+      g.setAttribute("aria-label", g.textContent.trim().replace(/\s+/g, " "));
+      const toggle = () => {
+        const s = state.chart[it.id], v = g.getAttribute("data-el");
+        if (!multi) { const had = s.has(v); s.clear(); wrap.querySelectorAll("[data-el]").forEach((x) => x.setAttribute("aria-pressed", "false")); if (had) return; }
+        if (s.has(v)) s.delete(v); else s.add(v);
+        g.setAttribute("aria-pressed", s.has(v) ? "true" : "false");
+      };
+      g.addEventListener("click", toggle);
+      g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+    });
+    box.append(wrap, el("p", { class: "hint", text: multi ? "Select every element that applies." : "Select one element." }));
+  } else if (it.type === "open") {
+    box.append(el("textarea", { id: "in-" + it.id, rows: "5", maxlength: String(OPEN_MAX), "aria-label": it.prompt, placeholder: "Optional. Skip it if you like." }));
+  }
+  if (it.source) box.append(el("div", { class: "src", text: "From: " + it.source }));
+});
+if (Q.sources && Q.sources.length) {
+  const f = $("sources"); f.hidden = false;
+  f.append(el("div", { text: "Your personal questions draw only on what you said yes to:" }), el("ul", {}, ...Q.sources.map((s) => el("li", { text: s }))));
+}
+
+function drawOrder(it, focusPos, which) {
+  const list = state.lists[it.id], ord = state.order[it.id];
+  list.textContent = "";
+  ord.forEach((src, pos) => {
+    const name = it.items[src];
+    const up = el("button", { type: "button", "aria-label": `Move "${name}" up`, disabled: pos === 0 }, "↑");
+    const dn = el("button", { type: "button", "aria-label": `Move "${name}" down`, disabled: pos === ord.length - 1 }, "↓");
+    up.onclick = () => move(it, pos, pos - 1, "up");
+    dn.onclick = () => move(it, pos, pos + 1, "down");
+    list.append(el("li", { "data-pos": String(pos) }, el("span", { class: "grip", "aria-hidden": "true", text: "⋮⋮" }), el("span", { class: "label", text: name }), up, dn));
+  });
+  if (focusPos != null) {
+    const btns = [...list.children[focusPos].querySelectorAll("button")];
+    (btns[which === "down" ? 1 : 0]?.disabled ? btns.find((b) => !b.disabled) : btns[which === "down" ? 1 : 0])?.focus();
+  }
+}
+function move(it, a, b, which) {
+  const o = state.order[it.id]; if (b < 0 || b >= o.length) return;
+  [o[a], o[b]] = [o[b], o[a]]; state.touched[it.id] = true;
+  drawOrder(it, b, which);
+  announce(`"${it.items[o[b]]}" moved to position ${b + 1} of ${o.length}`);
+}
+function wireDrag(it, list) {
+  let from = null, dragging = false;
+  list.addEventListener("pointerdown", (e) => {
+    if (e.target.closest("button")) return;
+    const li = e.target.closest("li"); if (!li) return;
+    from = +li.dataset.pos; dragging = true; li.classList.add("dragging"); list.setPointerCapture(e.pointerId);
+  });
+  list.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const over = [...list.children].find((r) => { const b = r.getBoundingClientRect(); return e.clientY >= b.top && e.clientY <= b.bottom; });
+    if (!over || +over.dataset.pos === from) return;
+    const to = +over.dataset.pos, o = state.order[it.id];
+    o.splice(to, 0, o.splice(from, 1)[0]); from = to; state.touched[it.id] = true;
+    drawOrder(it); list.children[to].classList.add("dragging");
+  });
+  const end = () => {
+    if (!dragging) return;
+    dragging = false; [...list.children].forEach((r) => r.classList.remove("dragging"));
+    if (from != null) announce(`"${it.items[state.order[it.id][from]]}" is now at position ${from + 1}`);
+    from = null;
+  };
+  list.addEventListener("pointerup", end); list.addEventListener("pointercancel", end);
+}
+
+function collect() {
+  const answers = {}, open = {};
+  for (const it of Q.items) {
+    if (it.type === "choice") {
+      const picked = [...form.querySelectorAll(`[name="in-${it.id}"]:checked`)].map((x) => +x.value);
+      answers[it.id] = Array.isArray(it.answer) && it.answer.length > 1 ? picked : (picked.length ? picked[0] : null);
+    } else if (it.type === "order") answers[it.id] = state.touched[it.id] ? state.order[it.id].slice() : null;
+    else if (it.type === "chart") answers[it.id] = [...state.chart[it.id]];
+    else if (it.type === "open") { const t = $("in-" + it.id).value.trim().slice(0, OPEN_MAX); if (t) open[it.id] = t; }
+  }
+  return { answers, open };
+}
+
+function keyText(it) {
+  if (it.type === "choice") return [].concat(it.answer).map((k) => it.options[k]).join(" · ");
+  if (it.type === "order") return it.items.map((s, k) => `${k + 1}. ${s}`).join("   ");
+  if (it.type === "chart") return [].concat(it.answer).map((k) => it.labels?.[k] || k).join(" · ");
+  return "";
+}
+
+// Shows a saved or just-checked attempt. Scores are always recomputed here from the answers.
+function showResults(attempt, grade) {
+  const sc = Score.quiz(Q.items, attempt.answers || {});
+  const box = $("results"); box.hidden = false; box.textContent = "";
+  box.append(el("h2", { text: "Your answers" }), el("div", { class: "score", text: `${sc.correct} / ${sc.total}` }));
+  for (const it of Q.items) {
+    const r = sc.results[it.id] || {};
+    const row = el("div", { class: "attempt" }, el("div", { class: "qtext", text: it.prompt }));
+    if (it.type === "open") {
+      const mine = attempt.open?.[it.id];
+      const g = grade?.status === "final" ? grade.items?.[it.id] : null;
+      row.append(el("div", { class: "verdict wait", text: mine ? (g?.feedback ? "Matthew's feedback" : "Saved for Matthew's review") : "Skipped" }));
+      if (mine) row.append(el("pre", { text: mine }));
+      if (g?.feedback) row.append(el("div", { class: "feedback", text: g.feedback }));
+    } else {
+      row.append(el("div", { class: "verdict " + (r.correct ? "ok" : "no"), text: r.correct ? "Correct" : (r.blank ? "Not answered" : (it.type === "order" ? `Not yet · ${r.placed} of ${r.of} in place` : "Not yet")) }));
+      row.append(el("p", { class: "key" }, el("b", { text: "Answer: " }), keyText(it)));
+      if (it.explain) row.append(el("p", { class: "key", text: it.explain }));
+    }
+    box.append(row);
+  }
+}
+
+const when = (a) => { const d = new Date(a.submittedAt); return isNaN(d) ? "an earlier attempt" : d.toLocaleString(); };
+// One artifact per member, and the owner preview never saves: every attempt here is the member's.
+const mineOnly = () => state.attempts.slice();
+
+function renderHistory() {
+  const h = $("history"), list = mineOnly().sort((a, b) => String(b.data.submittedAt).localeCompare(String(a.data.submittedAt)));
+  if (!list.length) { h.hidden = true; return; }
+  h.hidden = false; h.textContent = "";
+  h.append(el("h2", { text: "Earlier attempts" }));
+  for (const a of list.slice(0, 5)) {
+    const g = state.grades[a.id], sc = Score.quiz(Q.items, a.data.answers || {}), hasOpen = Object.keys(a.data.open || {}).length;
+    const btn = el("button", { class: "btn ghost", type: "button", text: "Show this attempt" });
+    btn.onclick = () => { showResults(a.data, g); $("results").scrollIntoView({ behavior: "smooth", block: "start" }); };
+    h.append(el("div", { class: "attempt" }, el("div", { class: "status", text: `${when(a.data)} · ${sc.correct} / ${sc.total}` + (hasOpen ? (g?.status === "final" ? " · feedback ready" : " · written answer awaiting review") : "") }), btn));
+  }
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function once(fn) {                                       // retry exactly once on a transient platform error
+  try { return await fn(); } catch (e) { if (e?.code !== "unavailable") throw e; await sleep(300 + Math.random() * 500); return fn(); }
+}
+
+// ---- submit ----------------------------------------------------------------------------------
+let lastSig = null;
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const { answers, open } = collect();
+  const sig = JSON.stringify([answers, open]);
+  if (sig !== lastSig) { state.pendingRef = null; lastSig = sig; }         // new answers → a new attempt document
+  const attempt = { quizId: Q.id, quizVersion: Q.version, submittedAt: new Date().toISOString(), by: state.me, answers, open };
+  state.lastAttempt = attempt;
+  showResults(attempt, null);
+  const msg = $("msg"); msg.className = "msg"; $("copy").hidden = true;
+  if (state.owner) { msg.textContent = "Checked. This is your preview as the owner, so nothing was saved."; return; }
+  if (!state.db || state.canSave === false) {
+    msg.className = "msg err"; msg.textContent = "Checked. This view can't save answers, so copy them and send them to Matthew."; $("copy").hidden = false; return;
+  }
+  $("submit").disabled = true; msg.textContent = "Saving…";
+  try {
+    state.pendingRef ??= state.db.collection("attempts").doc();          // one id per answer set: a retry can't duplicate it
+    const ref = state.pendingRef;
+    await once(() => ref.set(attempt));
+    state.attempts = state.attempts.filter((a) => a.id !== ref.id).concat({ id: ref.id, data: attempt });
+    msg.textContent = Object.keys(open).length ? "Saved. Matthew reviews your written answer and his feedback appears on this page." : "Saved.";
+    renderHistory();
+  } catch (err) {
+    msg.className = "msg err";
+    const big = Object.values(open).some((t) => t.length > 6000);
+    msg.textContent = (big ? "Your written answer is too long to save. Shorten it, or copy your answers and send them to Matthew."
+      : state.canSave === false ? "This view can't save answers. Copy them and send them to Matthew."
+      : "Your answers didn't save. Try again in a moment, or copy them and send them to Matthew.");
+    $("copy").hidden = false;
+  }
+  $("submit").disabled = false;
+});
+$("copy").addEventListener("click", async () => {
+  const text = JSON.stringify({ quiz: Q.id, version: Q.version, answers: state.lastAttempt?.answers, open: state.lastAttempt?.open }, null, 1);
+  try { await navigator.clipboard.writeText(text); $("msg").textContent = "Copied. Paste it in a DM to Matthew."; }
+  catch { const t = el("textarea", { readonly: true, "aria-label": "Your answers" }); t.value = text; $("copy").after(t); t.select(); $("msg").textContent = "Select all and copy the text below."; }
+});
+
+// ---- capabilities (light up later; the page above already works alone) -----------------------
+(async () => {
+  const claude = window.claude;
+  const [db, user] = await Promise.all([claude?.use?.("db") ?? null, claude?.use?.("user") ?? null]);
+  state.db = db;
+  state.owner = (await user?.isOwner?.()) ?? false;
+  state.me = (await user?.id?.()) ?? null;
+  state.canSave = user ? await user.canEdit() : null;                  // answers save at the share menu's Editor level
+  if (!db) { $("status").textContent = "Answers are checked here, but this view can't save them."; return; }
+  if (state.canSave === false && !state.owner) $("status").textContent = "You can check your answers here, but this link can't save them.";
+  const load = async () => {
+    const [att, grd] = await Promise.all([db.collection("attempts").get(), db.collection("grades").get()]);
+    state.attempts = att.docs.filter((d) => d.exists).map((d) => ({ id: d.id, data: d.data() }));
+    grd.docs.forEach((d) => { if (d.exists) state.grades[d.id] = d.data(); });
+  };
+  try {
+    await once(load);
+    const n = mineOnly().length, ready = mineOnly().filter((a) => state.grades[a.id]?.status === "final").length;
+    $("status").textContent = state.owner ? `Owner preview · ${state.attempts.length} saved attempt${state.attempts.length === 1 ? "" : "s"} by the member` : (n ? `${n} saved attempt${n > 1 ? "s" : ""}` : "No attempts yet");
+    if (ready && !state.owner) $("status").append(el("b", { text: ` · feedback on ${ready}` }));
+    renderHistory();
+  } catch (e) {
+    $("status").textContent = "Saved attempts couldn't load right now. You can still answer, and saving will be tried.";
+  }
+})();
+})();
+</script>
