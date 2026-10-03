@@ -1,0 +1,60 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+h1.two{font-size:52px;line-height:1.08;margin-top:10px;max-width:1160px}
+h1.two .l2{display:block;color:var(--gold);margin-top:4px}
+.wrap{display:grid;grid-template-columns:1fr 1fr .78fr;gap:20px;margin-top:24px;flex:1}
+.tier{border-radius:12px;padding:22px 24px;border:1px solid var(--line);background:var(--panel)}
+.tier.prem{border:1.5px solid var(--gold);background:linear-gradient(180deg,rgba(212,175,55,.10),rgba(20,20,20,1) 55%)}
+.head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.tname{font-family:'Anton',sans-serif;font-size:32px;text-transform:uppercase}
+.prem .tname{color:var(--gold)}
+.price{font-family:'Anton',sans-serif;font-size:32px}
+.price small{font-family:'IBM Plex Sans',sans-serif;font-size:16px;color:var(--muted);margin-left:4px}
+ul{list-style:none}
+li{display:flex;gap:10px;font-size:17px;line-height:1.3;padding:9px 0;border-top:1px solid var(--line)}
+li:first-child{border-top:none}
+li::before{content:"";flex:none;width:8px;height:8px;margin-top:8px;border-radius:2px;background:var(--muted)}
+.prem li::before{background:var(--gold)}
+.vip{border:1px solid var(--gold-lt);background:linear-gradient(180deg,rgba(232,200,74,.14),rgba(20,20,20,1) 60%)}
+.vip .tname{color:var(--gold-lt)}
+.vip li::before{background:var(--gold-lt)}
+.annual{margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--gold);letter-spacing:.06em}
+</style></head><body>
+<div class="brand">skool.com/<b>icodemybusiness</b></div>
+<div class="kicker">Three ways in</div>
+<h1 class="two">Start Building for Free<span class="l2">Level Up With Your People Inside as You Grow</span></h1>
+<div class="wrap">
+ <div class="tier">
+  <div class="head"><span class="tname">Standard</span><span class="price">Free</span></div>
+  <ul>
+   <li>Starter Pack: Start Delivering Quickly, Earn Testimonials</li>
+   <li>Get Up and Running Quickly</li>
+   <li>Operate Efficiently from Day One</li>
+   <li>Build Good Habits</li>
+   <li>Learn AI Audit Fundamentals to Get Your Foot in the Door with a New Client ($$)</li>
+   <li>Beginner Events &amp; Workshops!</li>
+  </ul>
+ </div>
+ <div class="tier prem">
+  <div class="head"><span class="tname">Premium</span><span class="price">$299<small>/mo</small></span></div>
+  <ul>
+   <li>Everything You Need To Know Once You Start Making Money</li>
+   <li>Learn Advanced AI Auditing Techniques</li>
+   <li>AI Implementation Strategy Post Audit</li>
+   <li>Exclusive Advanced Group Member Workshops</li>
+   <li>Scale Your Operations</li>
+   <li>Orchestrate Larger Agentic Workflows</li>
+  </ul>
+  <div class="annual">OR $2,499/YEAR</div>
+ </div>
+ <div class="tier vip">
+  <div class="head"><span class="tname">VIP</span><span class="price">$549<small>/mo</small></span></div>
+  <ul>
+   <li>One on One VIP Access</li>
+   <li>Done with You Time</li>
+   <li>VIP Learning Partner Weekly Calls</li>
+   <li>Special VIP Workshops &amp; Recordings for High Level Agency Builders</li>
+  </ul>
+ </div>
+</div>
+</body></html>
