@@ -1,0 +1,9 @@
+{"type": "flowchart", "title": "One question, one page", "kicker": "Module 2 · Plan on Paper", "direction": "LR",
+ "source": "[P2D] academy-outline.md P2 #1; PPR-010 (pending) 'bank the juicy idea as a question for next session'",
+ "nodes": [{"id": "q", "label": "Bank the question during work"},
+           {"id": "s", "label": "Paper session, distractions off", "accent": true},
+           {"id": "d", "label": "Answered?", "shape": "diamond"},
+           {"id": "p", "label": "Turn it into the plan"}],
+ "connections": [{"from": "q", "to": "s"}, {"from": "s", "to": "d"},
+                 {"from": "d", "to": "p", "label": "yes"},
+                 {"from": "d", "to": "q", "label": "not yet", "style": "dashed"}]}

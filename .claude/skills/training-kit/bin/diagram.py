@@ -280,6 +280,8 @@ def svg(spec, pos, back):
         n = nodes[i]
         stroke, fill, ink = (GOLD, "#1C1708", GOLD_LT) if n.get("accent") else (LINE, PANEL, INK)
         shape = n.get("shape", "rectangle")
+        # one group per node, keyed by its spec id — quizzes score a chart-element answer by data-el
+        out.append(f'<g data-el="{html.escape(str(i), quote=True)}" class="node">')
         if shape == "diamond":
             out.append(f'<polygon points="{x},{y - h / 2} {x + w / 2},{y} {x},{y + h / 2} {x - w / 2},{y}" fill="{fill}" '
                        f'stroke="{stroke}" stroke-width="2.5"/>')
@@ -297,6 +299,7 @@ def svg(spec, pos, back):
         for k, l in enumerate(lines):
             out.append(f'<text x="{x:.1f}" y="{y0 + k * size * 1.2:.1f}" text-anchor="middle" font-family="IBM Plex Sans" '
                        f'font-weight="600" font-size="{size}" fill="{ink}">{html.escape(l)}</text>')
+        out.append("</g>")
     out.append("</svg>")
     return "\n".join(out), problems
 
