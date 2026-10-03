@@ -111,6 +111,25 @@ Rollback = deploy the previous sha: `scripts/deploy-staging.sh <prev-sha>`
 - **Anything only a browser can check** (a Clerk round-trip, a Calendly embed,
   375 px layout) — name it so the deploy session screenshots it.
 
+## Clerk proxy
+
+Since 2026-10-02 browsers reach Clerk's Frontend API through the apex at
+`https://icodemybusiness.com/__clerk` (`src/lib/clerk-proxy.ts`, wired first in
+`src/middleware.ts`), not `clerk.icodemybusiness.com`, which Comcast/Cox block per
+hostname (`docs/comcast-reappeal-2026-09-17.md`). Three pieces, all required:
+
+1. The route (code, cf223c2). It needs `CLERK_SECRET_KEY` at runtime; without it
+   `/__clerk/*` answers 503.
+2. The Clerk production instance's domain `dmn_3Iy5uiDesnhZ2KJQKfGPQpoLa25` has
+   `proxy_url = https://icodemybusiness.com/__clerk` (Backend API `PATCH /v1/domains/{id}`,
+   set after `POST /v1/proxy_checks` passed).
+3. VPS: `NEXT_PUBLIC_CLERK_PROXY_URL=https://icodemybusiness.com/__clerk` in
+   `.env.build` plus its `--build-arg` line in `deploy.sh` (backups `*.bak.pre-clerk-proxy-20261002`).
+
+Verify: page HTML has no `clerk.icodemybusiness.com`, and in a browser `window.Clerk.proxyUrl`
+is the apex URL. **Rollback** (reverse order): remove the env line + rebuild, then
+`PATCH` the domain with `proxy_url: ""`. Changing only one side breaks sign-in.
+
 ## Manual verification checklist on staging
 
 - Routes 200; `/subscribe` → `/consulting`; `/testimonials` 404 (flag off).

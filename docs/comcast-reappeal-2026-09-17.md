@@ -157,3 +157,22 @@ Visitor impact while `clerk.` stays blocked, on Cox/Comcast only: public pages l
 returning visitor with an expired Clerk session (the middleware handshake redirects to `clerk.`) hit
 the block page. Code-side option (ask-first: auth/middleware change): serve Clerk's frontend API
 through the apex with Clerk's proxy feature, so no visitor ever needs `clerk.` directly.
+
+## Update 2026-10-02 — re-blocked; subdomains removed for real; sign-in off clerk.
+
+**The apex is blocked again** from the Cox connection (http → 302 to `safebrowse.io`), two days
+after the 09-30 clearance; `www.`, `clerk.` and `mango.` likewise. From the VPS and from
+check-host.net nodes every host returns 200.
+
+Changes since the 09-30 call script, for the next call:
+- **DNS:** `mcf-tts`, `cultivateelite` and `ideabrandcoach` A records deleted at Namecheap
+  (verified at `dns1.registrar-servers.com`); `demos.` was deleted too.
+- **Server:** the Mango box (54.243.53.44) no longer answers for
+  `cultivateelite.icodemybusiness.com` or `ideabrandcoach.icodemybusiness.com` — until today
+  it still served those brands to anyone resolving them to its IP (Caddy blocks removed;
+  backup `/opt/mango/Caddyfile.bak.pre-subdomain-removal-20261002`).
+- **Sign-in no longer uses `clerk.`:** Clerk's Frontend API is proxied through the apex at
+  `/__clerk` (`docs/DEPLOY.md` § Clerk proxy). Site pages contain no reference to
+  `clerk.icodemybusiness.com`; visitors on Cox/Comcast can sign in while it stays flagged.
+
+Ask on the call for re-scans of `icodemybusiness.com`, `www.`, `mango.` and `clerk.` by name.
