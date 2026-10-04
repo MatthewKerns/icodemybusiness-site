@@ -60,6 +60,11 @@ export const PROCESSORS: Processor[] = [
     data: "payment details, entered on Stripe's own checkout — we never see card numbers",
   },
   {
+    name: "Meta (Facebook)",
+    purpose: "measuring our ads on Facebook and Instagram and showing them to past visitors (the Meta Pixel)",
+    data: "the pages you view and whether you signed up or booked a call, with your IP address, browser details and Meta's cookie",
+  },
+  {
     name: "Clockify",
     purpose: "time tracking in the Mango dashboard",
     data: "time entries, only if you connect your own Clockify account",

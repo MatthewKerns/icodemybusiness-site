@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy" updated="22 September 2026">
+    <LegalPage title="Privacy Policy" updated="4 October 2026">
       <p>
         iCodeMyBusiness is a consulting and automation practice operated by {LEGAL_ENTITY_LINE},
         run by {BUSINESS.founder}. This policy covers this website and the applications linked
@@ -57,11 +57,9 @@ export default function PrivacyPage() {
           secret and is never displayed back to you or shown to anyone else.
         </p>
         <p>
-          <strong>
-            We do not sell or rent your data, and we never use it for advertising.
-          </strong>{" "}
-          It goes to the processors listed below, and nowhere else unless the law requires
-          it.
+          We use the Meta Pixel to measure our ads and to show them to people who have
+          visited this site. Your data goes to the processors listed below, and nowhere
+          else unless the law requires it.
         </p>
       </LegalSection>
 
@@ -90,7 +88,8 @@ export default function PrivacyPage() {
         </ul>
         <p>
           Clerk sets cookies to keep you signed in, and PostHog stores an anonymous visitor
-          identifier so repeat visits are counted once. None are used for advertising.
+          identifier so repeat visits are counted once. The Meta Pixel sets a cookie
+          (<code>_fbp</code>) so Meta can measure our ads and show them to past visitors.
         </p>
       </LegalSection>
 
@@ -103,6 +102,17 @@ export default function PrivacyPage() {
           </a>
           . Every marketing email carries an unsubscribe link, and you can disconnect a
           connected service at any time.
+        </p>
+        <p>
+          You can opt out of interest-based ads in your{" "}
+          <a href="https://www.facebook.com/adpreferences" className="text-blue hover:underline">
+            Facebook ad settings
+          </a>{" "}
+          or at{" "}
+          <a href="https://optout.aboutads.info" className="text-blue hover:underline">
+            aboutads.info
+          </a>
+          .
         </p>
       </LegalSection>
 
