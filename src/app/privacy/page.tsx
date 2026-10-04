@@ -103,6 +103,17 @@ export default function PrivacyPage() {
           . Every marketing email carries an unsubscribe link, and you can disconnect a
           connected service at any time.
         </p>
+        <p>
+          You can opt out of interest-based ads in your{" "}
+          <a href="https://www.facebook.com/adpreferences" className="text-blue hover:underline">
+            Facebook ad settings
+          </a>{" "}
+          or at{" "}
+          <a href="https://optout.aboutads.info" className="text-blue hover:underline">
+            aboutads.info
+          </a>
+          .
+        </p>
       </LegalSection>
 
       <LegalSection title="Contact">

@@ -74,6 +74,12 @@ describe("/privacy matches the Meta Pixel the site loads", () => {
     expect(html).toContain("_fbp");
   });
 
+  it("tells visitors how to opt out of interest-based ads (Meta Business Tools Terms)", () => {
+    expect(html).toMatch(/opt out of interest-based ads/i);
+    expect(html).toContain("https://www.facebook.com/adpreferences");
+    expect(html).toContain("https://optout.aboutads.info");
+  });
+
   it("no longer claims data is never used for advertising", () => {
     expect(html).not.toMatch(/never use it for advertising/i);
     expect(html).not.toMatch(/none are used for advertising/i);
