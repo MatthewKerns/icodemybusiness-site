@@ -1,0 +1,20 @@
+# Tools used to build trainings: names, usage units and where usage can be read. THIS REPO IS PUBLIC:
+# no plans, prices or billing notes here. The live copy with Matthew's own figures is
+# $TRAINING_LEDGER_DIR/tools.tsv (created from this file on first use) — edit that one, never this one.
+tool	paid	plan	usd_month	unit	read_path	training_use
+Skool	paid	unknown	unknown	lessons, members	skool.py snapshot (his own Chrome tab)	yes
+Claude subscription	paid	unknown	unknown	tokens, plan limits	ledger.py claude-code (transcripts)	yes
+Higgsfield	paid	unknown	unknown	credits	Higgsfield connector: transactions, show_generations	yes
+Google Workspace / Drive	unknown	unknown	unknown	Docs, storage	ledger.py gdocs (Drive mount)	yes
+Clockify	unknown	unknown	unknown	hours	Mango connector get_time_entries	yes
+Fathom	unknown	unknown	unknown	meetings	Fathom connector	unknown
+Fireflies	unknown	unknown	unknown	meetings	Fireflies connector	unknown
+ClickUp	unknown	unknown	unknown	tasks	ClickUp connector	unknown
+ffmpeg	free	local	0	runs	bin/kit	yes
+whisper.cpp	free	local	0	runs	bin/kit	yes
+headless Chrome (renders)	free	local	0	runs	bin/kit	yes
+openpyxl (workbooks)	free	local	0	runs	bin/kit	yes
+Google Apps Script (Doc cleanup)	free	with a Google account	0	runs	manual line (ledger.py log)	yes
+Claude in Chrome extension	free	with a Claude plan	0	captures	skool.py import	yes
+claude.ai Projects / chat	free	with a Claude plan	0	hours	manual line (ledger.py log) or a Clockify description	yes
+claude.ai Artifacts	free	with a Claude plan	0	artifacts	ledger.py artifacts (Artifact list)	yes

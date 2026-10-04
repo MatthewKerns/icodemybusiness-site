@@ -31,10 +31,22 @@ bin/academy.py check     # outline ↔ tsv ↔ Drive Docs ↔ tactics integrity
 | Card / graphic | `render.py page.html` | PNG (1400×790 @2× default) | same |
 | Google Doc | `docbuild.py draft.md` | Docs-ready HTML | A: app `createDocFromMarkdown` · B: Drive connector |
 | Google Sheet workbook | `workbook.py spec.json` | styled `.xlsx` | Drive connector → native Sheet |
+| Skool lesson history | `skool.py capture-js / import / diff / history / lessons` | dated snapshots + change events | read-only, his own Chrome tab |
+| Usage ledger | `ledger.py claude-code / clockify / higgsfield / artifacts / gdocs / log / report` | `~/.icmb-training/ledger/events.jsonl` | — |
+| Log a kit tool run | `kit [-t <training id>] <tool> …` | a `free_tool` event | — |
 
 **Google Suite for everything shared** (Matthew, 2026-10-02): Docs for worksheets, lesson packs and
 briefs; Sheets for trackers and workbooks. Members get the `/copy` link. Nothing is shared as .docx,
 .xlsx, PDF or a local file. Sharing settings are Matthew's to change — never the kit's.
+
+## The five skills that drive the kit (Matthew's process, in order)
+`training-source` (recording → transcript → outline → tactic leads) · `training-draft` (one lesson +
+worksheet in his format) · `training-review` (review angles → approval sheet → reverify) ·
+`training-publish` (paste-ready pack, protect his live edits, verify) · `training-ledger` (usage signals
+and Skool change history). His lesson format, and what he changes when he rewrites: `reference/lesson-format.md`.
+His live Classroom text is newer than any pack or Doc — he edits there directly; never overwrite it.
+**This repo is public:** lesson text, his stories, time entries, prices and the ledger stay out of git
+(`~/.icmb-training/`).
 
 ## Sources of record (read; never move)
 Drive desktop mount `~/Library/CloudStorage/GoogleDrive-12kernsmatthew@gmail.com/My Drive/iCodeMyBusiness/`:
