@@ -27,7 +27,8 @@ convention, the guardrails) · `docs/copy-principles.md` (whole file) · memory 
 2. **Draft in the worktree** (`content/` draft or the ASSIGN's path) using the citation convention.
    Anything Matthew hasn't said → `[Matthew: …]`, never a guess.
 3. **Build the pieces with the kit:** Doc (`docbuild.py`), workbook (`workbook.py`), diagram
-   (`diagram.py`), clip (`clip.py`, then `clip.py qa`). Google Docs/Sheets for everything shared.
+   (`diagram.py`), clip (`clip.py`, then `clip.py qa`), check-your-knowledge quiz (`quiz.py`, one
+   private Artifact per member). Google Docs/Sheets for everything shared.
 4. **Gate it yourself:** `academy.py lint` 0 FAIL; `diagram.py` 0 FAIL and you looked at the PNG;
    `clip.py qa` read in full (no guest voice/face, no names/money/third parties); copy-principles claim scan.
 5. **`[RESULT]`** with paths (drafts, PNG, MP4, xlsx), the lint/qa output pasted, the open `[Matthew: …]`

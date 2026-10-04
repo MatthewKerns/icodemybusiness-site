@@ -31,6 +31,7 @@ bin/academy.py check     # outline ↔ tsv ↔ Drive Docs ↔ tactics integrity
 | Card / graphic | `render.py page.html` | PNG (1400×790 @2× default) | same |
 | Google Doc | `docbuild.py draft.md` | Docs-ready HTML | A: app `createDocFromMarkdown` · B: Drive connector |
 | Google Sheet workbook | `workbook.py spec.json` | styled `.xlsx` | Drive connector → native Sheet |
+| Check your knowledge (member quiz) | `quiz.py build spec.json` | one private claude.ai Artifact per member | Claude publishes; Matthew shares it to the member as Editor |
 
 **Google Suite for everything shared** (Matthew, 2026-10-02): Docs for worksheets, lesson packs and
 briefs; Sheets for trackers and workbooks. Members get the `/copy` link. Nothing is shared as .docx,
@@ -102,6 +103,25 @@ frozen header row, gold input columns, dropdowns, filled-down formulas, totals, 
 Upload: connector `create_file` with `base64Content` and contentMimeType
 `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` → native Google Sheet. Verified
 2026-10-02: formulas and totals survived conversion (test Sheet trashed after).
+
+## Check your knowledge (`quiz.py`) — Matthew's decisions, 2026-10-02
+A member quiz with four answer types: **choice** (one or several), **order** (put items in order),
+**chart** (select elements of a `diagram.py` chart, scored by node id), **open** (optional own words,
+stored, reviewed later). Plus **personal** items drawn only from sources the member opted into
+(kickoff call in Fathom, Skool posts/comments copied by hand, their own turns in group-call
+recordings, data they share from internal tools); consent is per source and off by default. Never scrape Skool.
+- **One private Artifact per member**, shared by Matthew to the member's email as **Editor**. Outside
+  viewers below Editor cannot write (`db.d.ts`); no public link (a link drops outside Editors to view).
+- Closed answers show the score and the correct answer right away; open answers show feedback only
+  after Matthew approves it (`grades/<attemptId>` status `final`). No turnaround promise anywhere.
+- An Editor can republish their page, so: the page stores answers, never a trusted score; Claude
+  recomputes with `node bin/rescore.mjs <page.html> <attempts.json>`; Claude's draft feedback and
+  Matthew's record stay OUTSIDE the member's artifact; Matthew never needs to open a member's page.
+- Build: `quiz.py lint spec.json` (citations, consent basis, no contact details, chart ids, rubrics) →
+  `quiz.py build spec.json -o page.html` → publish with the printed capabilities, icon `quiz` →
+  `node bin/test_quiz.mjs` must pass after any template change.
+- Gate test page (Module 2, four items, DRAFT pending Matthew's approval of the items):
+  `examples/m2-one-question/` → https://claude.ai/artifact/NwNgKG2sCi9BNbk5XMKNXG
 
 ## Never
 Publish to Skool/YouTube, change Drive sharing, move or rename the outline/tsv, write another lane's Docs

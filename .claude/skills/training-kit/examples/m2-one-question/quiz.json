@@ -1,0 +1,53 @@
+{
+ "id": "m2-one-question",
+ "version": 1,
+ "kicker": "Module 2 · Check your knowledge",
+ "title": "The one-question session",
+ "lede": "Four questions. The last one is optional and in your own words.",
+ "items": [
+  {
+   "id": "q1",
+   "type": "choice",
+   "prompt": "What do you sit down with at the start of a paper session?",
+   "options": [
+    "A list of everything on your plate",
+    "One really good question, or a few",
+    "Your calendar for the week"
+   ],
+   "answer": 1,
+   "explain": "One really good question leads the session.",
+   "source": "[P2D] academy-outline.md P2 #1"
+  },
+  {
+   "id": "q2",
+   "type": "order",
+   "prompt": "Put the four pillars in the order the academy teaches them.",
+   "items": [
+    "Clockify",
+    "Plan on Paper",
+    "Writing Clarity",
+    "Claude"
+   ],
+   "source": "academy-outline.md 'What the academy is' (P2 3:07)"
+  },
+  {
+   "id": "q3",
+   "type": "chart",
+   "prompt": "Your session ends and the question isn't answered yet. Where does it go?",
+   "diagram": "session-flow.json",
+   "answer": [
+    "q"
+   ],
+   "explain": "Bank it as the question for your next session instead of chasing it now.",
+   "source": "[P2D] academy-outline.md P2 #1; [PPR-010]"
+  },
+  {
+   "id": "q4",
+   "type": "open",
+   "prompt": "What one question will you bring to your next session, and where did it come from?",
+   "rubric": "Names ONE specific question (not a task list) and says where it came up during their work.",
+   "source": "[P2D] academy-outline.md P2 #1"
+  }
+ ],
+ "page_title": "Plan on Paper Check (gate test)"
+}
