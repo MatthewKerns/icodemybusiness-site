@@ -57,13 +57,9 @@ export default function PrivacyPage() {
           secret and is never displayed back to you or shown to anyone else.
         </p>
         <p>
-          <strong>
-            We do not sell or rent your data.
-          </strong>{" "}
           We use the Meta Pixel to measure our ads and to show them to people who have
-          visited this site.
-          It goes to the processors listed below, and nowhere else unless the law requires
-          it.
+          visited this site. Your data goes to the processors listed below, and nowhere
+          else unless the law requires it.
         </p>
       </LegalSection>
 
