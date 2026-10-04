@@ -46,6 +46,11 @@ convex/_generated/ai/
 !.claude/skills/dig/
 !.claude/skills/email-voice/
 !.claude/skills/training-kit/
+!.claude/skills/training-source/
+!.claude/skills/training-draft/
+!.claude/skills/training-review/
+!.claude/skills/training-publish/
+!.claude/skills/training-ledger/
 
 # Testing
 coverage/

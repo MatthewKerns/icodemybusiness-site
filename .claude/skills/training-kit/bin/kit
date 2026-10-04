@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Run a training-kit tool and log the run in the usage ledger (free-tool usage).
+#   bin/kit [-t <training_id>] <tool> [args…]      e.g.  bin/kit -t m2 diagram.py spec.json
+# TRAINING_ID in the environment works too. The tool's own exit code is returned.
+B="$(cd "$(dirname "$0")" && pwd)"
+T=(); if [ "$1" = "-t" ]; then T=(--training "$2"); shift 2; fi
+tool="$1"; shift
+case "$tool" in                                  # a tool outside the kit (e.g. the transcript skill's script): run it as given
+  /*|~*) exec python3 "$B/ledger.py" run "${T[@]}" -- "${tool/#\~/$HOME}" "$@" ;;
+esac
+case "$tool" in
+  *.py)  exec python3 "$B/ledger.py" run "${T[@]}" -- python3 "$B/$tool" "$@" ;;
+  *.mjs) exec python3 "$B/ledger.py" run "${T[@]}" -- node "$B/$tool" "$@" ;;
+  *)     exec python3 "$B/ledger.py" run "${T[@]}" -- "$B/$tool" "$@" ;;
+esac

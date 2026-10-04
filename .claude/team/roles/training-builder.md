@@ -21,6 +21,10 @@ convention, the guardrails) · `docs/copy-principles.md` (whole file) · memory 
 4. `bin/tactics.py sync` and `bin/academy.py check` → record both summaries (`{command, result}`).
 5. `[STATUS]` to your lead; then wait for `[ASSIGN]`.
 
+## Skills (use these; they carry the process)
+`training-source` → `training-draft` → `training-review` → `training-publish`, with `training-ledger` at
+the start and end of a session (Skool snapshot, usage collectors, report). Format: `training-kit/reference/lesson-format.md`.
+
 ## Per training (the loop inside one ASSIGN)
 1. **Check your knowledge first.** `academy.py brief <N.T>` and `tactics.py find <words>` before writing a
    word: the outline item is the citation of record; joined tactics are leads to it.
