@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy" updated="22 September 2026">
+    <LegalPage title="Privacy Policy" updated="4 October 2026">
       <p>
         iCodeMyBusiness is a consulting and automation practice operated by {LEGAL_ENTITY_LINE},
         run by {BUSINESS.founder}. This policy covers this website and the applications linked
@@ -58,8 +58,10 @@ export default function PrivacyPage() {
         </p>
         <p>
           <strong>
-            We do not sell or rent your data, and we never use it for advertising.
+            We do not sell or rent your data.
           </strong>{" "}
+          We use the Meta Pixel to measure our ads and to show them to people who have
+          visited this site.
           It goes to the processors listed below, and nowhere else unless the law requires
           it.
         </p>
@@ -90,7 +92,8 @@ export default function PrivacyPage() {
         </ul>
         <p>
           Clerk sets cookies to keep you signed in, and PostHog stores an anonymous visitor
-          identifier so repeat visits are counted once. None are used for advertising.
+          identifier so repeat visits are counted once. The Meta Pixel sets a cookie
+          (<code>_fbp</code>) so Meta can measure our ads and show them to past visitors.
         </p>
       </LegalSection>
 

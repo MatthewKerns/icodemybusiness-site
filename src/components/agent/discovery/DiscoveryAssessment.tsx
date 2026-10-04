@@ -6,6 +6,7 @@ import { Send } from "lucide-react";
 import { api } from "../../../../convex/_generated/api";
 import { useTrackEvent } from "@/hooks/useTrackEvent";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
+import { META_STANDARD_EVENTS, trackMeta } from "@/lib/meta-pixel";
 import {
   coerceDiscoveryState,
   type DiscoveryState,
@@ -327,6 +328,7 @@ export function DiscoveryAssessment({ source }: { source: DiscoverySource }) {
         { source, degraded },
         "form"
       );
+      trackMeta(META_STANDARD_EVENTS.LEAD);
     },
     [confirmRecap, submit, track, source, degraded]
   );

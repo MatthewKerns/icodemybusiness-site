@@ -8,6 +8,7 @@ import { useAuth } from "@clerk/nextjs";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { PostHogProvider } from "@/components/shared/PostHogProvider";
 import { PageViewTracker } from "@/components/shared/PageViewTracker";
+import { MetaPixel } from "@/components/shared/MetaPixel";
 import { useEnsureUser } from "@/hooks/useEnsureUser";
 import { useBindDiscoverySession } from "@/hooks/useBindDiscoverySession";
 
@@ -96,6 +97,7 @@ export function Providers({ children }: { children: ReactNode }) {
       <ConvexClerkProvider>
         <SessionBridge>
           <PageViewTracker />
+          <MetaPixel />
           <PostHogProvider>{children}</PostHogProvider>
         </SessionBridge>
       </ConvexClerkProvider>

@@ -63,3 +63,19 @@ describe("/privacy discloses the site's own cookies", () => {
     for (const c of FIRST_PARTY_COOKIES) expect(html).toContain(c.name);
   });
 });
+
+describe("/privacy matches the Meta Pixel the site loads", () => {
+  // The pixel is an advertising tool. Until 2026-10-04 the policy said in bold
+  // that data was never used for advertising; with the pixel live that sentence
+  // would be the policy-vs-network-traffic mismatch described above.
+  it("names Meta as a processor and its _fbp cookie", () => {
+    expect(PROCESSORS.some((p) => p.name.startsWith("Meta"))).toBe(true);
+    expect(html).toContain("Meta Pixel");
+    expect(html).toContain("_fbp");
+  });
+
+  it("no longer claims data is never used for advertising", () => {
+    expect(html).not.toMatch(/never use it for advertising/i);
+    expect(html).not.toMatch(/none are used for advertising/i);
+  });
+});
