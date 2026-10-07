@@ -1,8 +1,9 @@
 # Comcast re-appeal — ticket IH270482834 — icodemybusiness.com
 
-**Status: SENT 2026-09-17 by Matthew** (confirmed by him on 2026-09-20; the drafting session had
-recorded "nothing submitted", so the send itself is his word, not a logged event). No reply as of
-2026-09-21. Comcast's stated turnaround is about 3 business days.
+**Status: SENT 2026-09-17 by Matthew — and DENIED the same day** under a new ticket,
+**IH270510985** ("not approved", 14:58 UTC, ~3 h after the 11:57 UTC acknowledgement). Found 2026-10-04
+by reading the Zoho inbox; the acknowledgements land in Spam, the denials in Inbox. The earlier
+"no reply as of 09-21" line was wrong. Both denials predate every fix listed below.
 
 - **Route used:** spa.xfinity.com → Report an issue → "I can't reach a website that I want to go to"
 - **Follow-up if no reply by 2026-09-24:** Customer Security Assurance, **888-565-4329**, quoting
@@ -176,3 +177,13 @@ Changes since the 09-30 call script, for the next call:
   `clerk.icodemybusiness.com`; visitors on Cox/Comcast can sign in while it stays flagged.
 
 Ask on the call for re-scans of `icodemybusiness.com`, `www.`, `mango.` and `clerk.` by name.
+
+## Update 2026-10-07 — block lifted again
+
+From the Cox connection at 22:20 UTC: apex, `www.`, `clerk.` and `mango.` all answer directly
+(http → our own https redirect, https 200/308). No Comcast email announced it (none since the
+17 September denial). Nothing was submitted between 10-02 and 10-07, so the lift followed the
+10-02 changes (subdomains gone from DNS and the Mango box, Clerk off `clerk.`) on the engine's
+own re-scan — inferred from timing, not confirmed by Comcast. The 09-30 lift lasted two days;
+re-check with `curl -s -o /dev/null -w '%{redirect_url}\n' http://icodemybusiness.com/` before
+assuming it holds. Latest ticket for any call: **IH270510985**.
