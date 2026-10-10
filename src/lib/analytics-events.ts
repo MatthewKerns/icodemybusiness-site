@@ -58,6 +58,12 @@ export const ANALYTICS_EVENTS = {
   TOOL_DOWNLOADED: "tool_downloaded",
   /** The "Book a Call" CTA was clicked (intent, precedes consultation_booked). */
   BOOK_CALL_CLICKED: "book_call_clicked",
+  /**
+   * A visitor passed through /skool on the way to the Skool community. The link
+   * is what goes in off-site bios (YouTube channel description, etc.) with UTM
+   * tags, so this event carries where the click came from — Skool reports none.
+   */
+  SKOOL_REDIRECT: "skool_redirect",
   /** The e-commerce intake agent was submitted into an application. */
   ECOMMERCE_INTAKE_COMPLETED: "ecommerce_intake_completed",
   /**
