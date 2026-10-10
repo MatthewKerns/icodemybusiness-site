@@ -24,7 +24,7 @@ afterEach(cleanup);
 
 describe("Skool community link", () => {
   it("is the real community slug, not a guess", () => {
-    expect(SKOOL_COMMUNITY_URL).toBe("https://www.skool.com/icodemybusiness-9679");
+    expect(SKOOL_COMMUNITY_URL).toBe("https://www.skool.com/icodemybusiness");
   });
 
   it("CommunityBanner links to it", () => {

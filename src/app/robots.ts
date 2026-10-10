@@ -16,7 +16,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/admin", "/forbidden", "/portal", "/sign-in", "/sign-up"],
+        disallow: ["/api/", "/admin", "/forbidden", "/portal", "/sign-in", "/sign-up", "/skool"],
       },
     ],
     sitemap: "https://icodemybusiness.com/sitemap.xml",

@@ -17,4 +17,4 @@ export const LEAD_SCORE_DEFAULT = 5;
 // they drifted once: both carried a guessed slug that 404'd on the live site until
 // 2026-09-06. Matthew's community is unlisted, so the slug is not discoverable — it
 // comes from him.
-export const SKOOL_COMMUNITY_URL = "https://www.skool.com/icodemybusiness-9679";
+export const SKOOL_COMMUNITY_URL = "https://www.skool.com/icodemybusiness";
