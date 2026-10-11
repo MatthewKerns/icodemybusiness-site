@@ -73,3 +73,7 @@ _bmad-output/
 .security-key
 logs/security/
 skill-packages/dist/
+
+# planning/ transcripts and digests are local-only: the repo is public (see planning/README.md)
+planning/transcripts/
+planning/digests/
