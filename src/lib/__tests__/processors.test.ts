@@ -1,8 +1,15 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import fs from "fs";
 import path from "path";
 import { renderToStaticMarkup } from "react-dom/server";
-import { PROCESSORS, FIRST_PARTY_COOKIES } from "../processors";
+import {
+  PROCESSORS,
+  FIRST_PARTY_COOKIES,
+  GOOGLE_ADS_PROCESSOR,
+  GOOGLE_ADS_COOKIE_SENTENCE,
+  activeProcessors,
+  isGoogleAdsTagId,
+} from "../processors";
 import PrivacyPage from "@/app/privacy/page";
 import { ATTRIBUTION_COOKIE_SOURCE, ATTRIBUTION_COOKIE_VARIANT } from "../constants";
 
@@ -83,5 +90,94 @@ describe("/privacy matches the Meta Pixel the site loads", () => {
   it("no longer claims data is never used for advertising", () => {
     expect(html).not.toMatch(/never use it for advertising/i);
     expect(html).not.toMatch(/none are used for advertising/i);
+  });
+});
+
+describe("Google Ads tag id", () => {
+  it.each(["AW-18511931386", "AW-1"])("accepts %s", (id) => {
+    expect(isGoogleAdsTagId(id)).toBe(true);
+  });
+
+  it.each([
+    undefined,
+    "",
+    "G-123",
+    "AW-",
+    "AW-abc",
+    "aw-123",
+    " AW-123",
+    "AW-123 ",
+    "AW-123\n",
+    "AW-123-456",
+    "AW-1';alert(1)//",
+  ])("rejects %j", (id) => {
+    expect(isGoogleAdsTagId(id)).toBe(false);
+  });
+});
+
+describe("activeProcessors", () => {
+  it("is exactly the always-on list while the Google Ads tag is off", () => {
+    for (const off of [undefined, "", "G-123", "AW-"]) {
+      expect(activeProcessors(off)).toEqual(PROCESSORS);
+    }
+    expect(PROCESSORS.some((p) => p.name.startsWith("Google"))).toBe(false);
+  });
+
+  it("adds Google Ads, and only it, when the tag is on", () => {
+    expect(activeProcessors("AW-18511931386")).toEqual([...PROCESSORS, GOOGLE_ADS_PROCESSOR]);
+  });
+});
+
+describe("/privacy matches the Google Ads tag in both states", () => {
+  const ENV = "NEXT_PUBLIC_GOOGLE_ADS_TAG_ID";
+  const TAG = "AW-18511931386";
+  // renderToStaticMarkup escapes apostrophes; compare as the visitor reads them.
+  const privacyWith = (tagId: string | undefined) => {
+    if (tagId === undefined) delete process.env[ENV];
+    else vi.stubEnv(ENV, tagId);
+    return renderToStaticMarkup(PrivacyPage()).replace(/&#x27;/g, "'");
+  };
+  const entry = (p: { name: string; purpose: string; data: string }) =>
+    `<strong>${p.name}</strong> — ${p.purpose}. Receives ${p.data}.`;
+  const entryCount = (page: string) => page.split("Receives ").length - 1;
+  const cookiesEnd = "past visitors.";
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    delete process.env[ENV];
+  });
+
+  it("off: renders exactly the always-on processors and never mentions Google", () => {
+    const page = privacyWith(undefined);
+    for (const p of activeProcessors(undefined)) expect(page).toContain(entry(p));
+    expect(entryCount(page)).toBe(PROCESSORS.length);
+    expect(page).not.toMatch(/google/i);
+    expect(page).not.toContain(GOOGLE_ADS_COOKIE_SENTENCE);
+    expect(page).toContain(`${cookiesEnd}</p>`);
+  });
+
+  it("off: an empty or malformed id renders the same page as an unset one", () => {
+    const unset = privacyWith(undefined);
+    for (const bad of ["", "G-123", "AW-"]) expect(privacyWith(bad)).toBe(unset);
+  });
+
+  it("on: renders every active processor, including Google Ads, and nothing extra", () => {
+    const page = privacyWith(TAG);
+    for (const p of activeProcessors(TAG)) expect(page).toContain(entry(p));
+    expect(page).toContain(entry(GOOGLE_ADS_PROCESSOR));
+    expect(entryCount(page)).toBe(PROCESSORS.length + 1);
+  });
+
+  it("on: the Cookies paragraph says Google's tag sets its own cookies, and still never claims none are for advertising", () => {
+    const page = privacyWith(TAG);
+    expect(GOOGLE_ADS_COOKIE_SENTENCE).toBe(
+      "Google's advertising tag sets its own cookies to measure our ads."
+    );
+    expect(page).toContain(`${cookiesEnd} ${GOOGLE_ADS_COOKIE_SENTENCE}</p>`);
+    expect(page).not.toMatch(/none are used for advertising/i);
+  });
+
+  it("does not put the tag id on the page", () => {
+    expect(privacyWith(TAG)).not.toContain(TAG);
   });
 });
