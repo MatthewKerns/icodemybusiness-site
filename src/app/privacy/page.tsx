@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/legal/LegalPage";
-import { PROCESSORS, FIRST_PARTY_COOKIES } from "@/lib/processors";
+import {
+  activeProcessors,
+  isGoogleAdsTagId,
+  GOOGLE_ADS_COOKIE_SENTENCE,
+  FIRST_PARTY_COOKIES,
+} from "@/lib/processors";
 import { BUSINESS, LEGAL_ENTITY_LINE } from "@/lib/business";
 
 export const metadata: Metadata = {
@@ -10,6 +15,8 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPage() {
+  // Same switch as the tag itself (GoogleAdsTag): the policy names Google only while the tag is on.
+  const googleAdsTagId = process.env.NEXT_PUBLIC_GOOGLE_ADS_TAG_ID;
   return (
     <LegalPage title="Privacy Policy" updated="4 October 2026">
       <p>
@@ -69,7 +76,7 @@ export default function PrivacyPage() {
           own policy. There are no others apart from our hosting providers.
         </p>
         <ul>
-          {PROCESSORS.map((p) => (
+          {activeProcessors(googleAdsTagId).map((p) => (
             <li key={p.name}>
               <strong>{p.name}</strong> — {p.purpose}. Receives {p.data}.
             </li>
@@ -90,6 +97,7 @@ export default function PrivacyPage() {
           Clerk sets cookies to keep you signed in, and PostHog stores an anonymous visitor
           identifier so repeat visits are counted once. The Meta Pixel sets a cookie
           (<code>_fbp</code>) so Meta can measure our ads and show them to past visitors.
+          {isGoogleAdsTagId(googleAdsTagId) && <> {GOOGLE_ADS_COOKIE_SENTENCE}</>}
         </p>
       </LegalSection>
 

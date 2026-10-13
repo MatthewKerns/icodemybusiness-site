@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, EB_Garamond } from "next/font/google";
 import { Providers } from "@/components/shared/Providers";
+import { GoogleAdsTag } from "@/components/shared/GoogleAdsTag";
 import { NavBar } from "@/components/landing/NavBar";
 import { Footer } from "@/components/landing/Footer";
 import { organizationJsonLd } from "@/lib/business";
@@ -60,6 +61,8 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
         />
+        {/* Renders nothing unless NEXT_PUBLIC_GOOGLE_ADS_TAG_ID is set; /privacy follows the same switch. */}
+        <GoogleAdsTag />
         <Providers>
           <NavBar />
           {children}

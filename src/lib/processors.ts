@@ -71,6 +71,35 @@ export const PROCESSORS: Processor[] = [
   },
 ];
 
+/**
+ * Google Ads is the one processor that is OFF by default: the tag loads only
+ * when NEXT_PUBLIC_GOOGLE_ADS_TAG_ID is a valid `AW-<digits>` id
+ * (src/components/shared/GoogleAdsTag.tsx), so /privacy must name Google only
+ * in that state. It is therefore not in PROCESSORS; `activeProcessors` adds it.
+ *
+ * DRAFT wording below — for Matthew to approve or rewrite before the tag is
+ * enabled anywhere real.
+ */
+export const GOOGLE_ADS_PROCESSOR: Processor = {
+  name: "Google Ads",
+  purpose: "measuring our advertising",
+  data: "pages viewed and your device and browser type, and Google sets its own cookies",
+};
+
+/** DRAFT — shown in /privacy's Cookies paragraph only while the Google Ads tag is on. */
+export const GOOGLE_ADS_COOKIE_SENTENCE =
+  "Google's advertising tag sets its own cookies to measure our ads.";
+
+/** True only for a Google Ads tag id (`AW-` + digits). Anything else leaves the tag off. */
+export function isGoogleAdsTagId(value: string | undefined): value is string {
+  return typeof value === "string" && /^AW-\d+$/.test(value);
+}
+
+/** The processors the live site actually sends data to, given the Google Ads tag id (or undefined). */
+export function activeProcessors(googleAdsTagId: string | undefined): Processor[] {
+  return isGoogleAdsTagId(googleAdsTagId) ? [...PROCESSORS, GOOGLE_ADS_PROCESSOR] : PROCESSORS;
+}
+
 /** First-party cookies this site sets itself (third-party tools set their own). */
 export const FIRST_PARTY_COOKIES = [
   {
