@@ -1,18 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FreeResourceCard,
   BUILDER_RESOURCES,
   FOUNDER_RESOURCES,
   type FreeResource,
+  type ResourceDelivery,
 } from "@/components/shared/FreeResourceCard";
 import { EmailCapture } from "@/components/shared/EmailCapture";
+import { analytics } from "@/lib/analytics";
 import Link from "next/link";
 import { Wrench, ShieldAlert, Rocket, Plug, ArrowRight } from "lucide-react";
 
+/** Browser-only marker that this visitor already left an email. */
+const UNLOCK_KEY = "icmb.freeToolsUnlocked";
+
 export default function FreeResourcesPage() {
   const [hasAccess, setHasAccess] = useState(false);
+
+  // The unlock lives in the browser so a return visit (for example from the
+  // welcome email) keeps the links open. It is a soft gate: the links are
+  // public once known, and the server never enforces it.
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(UNLOCK_KEY) === "1") setHasAccess(true);
+    } catch {
+      // storage unavailable (private mode, blocked): stay locked
+    }
+  }, []);
 
   return (
     <main
@@ -86,6 +102,12 @@ export default function FreeResourcesPage() {
             successMessage="Check your email — we've sent your download links."
             onSuccess={(email) => {
               setHasAccess(true);
+              try {
+                window.localStorage.setItem(UNLOCK_KEY, "1");
+              } catch {
+                // storage unavailable: the links still arrive by email
+              }
+              analytics.freeToolAccessed({ source: "free-tools" });
               void fetch("/api/email/welcome", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -144,11 +166,10 @@ export default function FreeResourcesPage() {
                 toolName={resource.toolName}
                 tagline={resource.tagline}
                 description={resource.description}
-                delivery={resource.delivery}
+                delivery={deliveryFor(resource)}
                 disclaimer={resource.disclaimer}
                 ctaLabel={ctaLabelFor(resource)}
                 ctaHref={ctaHrefFor(resource)}
-                downloaded={resource.delivery === "email" ? hasAccess : false}
               />
             ))}
           </div>
@@ -182,7 +203,7 @@ export default function FreeResourcesPage() {
                 toolName={resource.toolName}
                 tagline={resource.tagline}
                 description={resource.description}
-                delivery={resource.delivery}
+                delivery={deliveryFor(resource)}
                 disclaimer={resource.disclaimer}
                 ctaLabel={ctaLabelFor(resource)}
                 ctaHref={ctaHrefFor(resource)}
@@ -194,15 +215,24 @@ export default function FreeResourcesPage() {
     </main>
   );
 
+  /** Free tools stay locked until the visitor leaves an email; paid cards are untouched. */
+  function isLocked(resource: FreeResource): boolean {
+    return resource.delivery !== "paid" && !hasAccess;
+  }
+
+  function deliveryFor(resource: FreeResource): ResourceDelivery {
+    return isLocked(resource) ? "email" : (resource.delivery ?? "email");
+  }
+
   function ctaLabelFor(resource: FreeResource): string {
+    if (isLocked(resource)) return "Send me the link";
     if (resource.delivery === "download") return "Download";
     if (resource.delivery === "external") return "View on GitHub";
     if (resource.delivery === "paid") return "View plans";
-    return hasAccess ? "Check Email" : "Get Free";
+    return "Open";
   }
 
   function ctaHrefFor(resource: FreeResource): string {
-    if (resource.delivery === "email") return hasAccess ? resource.href : "#get-access";
-    return resource.href;
+    return isLocked(resource) ? "#get-access" : resource.href;
   }
 }

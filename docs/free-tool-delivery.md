@@ -5,9 +5,13 @@ How a visitor gets the free tools by email, and how paid work is now sold
 
 ## End-to-end flow
 
-1. A visitor opens **`/free-tools`** (`src/app/free-tools/page.tsx`). It is a
-   fully public page — every tool card's CTA (`Download` / `View on GitHub`)
-   links directly to the tool, no account or email required.
+1. A visitor opens **`/free-tools`** (`src/app/free-tools/page.tsx`). The page
+   is public, but every free tool card is **soft-gated**: its CTA reads
+   `Send me the link` and scrolls to the email form until the visitor leaves an
+   email. The unlock is remembered in the browser (`localStorage`
+   `icmb.freeToolsUnlocked`), so a return visit keeps the real `Download` /
+   `View on GitHub` links open. Nothing is enforced server-side: the GitHub
+   folders are public once the link is known.
 2. The page also shows an email-capture form (`EmailCapture`,
    `src/components/shared/EmailCapture.tsx`, `source="free-tools"`) so visitors
    who just want the links by email can leave one, no Clerk account needed:
@@ -22,12 +26,15 @@ How a visitor gets the free tools by email, and how paid work is now sold
      arbitrary addresses.
    - Renders `WelcomeEmail` (`src/emails/WelcomeEmail.tsx`) to HTML and sends
      it via **Resend** from `iCodeMyBusiness <matthew@icodemybusiness.com>`.
-4. The welcome email's **"Access Free Tools"** button links straight to the
-   public **`/free-tools`** page — no sign-in, no gated portal.
+4. The welcome email lists every free tool as a **direct link** (the lineup is
+   read from `src/lib/free-resources.ts`, the same source the page uses), and its
+   **"Access Free Tools"** button links to **`/free-tools`** — no sign-in, no
+   gated portal.
 
 ## What gets delivered
 
-The lineup lives in `src/components/shared/FreeResourceCard.tsx`:
+The lineup lives in `src/lib/free-resources.ts` (re-exported by
+`src/components/shared/FreeResourceCard.tsx`):
 
 | Tool | List | Delivery | Where it comes from |
 |------|------|----------|---------------------|
@@ -35,8 +42,9 @@ The lineup lives in `src/components/shared/FreeResourceCard.tsx`:
 | Google Drive Archiver | `BUILDER_RESOURCES` (free) | `download` | `public/downloads/google-drive-archiver-skill.zip` |
 | Feature Factory + Best Practices | `BUILDER_RESOURCES` (free) | `external` | GitHub best-practices repo (the free hub) |
 
-Free = the GitHub best-practices repo set (dev skills), all directly
-accessible on `/free-tools` regardless of whether the visitor left an email.
+Free = the GitHub best-practices repo set (dev skills). On `/free-tools` the
+links appear after the visitor leaves an email; the welcome email carries them
+too.
 
 On the **gated portal page** (`/portal/resources`, Clerk-authenticated
 customers only), the same three free tools plus the founder tools are shown
