@@ -1,7 +1,7 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { internal, api } from "./_generated/api";
-import { verifyResendSignature } from "./lib/resendWebhook";
+import { resendSuppressionReason, verifyResendSignature } from "./lib/resendWebhook";
 import type { GenericActionCtx } from "convex/server";
 import type { DataModel } from "./_generated/dataModel";
 import { verifyUnsubscribeToken } from "./lib/unsubscribeToken";
@@ -132,7 +132,12 @@ http.route({
     let payload: {
       type?: string;
       created_at?: string;
-      data?: { email_id?: string; to?: string | string[]; click?: { link?: string } };
+      data?: {
+        email_id?: string;
+        to?: string | string[];
+        click?: { link?: string };
+        bounce?: { type?: string; subType?: string };
+      };
     };
     try {
       payload = JSON.parse(body);
@@ -155,6 +160,22 @@ http.route({
       link: payload.data?.click?.link,
       occurredAt,
     });
+
+    // A permanent bounce or a spam complaint stops ALL mail to the address, in
+    // the same request that recorded it: continuing to send is what damages
+    // the sending domain. A transient bounce (full mailbox, greylisting) does
+    // not suppress — Resend retries those itself.
+    const suppressReason = resendSuppressionReason(payload.type, payload.data?.bounce?.type);
+    if (suppressReason) {
+      await ctx.runMutation(internal.emailSuppressions.suppress, {
+        email: to,
+        reason: suppressReason,
+        scope: "all" as const,
+        source: `resend-webhook:${payload.type}`,
+        detail: payload.data?.bounce?.subType ?? payload.data?.bounce?.type,
+        resendId: emailId,
+      });
+    }
     return new Response(JSON.stringify({ received: true, stored: true }), { status: 200 });
   }),
 });

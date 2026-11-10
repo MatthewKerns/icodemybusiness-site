@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { createHmac } from "node:crypto";
-import { verifyResendSignature, MAX_SKEW_MS } from "./resendWebhook";
+import { resendSuppressionReason, verifyResendSignature, MAX_SKEW_MS } from "./resendWebhook";
 
 // The expected signature is computed here with Node's crypto — an
 // implementation independent of the Web Crypto path under test — from the
@@ -65,5 +65,20 @@ describe("verifyResendSignature", () => {
     expect(await verifyResendSignature(BODY, headers(`v1,${sign(BODY)}`, NaN), SECRET, NOW)).toBe(false);
     expect(await verifyResendSignature(BODY, headers(`v1,${sign(BODY)}`), "nope", NOW)).toBe(false);
     expect(await verifyResendSignature(BODY, { id: "", timestamp: "", signature: "" }, SECRET, NOW)).toBe(false);
+  });
+});
+
+describe("resendSuppressionReason", () => {
+  it("suppresses on a spam complaint and on a permanent bounce", () => {
+    expect(resendSuppressionReason("email.complained", undefined)).toBe("complaint");
+    expect(resendSuppressionReason("email.bounced", "Permanent")).toBe("hard_bounce");
+    expect(resendSuppressionReason("email.bounced", "permanent")).toBe("hard_bounce");
+  });
+
+  it("does not suppress on a transient or untyped bounce, or on engagement", () => {
+    expect(resendSuppressionReason("email.bounced", "Transient")).toBeNull();
+    expect(resendSuppressionReason("email.bounced", undefined)).toBeNull();
+    expect(resendSuppressionReason("email.delivered", undefined)).toBeNull();
+    expect(resendSuppressionReason("email.opened", "Permanent")).toBeNull();
   });
 });

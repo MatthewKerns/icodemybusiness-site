@@ -2,6 +2,10 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { rateLimit } from "./lib/rateLimits";
 import { requireRole } from "./lib/auth";
+import { internal } from "./_generated/api";
+
+/** `ANALYTICS_EVENTS.CONSULTATION_BOOKED` in src/lib/analytics-events.ts. */
+const BOOKED_EVENT = "consultation_booked";
 
 /**
  * Durable capture of a visitor click / decision. Public and unauthenticated —
@@ -26,6 +30,25 @@ export const track = mutation({
       key: args.sessionId ?? args.clerkUserId ?? "anon",
     });
     if (!ok) return null;
+
+    // A booking made in the Calendly embed is the one event that changes
+    // where a lead stands. It is reported by the visitor's browser, keyed on
+    // their own session id, so it can only ever mark that visitor's own lead.
+    if (args.name === BOOKED_EVENT && args.sessionId) {
+      const lead = await ctx.db
+        .query("leads")
+        .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
+        .first();
+      if (lead && lead.stage !== "won" && lead.stage !== "booked") {
+        await ctx.db.patch(lead._id, { stage: "booked", stageUpdatedAt: Date.now() });
+        // Someone who just booked must not keep getting "here's why to book".
+        await ctx.runMutation(internal.emailSequences.exitTracks, {
+          email: lead.email,
+          reason: "booked",
+          except: "post-call",
+        });
+      }
+    }
 
     return await ctx.db.insert("visitorEvents", {
       name: args.name,

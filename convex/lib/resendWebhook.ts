@@ -86,3 +86,21 @@ export async function verifyResendSignature(
   }
   return false;
 }
+
+/**
+ * Whether a Resend callback means the address must be suppressed, and why.
+ * `bounceType` is `data.bounce.type` from the payload ("Permanent" |
+ * "Transient" | …). A bounce with no type is treated as transient: wrongly
+ * keeping an address is recoverable on the next bounce, wrongly suppressing
+ * one silently drops a real person.
+ */
+export function resendSuppressionReason(
+  eventType: string,
+  bounceType: string | undefined
+): "hard_bounce" | "complaint" | null {
+  if (eventType === "email.complained") return "complaint";
+  if (eventType === "email.bounced" && bounceType?.toLowerCase() === "permanent") {
+    return "hard_bounce";
+  }
+  return null;
+}

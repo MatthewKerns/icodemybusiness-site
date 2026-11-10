@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as academy from "../academy.js";
 import type * as activities from "../activities.js";
 import type * as admin from "../admin.js";
 import type * as agentSessions from "../agentSessions.js";
@@ -21,6 +22,7 @@ import type * as discoveryAssessments from "../discoveryAssessments.js";
 import type * as discoveryProcessor from "../discoveryProcessor.js";
 import type * as email from "../email.js";
 import type * as emailEvents from "../emailEvents.js";
+import type * as emailOps from "../emailOps.js";
 import type * as emailSends from "../emailSends.js";
 import type * as emailSequences from "../emailSequences.js";
 import type * as emailSuppressions from "../emailSuppressions.js";
@@ -39,6 +41,7 @@ import type * as lib_leadScoring from "../lib/leadScoring.js";
 import type * as lib_mangoClient from "../lib/mangoClient.js";
 import type * as lib_objectiveOps from "../lib/objectiveOps.js";
 import type * as lib_owner from "../lib/owner.js";
+import type * as lib_pipeline from "../lib/pipeline.js";
 import type * as lib_rateLimits from "../lib/rateLimits.js";
 import type * as lib_resendWebhook from "../lib/resendWebhook.js";
 import type * as lib_sequenceTracks from "../lib/sequenceTracks.js";
@@ -50,6 +53,7 @@ import type * as mango from "../mango.js";
 import type * as milestones from "../milestones.js";
 import type * as objectives from "../objectives.js";
 import type * as objectivesIntake from "../objectivesIntake.js";
+import type * as outbound from "../outbound.js";
 import type * as outboundClicks from "../outboundClicks.js";
 import type * as pageViews from "../pageViews.js";
 import type * as projects from "../projects.js";
@@ -70,6 +74,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  academy: typeof academy;
   activities: typeof activities;
   admin: typeof admin;
   agentSessions: typeof agentSessions;
@@ -83,6 +88,7 @@ declare const fullApi: ApiFromModules<{
   discoveryProcessor: typeof discoveryProcessor;
   email: typeof email;
   emailEvents: typeof emailEvents;
+  emailOps: typeof emailOps;
   emailSends: typeof emailSends;
   emailSequences: typeof emailSequences;
   emailSuppressions: typeof emailSuppressions;
@@ -101,6 +107,7 @@ declare const fullApi: ApiFromModules<{
   "lib/mangoClient": typeof lib_mangoClient;
   "lib/objectiveOps": typeof lib_objectiveOps;
   "lib/owner": typeof lib_owner;
+  "lib/pipeline": typeof lib_pipeline;
   "lib/rateLimits": typeof lib_rateLimits;
   "lib/resendWebhook": typeof lib_resendWebhook;
   "lib/sequenceTracks": typeof lib_sequenceTracks;
@@ -112,6 +119,7 @@ declare const fullApi: ApiFromModules<{
   milestones: typeof milestones;
   objectives: typeof objectives;
   objectivesIntake: typeof objectivesIntake;
+  outbound: typeof outbound;
   outboundClicks: typeof outboundClicks;
   pageViews: typeof pageViews;
   projects: typeof projects;

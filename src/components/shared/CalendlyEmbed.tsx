@@ -4,6 +4,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { analytics } from "@/lib/analytics";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
+import { useMutation } from "convex/react";
+import { usePathname } from "next/navigation";
+import { api } from "../../../convex/_generated/api";
+import { useSessionId } from "@/hooks/useSessionId";
 
 interface CalendlyEmbedProps {
   url: string;
@@ -79,6 +84,10 @@ export function CalendlyEmbedComponent({ url, email, name, utmContent }: Calendl
     };
   }, []);
 
+  const recordEvent = useMutation(api.visitorEvents.track);
+  const sessionId = useSessionId();
+  const pathname = usePathname();
+
   // Capture the booking conversion. Calendly posts a message to the parent
   // window when a meeting is scheduled inside the iframe.
   useEffect(() => {
@@ -89,11 +98,22 @@ export function CalendlyEmbedComponent({ url, email, name, utmContent }: Calendl
         e.data?.event === "calendly.event_scheduled"
       ) {
         analytics.consultationBooked();
+        // Also to Convex, so the booking exists server-side: the admin
+        // pipeline moves this visitor's lead to "booked". Not via
+        // useTrackEvent, which would send PostHog the event a second time.
+        void recordEvent({
+          name: ANALYTICS_EVENTS.CONSULTATION_BOOKED,
+          category: "decision",
+          sessionId: sessionId ?? undefined,
+          page: pathname ?? undefined,
+        }).catch(() => {
+          // Never surface tracking errors to the visitor.
+        });
       }
     }
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, []);
+  }, [recordEvent, sessionId, pathname]);
 
   const handleIframeLoad = useCallback(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);

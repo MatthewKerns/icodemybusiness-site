@@ -1,6 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { rateLimitTables } from "convex-helpers/server/rateLimit";
+import { inboxStatus, pipelineStage, replyCategory } from "./lib/pipeline";
 
 export default defineSchema(
   {
@@ -40,11 +41,125 @@ export default defineSchema(
       consentedAt: v.optional(v.number()),
       /** Which form the consent came from, e.g. "free-tools" | "academy". */
       consentSource: v.optional(v.string()),
+      /**
+       * Where the lead is in the pipeline, set by the owner in /admin/email
+       * (or to "booked" by a recorded Calendly booking). Absent means "new".
+       */
+      stage: v.optional(pipelineStage),
+      stageUpdatedAt: v.optional(v.number()),
     })
       .index("by_email", ["email"])
       .index("by_source", ["source"])
       .index("by_sessionId", ["sessionId"])
       .index("by_clerkUserId", ["clerkUserId"]),
+
+    // APPEND-ONLY
+    // Owner notes on a person in the pipeline: a site lead or an outbound
+    // prospect. Exactly one of the two ids is set.
+    pipelineNotes: defineTable({
+      leadId: v.optional(v.id("leads")),
+      prospectId: v.optional(v.id("outboundProspects")),
+      text: v.string(),
+      createdAt: v.number(),
+    })
+      .index("by_leadId", ["leadId"])
+      .index("by_prospectId", ["prospectId"]),
+
+    // Cold outbound campaigns. Sender-agnostic on purpose (Matthew, 2026-11-09):
+    // the site never sends cold email itself — a campaign is the plan, the copy
+    // and the numbers, whichever tool does the sending.
+    outboundCampaigns: defineTable({
+      name: v.string(),
+      status: v.union(
+        v.literal("draft"),
+        v.literal("live"),
+        v.literal("paused"),
+        v.literal("done")
+      ),
+      /** "instantly" (the planned sender) | "manual" | "apollo" | … */
+      sender: v.string(),
+      /** The campaign's id in the sending tool, for a later analytics sync. */
+      externalId: v.optional(v.string()),
+      /** Who it is for, in the owner's words. */
+      audience: v.optional(v.string()),
+      /** What is being offered, in the owner's words. */
+      offer: v.optional(v.string()),
+      /** The sequence copy. Bounded: a cold sequence is a handful of steps. */
+      steps: v.array(
+        v.object({
+          subject: v.string(),
+          body: v.string(),
+          delayDays: v.number(),
+        })
+      ),
+      /**
+       * Totals copied from the sending tool. Per-prospect sends are not logged
+       * here, so these are the only source for sent/bounced counts.
+       */
+      reportedSent: v.optional(v.number()),
+      reportedBounced: v.optional(v.number()),
+      reportedAt: v.optional(v.number()),
+      launchedAt: v.optional(v.number()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }).index("by_status", ["status"]),
+
+    // People a cold campaign is aimed at. Deliberately NOT `leads`: a lead gave
+    // us their address and may have consented to email; a prospect did neither,
+    // and nothing that reads `leads` (welcome email, sequences, the Mango push)
+    // may ever pick one up.
+    outboundProspects: defineTable({
+      campaignId: v.optional(v.id("outboundCampaigns")),
+      email: v.string(),
+      firstName: v.optional(v.string()),
+      lastName: v.optional(v.string()),
+      company: v.optional(v.string()),
+      title: v.optional(v.string()),
+      website: v.optional(v.string()),
+      linkedinUrl: v.optional(v.string()),
+      /** "csv" | "manual" | "apollo" | "clay" | … */
+      source: v.string(),
+      stage: pipelineStage,
+      stageUpdatedAt: v.number(),
+      createdAt: v.number(),
+    })
+      .index("by_email", ["email"])
+      .index("by_campaignId", ["campaignId"])
+      .index("by_createdAt", ["createdAt"]),
+
+    // Replies the owner logs against a lead or a prospect, with the category
+    // that decides what happens next. `handledAt` unset = still needs a reply.
+    outboundReplies: defineTable({
+      email: v.string(),
+      leadId: v.optional(v.id("leads")),
+      prospectId: v.optional(v.id("outboundProspects")),
+      campaignId: v.optional(v.id("outboundCampaigns")),
+      category: replyCategory,
+      text: v.optional(v.string()),
+      receivedAt: v.number(),
+      handledAt: v.optional(v.number()),
+      createdAt: v.number(),
+    })
+      .index("by_createdAt", ["createdAt"])
+      .index("by_email", ["email"])
+      .index("by_campaignId", ["campaignId"]),
+
+    // Mailboxes that send (or could send) cold email, wherever they are hosted.
+    // Tracked here so there are always backups warming: an address can go
+    // undeliverable for a stretch after one bad send or a spam flag.
+    sendingInboxes: defineTable({
+      email: v.string(),
+      /** "google" | "microsoft" | "zapmail" | … */
+      provider: v.optional(v.string()),
+      status: inboxStatus,
+      warmupStartedAt: v.optional(v.number()),
+      /** Cold sends per day this inbox is allowed, when it is sending. */
+      dailyLimit: v.optional(v.number()),
+      campaignId: v.optional(v.id("outboundCampaigns")),
+      notes: v.optional(v.string()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }).index("by_email", ["email"]),
 
     // APPEND-ONLY
     // Every transactional email the app hands to Resend, success or failure,
